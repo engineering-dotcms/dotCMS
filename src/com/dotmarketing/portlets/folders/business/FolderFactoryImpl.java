@@ -634,9 +634,9 @@ public class FolderFactoryImpl extends FolderFactory {
 		for(Folder subFolder : subFolders){
 			move(subFolder, (Object)folder);
 		}
-
-		CacheLocator.getIdentifierCache().clearCache();
-
+		/* BEGIN: ISSUE 4140 */
+		CacheLocator.getIdentifierCache().removeFromCacheByIdentifier(folderId.getId());
+		/* END: ISSUE 4140 */
 		if(folder.isShowOnMenu())
 			RefreshMenus.deleteMenu(folder);
 

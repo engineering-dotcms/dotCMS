@@ -115,7 +115,7 @@ public class IdentifierCacheImpl extends IdentifierCache {
 	}
 	
 
-	protected void removeFromCacheByIdentifier(Identifier id) {
+	public void removeFromCacheByIdentifier(Identifier id) {
 		if(id==null) return;
 		
 		cache.remove(getPrimaryGroup() + id.getId(),  getPrimaryGroup());
@@ -134,7 +134,7 @@ public class IdentifierCacheImpl extends IdentifierCache {
 		}
 	}
 	
-	protected void removeFromCacheByIdentifier(String ident) {
+	public void removeFromCacheByIdentifier(String ident) {
 		
 		Identifier id = getIdentifier(ident);
 		if(id==null){
