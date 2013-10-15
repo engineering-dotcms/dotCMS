@@ -485,16 +485,16 @@ public class DotConnect {
         Connection conn = DbConnectionFactory.getConnection();
         executeQuery(conn);
         
-//        if(conn.getAutoCommit())
-//        	conn.close();
+        if(conn.getAutoCommit())
+        	conn.close();
     }
     
     private void executeQuery(String dataSource) throws SQLException{
     	Connection conn = DbConnectionFactory.getConnection(dataSource);
         executeQuery(conn);
         
-//        if(conn.getAutoCommit())
-//        	conn.close();
+        if(conn.getAutoCommit())
+        	conn.close();
     }
     
     private void executeQuery(Connection conn) throws SQLException{
