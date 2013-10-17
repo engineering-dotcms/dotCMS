@@ -49,8 +49,7 @@ GregorianCalendar cal = new GregorianCalendar();
 			</div>
 			<div class="fieldValue">
 				<input type="radio" dojoType="dijit.form.RadioButton" checked="true" onChange="pushHandler.togglePublishExpireDivs()" value="<%= RemotePublishAjaxAction.DIALOG_ACTION_PUBLISH %>" name="wfIWantTo" id="iwtPublish" ><label for="iwtPublish"><%= LanguageUtil.get(pageContext, "publish") %></label>&nbsp;
-				<input type="radio" dojoType="dijit.form.RadioButton" onChange="pushHandler.togglePublishExpireDivs()" value="<%= RemotePublishAjaxAction.DIALOG_ACTION_EXPIRE %>" name="wfIWantTo" id="iwtExpire" ><label for="iwtExpire"><%= LanguageUtil.get(pageContext, "delete") %></label>&nbsp;
-				<input type="radio" dojoType="dijit.form.RadioButton" onChange="pushHandler.togglePublishExpireDivs()" value="<%= RemotePublishAjaxAction.DIALOG_ACTION_PUBLISH_AND_EXPIRE %>" name="wfIWantTo" id="iwtPublishExpire" ><label for="iwtPublishExpire"><%= LanguageUtil.get(pageContext, "publish") %> &amp; <%= LanguageUtil.get(pageContext, "delete") %></label>
+
 			</div>
 			<div class="clear"></div>
 		</div>
@@ -79,7 +78,6 @@ GregorianCalendar cal = new GregorianCalendar();
 				 	data-dojo-type="dijit.form.TimeTextBox"
 					required="true" style="width: 100px;"/>
 
-					<input type="checkbox" data-dojo-type="dijit/form/CheckBox"  name="forcePush" id="forcePush" value="true"><label for="forcePush"><%= LanguageUtil.get(pageContext, "publisher_dialog_force-push") %></label>
 			</div>
 			<div class="clear"></div>
 		</div>
@@ -109,6 +107,11 @@ GregorianCalendar cal = new GregorianCalendar();
 			<div class="fieldValue">
 				<input data-dojo-type="dijit/form/FilteringSelect" required="false"  data-dojo-props="store:pushHandler.environmentStore, searchAttr:'name', displayedValue:'0'"
 			    name="environmentSelect" id="environmentSelect" onChange="pushHandler.addSelectedToWhereToSend()" style="width:250px" />
+				<button dojoType="dijit.form.Button" iconClass="saveAssignIcon" onClick="pushHandler.addSelectedToWhereToSend()" type="button" id="remotePublishAddEnvButton">
+					<%= UtilMethods.escapeSingleQuotes(LanguageUtil.get(pageContext, "add")) %>
+				</button>
+			    
+			    
 
 				<div class="wfWhoCanUseDiv">
 					<table class="listingTable" id="whereToSendTable">

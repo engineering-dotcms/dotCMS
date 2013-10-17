@@ -89,12 +89,7 @@ dojo.declare("dotcms.dojo.push.PushHandler", null, {
     togglePublishExpireDivs: function () {
 
         var x = "publish";
-        if (dijit.byId("iwtExpire").getValue() != false) {
-            x = "expire";
-        }
-        else if (dijit.byId("iwtPublishExpire").getValue() != false) {
-            x = "publishexpire";
-        }
+
 
         if ("publish" == x) {
             dojo.style("publishTimeDiv", "display", "");
@@ -155,7 +150,9 @@ dojo.declare("dotcms.dojo.push.PushHandler", null, {
 			alert(dojo.byId("whereToSendRequired").value);
 			return;
 		}
-
+		
+		console.log("pushing");
+		
 		// BEGIN: PUSH PUBLISHING ACTIONLET
 
 		var publishDate = (dijit.byId("wfPublishDateAux") && dijit.byId("wfPublishDateAux")!='undefined')
@@ -183,15 +180,11 @@ dojo.declare("dotcms.dojo.push.PushHandler", null, {
 					? dojo.byId("wfExpireTimeAux").value!=null ? dojo.date.locale.format(dojo.byId("wfExpireTimeAux").value,{timePattern: "H-m", selector: "time"}) : ""
 							: "";
 
-		var iWantTo = (dijit.byId("publishForm").attr('value').wfIWantTo)
-		? dijit.byId("publishForm").attr('value').wfIWantTo
-			: (dijit.byId("publishForm").attr('value').wfIWantTo)
-				? dijit.byId("publishForm").attr('value').wfIWantTo
-						: "";
+		var iWantTo = "publish";
 
 		var whereToSend = dojo.byId("whereToSend").value;
 
-		var forcePush = dijit.byId("forcePush").checked;
+		var forcePush = true;
 
 
 		// END: PUSH PUBLISHING ACTIONLET
@@ -306,7 +299,7 @@ dojo.declare("dotcms.dojo.push.PushHandler", null, {
 
 		var user = select.getValue();
 		var userName = select.attr('displayedValue');
-
+		console.log("adding" + user +":"+ userName);
 		this.addToWhereToSend(user, userName);
 		this.refreshWhereToSend();
 	},
