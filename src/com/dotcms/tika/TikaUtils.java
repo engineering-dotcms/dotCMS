@@ -25,6 +25,7 @@ import com.dotmarketing.util.UtilMethods;
 
 public class TikaUtils {
 
+	private static final String HTML_PAGE_MIMETYPE = "text/html";
 	
 	/**
 	 * Right now the method use the Tika facade directly for parse the document without any kind of restriction about the parser because the 
@@ -51,7 +52,7 @@ public class TikaUtils {
 		// if the limit is not "unlimited"
 		// I can use the faster parseToString
 		try {
-			if(forceMemory || (maxStringLenght>0 && maxStringLenght<=defaultMaxStringLenght)){
+			if(forceMemory || (maxStringLenght>0 && maxStringLenght<=defaultMaxStringLenght) || isHtmlPage(mimeType)){
 				// no worry about the limit and less time to process.
 				String content = t.parseToString(new FileInputStream(binFile), met);
 				metaMap = new HashMap<String, String>();
@@ -193,5 +194,9 @@ public class TikaUtils {
 			}
 		}
 		return translateMeta;
+	}
+	
+	private boolean isHtmlPage(String mimeType){
+		return mimeType!=null?mimeType.equals(HTML_PAGE_MIMETYPE):false;
 	}
 }
