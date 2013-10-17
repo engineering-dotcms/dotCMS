@@ -17,7 +17,6 @@ import java.util.Map;
 
 import org.apache.commons.collections.map.LRUMap;
 
-import com.caucho.quercus.lib.db.Oracle;
 import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotRuntimeException;
@@ -484,15 +483,12 @@ public class DotConnect {
     private void executeQuery() throws SQLException{
         Connection conn = DbConnectionFactory.getConnection();
         executeQuery(conn);
-        if(conn.getAutoCommit())
-        	conn.close();
+
     }
     
     private void executeQuery(String dataSource) throws SQLException{
     	Connection conn = DbConnectionFactory.getConnection(dataSource);
         executeQuery(conn);
-        if(conn.getAutoCommit())
-        	conn.close();
     }
     
     private void executeQuery(Connection conn) throws SQLException{
