@@ -46,7 +46,9 @@
 <%@page import="com.dotmarketing.business.Role"%>
 
 <style type="text/css">
-	@import "/html/portlet/ext/workflows/schemes/workflow.css"; 
+	@import "/html/portlet/ext/workflows/schemes/workflow.css";
+	dt{height:30px;}
+	dd{height:30px;} 
 </style>	
 
 <%
@@ -63,10 +65,11 @@
 	Structure structure = null;
 
 
-    boolean isAdministrator = APILocator.getRoleAPI().doesUserHaveRole(user, APILocator.getRoleAPI().loadCMSAdminRole())
-                               || APILocator.getRoleAPI().doesUserHaveRole(user,RoleAPI.WORKFLOW_ADMIN_ROLE_KEY);
+    boolean isAdministrator = APILocator.getRoleAPI().doesUserHaveRole(user, APILocator.getRoleAPI().loadCMSAdminRole());
 	List<Role> roles = APILocator.getRoleAPI().loadRolesForUser(user.getUserId());
-
+	for(Role r: roles)
+		if(r.getName().startsWith("WF_ADMIN"))
+			isAdministrator=true;
     Role assignedTo  = APILocator.getRoleAPI().loadRoleById(searcher.getAssignedTo());
     Role myRole  = APILocator.getRoleAPI().getUserRole(user);
     

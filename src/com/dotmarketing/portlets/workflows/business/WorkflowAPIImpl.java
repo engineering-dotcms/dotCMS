@@ -509,8 +509,14 @@ public class WorkflowAPIImpl implements WorkflowAPI, WorkflowAPIOsgiService {
 
 	public WorkflowAction findAction(String id, User user) throws DotDataException, DotSecurityException {
 
+		boolean isWFAdmin = false;
+		List<Role> roles = APILocator.getRoleAPI().loadRolesForUser(user.getUserId());
+		for(Role r: roles)
+			if(r.getName().startsWith("WF_ADMIN"))
+				isWFAdmin=true;
 		WorkflowAction action = wfac.findAction(id);
-		if (!APILocator.getPermissionAPI().doesUserHavePermission(action, PermissionAPI.PERMISSION_USE, user, true)) {
+		
+		if (!isWFAdmin && !APILocator.getPermissionAPI().doesUserHavePermission(action, PermissionAPI.PERMISSION_USE, user, true)) {
 			throw new DotSecurityException("User " + user + " cannot read action " + action.getName());
 		}
 		return action;

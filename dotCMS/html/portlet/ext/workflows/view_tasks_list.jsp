@@ -18,7 +18,8 @@
 	session.setAttribute(com.dotmarketing.util.WebKeys.WORKFLOW_SEARCHER, searcher);	
 	WorkflowSearcher fakeSearcher =(WorkflowSearcher) BeanUtils.cloneBean(searcher) ;
 	WorkflowAPI wapi = APILocator.getWorkflowAPI();
-
+	String assignedTo = searcher.getAssignedTo();
+	Role aRole = APILocator.getRoleAPI().loadRoleById(assignedTo);	
 	List<WorkflowTask> tasks = searcher.findTasks();
 	
 
@@ -114,7 +115,9 @@
 
 		<th nowrap="nowrap" width="8%" style="text-align:center;"><a href="javascript: doOrderBy('<%="status".equals(searcher.getOrderBy())?"status desc":"status"%>')"><%=LanguageUtil.get(pageContext, "Status")%></a></th>
 		<th nowrap="nowrap" width="10%" style="text-align:center;"><a href="javascript: doOrderBy('<%="workflow_step.name".equals(searcher.getOrderBy())?"workflow_step.name desc":"workflow_step.name"%>')"><%=LanguageUtil.get(pageContext, "Workflow-Step")%></a></th>
-		
+		<%if(null!=aRole && !aRole.isUser()){ %>
+			<th nowrap="nowrap" width="10%" style="text-align:center;"><a href="javascript: doOrderBy('<%="assigned_to".equals(searcher.getOrderBy())?"assigned_to desc":"assigned_to"%>')"><%=LanguageUtil.get(pageContext, "User-Assignee")%></a></th>
+		<%}%>	
 		<th nowrap="nowrap" width="10%" style="text-align:center;"><a href="javascript: doOrderBy('<%="assigned_to".equals(searcher.getOrderBy())?"assigned_to desc":"assigned_to"%>')"><%=LanguageUtil.get(pageContext, "Assignee")%></a></th>
 		<th nowrap="nowrap" width="15%" style="text-align:center;"><a href="javascript: doOrderBy('<%="mod_date".equals(searcher.getOrderBy())?"mod_date desc":"mod_date"%>')"><%=LanguageUtil.get(pageContext, "Last-Updated")%></a></th>
 		
@@ -181,7 +184,11 @@
 				 <%=step.getName() %>
 
 			</td>
-
+			<%if(null!=aRole && !aRole.isUser()){ 
+				User userAssignee = APILocator.getUserAPI().loadUserById(contentlet.getModUser()); 
+			%>
+				<td nowrap="norap" align="center"><%=userAssignee.getFirstName() + " " + userAssignee.getLastName() %></td>
+			<%}%>
 			<td nowrap="norap" align="center"><%=assignedRoleName %></td>
 			<td align="center" nowrap="norap"><%=DateUtil.prettyDateSince(task.getModDate(), user.getLocale()) %></td>
 			
