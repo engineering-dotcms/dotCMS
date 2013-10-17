@@ -6,6 +6,9 @@
  */
 package com.dotmarketing.cache;
 
+import java.io.File;
+import java.util.List;
+
 import com.dotmarketing.beans.Host;
 import com.dotmarketing.beans.Identifier;
 import com.dotmarketing.beans.Inode;
@@ -14,6 +17,7 @@ import com.dotmarketing.business.CacheLocator;
 import com.dotmarketing.business.DotCacheAdministrator;
 import com.dotmarketing.business.DotCacheException;
 import com.dotmarketing.business.DotStateException;
+import com.dotmarketing.business.PermissionAPI;
 import com.dotmarketing.business.Treeable;
 import com.dotmarketing.business.Versionable;
 import com.dotmarketing.exception.DotDataException;
@@ -96,10 +100,25 @@ public class LiveCache {
     			cache.put(getPrimaryGroup() + hostId + ":" + uri,path, getPrimaryGroup() + "_" + hostId);
     			ret = path;
     		} else if(asset instanceof Contentlet){
+    			Contentlet cont = (Contentlet) asset;
     			String path = APILocator.getFileAssetAPI().getRelativeAssetPath(APILocator.getFileAssetAPI().fromContentlet((Contentlet)asset));
     			//add the entry to the cache
-    		    Logger.debug(LiveCache.class, "Mapping: " + uri + " to " + path);
-    			cache.put(getPrimaryGroup() + hostId + ":" + uri,path, getPrimaryGroup() + "_" + hostId);
+    			
+    			String actualUri = uri;
+    			String fileName = cont.getStringProperty("fileName");
+    			if(fileName != null && UtilMethods.isSet(fileName)) {
+					try {
+						Folder myFolder = APILocator.getFolderAPI().find(cont.getFolder(), APILocator.getUserAPI().getSystemUser(), false);
+						Identifier idFolder = APILocator.getIdentifierAPI().find(myFolder);
+						
+						actualUri = idFolder.getPath()+cont.getStringProperty("fileName");
+					} catch (DotSecurityException e) {
+						actualUri = uri;
+					}
+    			}
+    			
+    		    Logger.debug(LiveCache.class, "Mapping: " + actualUri + " to " + path);
+    			cache.put(getPrimaryGroup() + hostId + ":" + actualUri,path, getPrimaryGroup() + "_" + hostId);
     			ret = path;
     		
     		}else {
@@ -192,6 +211,35 @@ public class LiveCache {
 		Host fake = new Host();
 		fake.setIdentifier(hostId);
 		Identifier id = APILocator.getIdentifierAPI().find( fake,URI);
+		List<Identifier> idents = null;
+		if(!InodeUtils.isSet(id.getInode())) {
+        	String parent_path = URI.substring(0, URI.lastIndexOf(File.separator));
+        	String fileName = URI.substring(URI.lastIndexOf(File.separator)+1, URI.length());
+        	idents = APILocator.getIdentifierAPI().findByParentPath(hostId,parent_path+File.separator);
+        	
+        	StringBuilder strb = new StringBuilder("+identifier:(");
+        	for (Identifier identifier : idents) {
+				strb.append(identifier.getId()+" ");
+			}
+        	strb.append(") +live:true");
+        	
+        	try {
+        		if(idents.size()>0){
+    				List<Contentlet> contents = 
+    						APILocator.getContentletAPI().search(strb.toString(), 0, -1, null, APILocator.getUserAPI().getSystemUser(), false);
+    				
+    				for (Contentlet contentlet : contents) {
+    					String tempName = contentlet.getStringProperty("fileName");
+    	    			if(tempName != null && UtilMethods.isSet(tempName)) {
+    						if(tempName.equals(fileName)) {
+    							id = APILocator.getIdentifierAPI().find(contentlet.getIdentifier());
+    							break;
+    						}
+    	    			}
+    				}        			
+        		}
+			} catch (Exception e) {}
+    	}
 
 		if(!InodeUtils.isSet(id.getInode())) 
 		{
@@ -210,7 +258,17 @@ public class LiveCache {
 		Versionable asset = null;
 		if(id.getAssetType().equals("contentlet")){
 			User systemUser = APILocator.getUserAPI().getSystemUser();
-			asset = APILocator.getContentletAPI().findContentletByIdentifier(id.getId(), true, APILocator.getLanguageAPI().getDefaultLanguage().getId(), systemUser, false);
+			
+			List<Contentlet> assets = APILocator.getContentletAPI().search("+identifier:"+id.getId()+" +live:true", 0, -1, null, systemUser, false);
+			for (Contentlet contentlet : assets) {
+				addToLiveAssetToCache(contentlet);
+			}
+			
+			try{
+				return (String) cache.get(getPrimaryGroup() + hostId + ":" + URI,getPrimaryGroup() + "_" + hostId);
+			}catch (DotCacheException e) {
+				return null;
+	    	} 
 		}else{
 			asset =  APILocator.getVersionableAPI().findLiveVersion(id, APILocator.getUserAPI().getSystemUser(), false);
 		}
