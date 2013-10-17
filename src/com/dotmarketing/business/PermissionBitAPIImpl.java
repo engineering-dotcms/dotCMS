@@ -1049,10 +1049,15 @@ public class PermissionBitAPIImpl implements PermissionAPI {
 	}
 
 	public <P extends Permissionable> List<P> filterCollection(List<P> inputList, int requiredTypePermission,boolean respectFrontendRoles, User user) throws DotDataException, DotSecurityException {
-
+		boolean isWFAdmin = false;
 		RoleAPI roleAPI = APILocator.getRoleAPI();
-
-		if ((user != null) && roleAPI.doesUserHaveRole(user, roleAPI.loadCMSAdminRole()))
+		if(null!=user){
+			List<Role> roles = roleAPI.loadRolesForUser(user.getUserId());
+			for(Role r: roles)
+				if(r.getName().startsWith("WF_ADMIN"))
+					isWFAdmin=true;			
+		}
+		if ((user != null) && (roleAPI.doesUserHaveRole(user, roleAPI.loadCMSAdminRole()) || isWFAdmin))
 			return inputList;
 
 		List<P> permissionables = new ArrayList<P>(inputList);
