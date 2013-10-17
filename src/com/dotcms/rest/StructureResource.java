@@ -16,11 +16,20 @@ import javax.servlet.http.HttpServletResponse;
 import com.dotmarketing.portlets.structure.model.Structure;
 import com.dotmarketing.portlets.structure.factories.StructureFactory;
 import com.dotmarketing.portlets.structure.model.Field;
+import com.dotmarketing.beans.Permission;
+import com.dotmarketing.business.APILocator;
 import com.dotmarketing.business.DotStateException;
+import com.dotmarketing.business.PermissionAPI;
+import com.dotmarketing.business.Permissionable;
+import com.dotmarketing.business.web.WebAPILocator;
 import com.dotmarketing.cache.FieldsCache;
 import com.dotmarketing.cache.StructureCache;
 import com.dotmarketing.exception.DotDataException;
+import com.dotmarketing.exception.DotRuntimeException;
 import com.dotmarketing.exception.DotSecurityException;
+import com.liferay.portal.PortalException;
+import com.liferay.portal.SystemException;
+import com.liferay.portal.model.User;
 
 @Path("/structure")
 public class StructureResource extends WebResource {
@@ -28,9 +37,9 @@ public class StructureResource extends WebResource {
 	@GET
 	@Path("/{path:.*}")
 	@Produces("application/json")
-	public String getStructuresWithWYSIWYGFields(@Context HttpServletRequest request, @Context HttpServletResponse response, @PathParam("path") String path, @QueryParam("name") String name) throws DotStateException, DotDataException, DotSecurityException {
+	public String getStructuresWithWYSIWYGFields(@Context HttpServletRequest request, @Context HttpServletResponse response, @PathParam("path") String path, @QueryParam("name") String name) throws DotDataException, DotSecurityException, DotRuntimeException, PortalException, SystemException {
 		List<Structure> structures=new ArrayList<Structure>();
-		
+		User user = WebAPILocator.getUserWebAPI().getLoggedInUser(request);
 		String inodeFilter = "";
 		if(path!= null && path.length() > 1) {
 			inodeFilter = path.substring(1);
@@ -55,12 +64,14 @@ public class StructureResource extends WebResource {
 		
 		if(inodeFilter.isEmpty()) {
 			List<Structure> allStructures = StructureFactory.getStructures("structuretype,upper(name)", -1);
-			for(Structure st : allStructures) {
-				if(st.isArchived() == false && (nameFilter.isEmpty() || (st.getName().toLowerCase().startsWith(nameFilter)))) {
-					for(Field field : FieldsCache.getFieldsByStructureInode(st.getInode())) {
-						if(field.getFieldType().equals(Field.FieldType.WYSIWYG.toString())) {
-							structures.add(st);
-							break;
+			for(Structure st : allStructures) {				
+				if(APILocator.getPermissionAPI().doesUserHavePermission(st, PermissionAPI.PERMISSION_PUBLISH, user)){
+					if(st.isArchived() == false && (nameFilter.isEmpty() || (st.getName().toLowerCase().startsWith(nameFilter)))) {
+						for(Field field : FieldsCache.getFieldsByStructureInode(st.getInode())) {
+							if(field.getFieldType().equals(Field.FieldType.WYSIWYG.toString())) {
+								structures.add(st);
+								break;
+							}
 						}
 					}
 				}
@@ -68,8 +79,10 @@ public class StructureResource extends WebResource {
 		}
 		else {
 			Structure specificStructure = StructureCache.getStructureByInode(inodeFilter);
-			if(specificStructure != null)
-				structures.add(specificStructure);
+			if(APILocator.getPermissionAPI().doesUserHavePermission(specificStructure, PermissionAPI.PERMISSION_PUBLISH, user)){
+				if(specificStructure != null)
+					structures.add(specificStructure);
+			}
 		}
 
 		boolean bInitialStruct = true;
@@ -80,8 +93,8 @@ public class StructureResource extends WebResource {
 			structureDataStore.append(EOL);
 		}
 		int structCount = 0;
-		for(Structure st: structures)
-		{
+		for(Structure st: structures){
+			
 			if(!inodeFilter.isEmpty() || (!range.isEmpty() && structCount >= beginItem && structCount <= endItem)){
 				if(bInitialStruct)
 					bInitialStruct = false;
