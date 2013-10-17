@@ -55,9 +55,6 @@ public class PushPublishActionlet extends WorkFlowActionlet {
 	public void executeAction(WorkflowProcessor processor, Map<String, WorkflowActionClassParameter> params)
 	throws WorkflowActionFailureException {
 		try {
-			//Gets available languages
-			//List<Language> languages = languagesAPI.getLanguages();
-			
 			Contentlet ref = processor.getContentlet();
 			String _contentPushPublishDate = ref.getStringProperty("wfPublishDate");
 			String _contentPushPublishTime = ref.getStringProperty("wfPublishTime");
@@ -80,19 +77,17 @@ public class PushPublishActionlet extends WorkFlowActionlet {
 			Date publishDate = dateFormat.parse(_contentPushPublishDate+"-"+_contentPushPublishTime);
 			
 			List<String> identifiers = new ArrayList<String>();			
-			String bundleId = UUID.randomUUID().toString();			
 			identifiers.add(ref.getIdentifier());
 			
 			Bundle bundle = new Bundle(null, publishDate, null, processor.getUser().getUserId());
         	APILocator.getBundleAPI().saveBundle(bundle, envsToSendTo);
 			
-			publisherAPI.addContentsToPublish(identifiers, bundleId, publishDate, processor.getUser());
+			publisherAPI.addContentsToPublish(identifiers, bundle.getId(), publishDate, processor.getUser());
 			if(!_contentPushNeverExpire && (!"".equals(_contentPushExpireDate.trim()) && !"".equals(_contentPushExpireTime.trim()))){
-				bundleId = UUID.randomUUID().toString();
 				Date expireDate = dateFormat.parse(_contentPushExpireDate+"-"+_contentPushExpireTime);
 				bundle = new Bundle(null, publishDate, expireDate, processor.getUser().getUserId());
             	APILocator.getBundleAPI().saveBundle(bundle, envsToSendTo);
-				publisherAPI.addContentsToUnpublish(identifiers, bundleId, expireDate, processor.getUser());
+				publisherAPI.addContentsToUnpublish(identifiers, bundle.getId(), expireDate, processor.getUser());
 			}
 		} catch (DotPublisherException e) {
 			Logger.debug(PushPublishActionlet.class, e.getMessage());

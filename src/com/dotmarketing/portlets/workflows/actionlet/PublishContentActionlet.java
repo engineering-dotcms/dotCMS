@@ -4,14 +4,16 @@ import java.util.List;
 import java.util.Map;
 
 import com.dotmarketing.business.APILocator;
+import com.dotmarketing.portlets.contentlet.model.Contentlet;
 import com.dotmarketing.portlets.workflows.model.WorkflowActionClassParameter;
 import com.dotmarketing.portlets.workflows.model.WorkflowActionFailureException;
 import com.dotmarketing.portlets.workflows.model.WorkflowActionletParameter;
 import com.dotmarketing.portlets.workflows.model.WorkflowProcessor;
 import com.dotmarketing.portlets.workflows.model.WorkflowStep;
 import com.dotmarketing.util.Logger;
+import com.dotmarketing.util.UtilMethods;
 
-public class PublishContentActionlet extends WorkFlowActionlet {
+public class PublishContentActionlet extends ContentActionlet {
 
 
 
@@ -30,14 +32,18 @@ public class PublishContentActionlet extends WorkFlowActionlet {
 	}
 
 	public void executeAction(WorkflowProcessor processor,Map<String,WorkflowActionClassParameter>  params) throws WorkflowActionFailureException {
-		try {
-
+		try {			
+			super.executeAction(processor, params);
 			
 			if(processor.getContentlet().isArchived()){
-				APILocator.getContentletAPI().unarchive(processor.getContentlet(), processor.getUser(), false);
+				for(Contentlet c : contentletsToProcess)
+					APILocator.getContentletAPI().unarchive(c, processor.getUser(), false);
 			}
 			
-			APILocator.getContentletAPI().publish(processor.getContentlet(), processor.getUser(), false);
+			for(Contentlet c : contentletsToProcess){
+				if(!UtilMethods.isSet(APILocator.getIdentifierAPI().find(c.getIdentifier()).getSysPublishDate()))
+					APILocator.getContentletAPI().publish(c, processor.getUser(), false);
+			}
 
 		} catch (Exception e) {
 			Logger.error(PublishContentActionlet.class,e.getMessage(),e);
