@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
 import com.dotmarketing.business.DotStateException;
 import com.dotmarketing.util.ConfigUtils;
 import com.dotmarketing.util.Logger;
@@ -94,9 +93,12 @@ public class BundlerUtil {
 
 		try {
 			if(!f.exists())f.createNewFile();
+			
 			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(f));
-			XStreamInstance.INSTANCE.getXStream().toXML(obj, out);
-			out.close();
+			synchronized(out){
+				XStreamInstance.INSTANCE.getXStream().toXML(obj, out);
+				out.close();
+			}
 			
 			
 		} catch (FileNotFoundException e) {

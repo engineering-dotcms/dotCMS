@@ -111,10 +111,7 @@ public class Template extends WebAsset implements Serializable, Comparable {
 	private String footer;
 
 	public String getInode() {
-		if(InodeUtils.isSet(this.inode))
-			return this.inode;
-
-		return "";
+		return this.inode;
 	}
 
 	/**

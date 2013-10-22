@@ -41,7 +41,7 @@ public class SiteSearchJobImpl {
     public void setStatus(PublishStatus status) {
         this.status = status;
     }
-    @SuppressWarnings("unchecked")
+
     public void run(JobExecutionContext jobContext) throws JobExecutionException, DotPublishingException, DotDataException, DotSecurityException, ElasticSearchException, IOException {
         if(LicenseUtil.getLevel()<200)
             return;

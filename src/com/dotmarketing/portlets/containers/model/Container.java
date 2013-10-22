@@ -9,7 +9,6 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import com.dotmarketing.beans.Host;
 import com.dotmarketing.beans.WebAsset;
 import com.dotmarketing.business.APILocator;
-import com.dotmarketing.business.DotStateException;
 import com.dotmarketing.business.PermissionAPI;
 import com.dotmarketing.business.PermissionSummary;
 import com.dotmarketing.business.Permissionable;
@@ -18,7 +17,6 @@ import com.dotmarketing.exception.DotRuntimeException;
 import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.portlets.contentlet.business.HostAPI;
 import com.dotmarketing.portlets.folders.model.Folder;
-import com.dotmarketing.util.InodeUtils;
 import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.UtilMethods;
 import com.liferay.portal.model.User;
@@ -70,10 +68,7 @@ public class Container extends WebAsset implements Serializable {
 	}
 
 	public String getInode() {
-		if (InodeUtils.isSet(this.inode))
-			return this.inode;
-
-		return "";
+		return this.inode;
 	}
 
 	/**
@@ -286,9 +281,7 @@ public class Container extends WebAsset implements Serializable {
 	}
 
 	public String getNotes() {
-		if (UtilMethods.isSet(this.notes))
-			return this.notes;
-		return "";
+		return this.notes;
 	}
 
 	public void setNotes(String notes) {

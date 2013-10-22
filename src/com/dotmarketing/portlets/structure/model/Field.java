@@ -224,10 +224,7 @@ public class Field extends Inode implements Exportable, Importable
 		this.structureInode = structureInode;
 	}
 	public String getValues() {
-		if(UtilMethods.isSet(values)){
-			return values;
-		}
-		return "";
+		return values;
 	}
 	public void setValues(String values) {
 		this.values = values;
