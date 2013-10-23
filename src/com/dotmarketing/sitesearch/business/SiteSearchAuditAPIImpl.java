@@ -23,5 +23,10 @@ public class SiteSearchAuditAPIImpl implements SiteSearchAuditAPI {
     public void removeAudits(String jobId) throws DotDataException {
         ssFac.removeAudits(jobId);
     }
+
+	@Override
+	public List<SiteSearchAudit> findByJobName(String jobName) throws DotDataException {
+		return ssFac.findByJobName(jobName);
+	}
     
 }

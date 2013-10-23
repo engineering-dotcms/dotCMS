@@ -30,4 +30,6 @@ public interface SiteSearchAuditAPI {
      * @throws DotDataException 
      */
     void removeAudits(String jobId) throws DotDataException;
+    
+    List<SiteSearchAudit> findByJobName(String jobName) throws DotDataException;
 }

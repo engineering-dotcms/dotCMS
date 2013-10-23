@@ -1,3 +1,5 @@
+<%@page import="com.dotmarketing.sitesearch.model.SiteSearchAudit"%>
+<%@page import="com.dotmarketing.sitesearch.business.SiteSearchAuditAPI"%>
 <%@page import="com.dotmarketing.sitesearch.business.SiteSearchAPI"%>
 <%@page import="com.dotmarketing.portlets.languagesmanager.model.Language"%>
 <%@page import="com.dotmarketing.beans.Host"%>
@@ -27,10 +29,17 @@
 <%@page import="java.util.List"%>
 <%
 SiteSearchAPI ssapi = APILocator.getSiteSearchAPI();
+SiteSearchAuditAPI ssaudapi = APILocator.getSiteSearchAuditAPI();
 Map<String, Object> props = new HashMap<String, Object>();
+List<SiteSearchAudit> audits = new ArrayList<SiteSearchAudit>();
+String JOB_ID = null;
 if(request.getParameter("jobName") != null){
+	String jobName = request.getParameter("jobName");
 	try{
-		props = ssapi.getTask(request.getParameter("jobName")).getProperties();
+		props = ssapi.getTask(jobName).getProperties();
+		audits = ssaudapi.findByJobName(jobName);
+		if(audits.size()>0)
+			JOB_ID = audits.get(0).getJobId();
 	}
 	catch(Exception e){
 
@@ -276,6 +285,9 @@ boolean hasPath = false;
 			<td>
 
 				<input name="CRON_EXPRESSION" id="cronExpression" type="text" dojoType='dijit.form.ValidationTextBox' required="true" style='width: 200px'" value="<%=CRON_EXPRESSION %>" size="10" />
+				<%if(null!=JOB_ID) {%>
+					<input type="hidden" name="JOB_ID" id="JOB_ID" value='<%=JOB_ID%>' />
+				<%} %>	
 				 <div style="width: 350px; margin:20px; text-align: left;" id="cronHelpDiv" class="callOutBox2">
 					<h3><%= LanguageUtil.get(pageContext, "cron-examples") %></h3>
 					<span style="font-size: 88%;">
@@ -288,7 +300,8 @@ boolean hasPath = false;
 
 			</td>
 		</tr>
-
+		
+		
 
 
 

@@ -22,6 +22,9 @@ abstract class SiteSearchAuditSQL {
             " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
     
     String findrecent="select * from sitesearch_audit where job_id=? order by fire_date desc limit ? offset ?";
+    
+    String findbyjobname="select * from sitesearch_audit where job_name =?";
+    
     void setRecentParams(DotConnect dc, String jobId, int limit, int offset) {
         dc.addParam(jobId);
         dc.addParam(limit);

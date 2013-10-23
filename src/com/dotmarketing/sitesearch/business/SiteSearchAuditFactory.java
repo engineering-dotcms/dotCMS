@@ -12,4 +12,6 @@ interface SiteSearchAuditFactory {
     List<SiteSearchAudit> findRecentAudits(String jobId, int offset, int limit) throws DotDataException;
     
     void removeAudits(String jobId) throws DotDataException;
+    
+    List<SiteSearchAudit> findByJobName(String jobName) throws DotDataException;
 }

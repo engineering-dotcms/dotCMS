@@ -76,5 +76,34 @@ class SiteSearchAuditFactoryImpl implements SiteSearchAuditFactory {
         dc.addParam(jobId);
         dc.loadResult();
     }
+
+	@Override
+	public List<SiteSearchAudit> findByJobName(String jobName) throws DotDataException {
+		List<SiteSearchAudit> recents=new ArrayList<SiteSearchAudit>();
+		DotConnect dc=new DotConnect();
+        dc.setSQL(auditSQL.findbyjobname);
+        dc.addParam(jobName);
+        List<Map<String,Object>> results = dc.loadObjectResults();
+        for (Map<String, Object> map : results) {
+            SiteSearchAudit audit=new SiteSearchAudit();
+            audit.setAllHosts(DbConnectionFactory.isDBTrue(map.get("all_hosts").toString()));
+            audit.setIncremental(DbConnectionFactory.isDBTrue(map.get("incremental").toString()));
+            audit.setEndDate((Date)map.get("end_date"));
+            audit.setStartDate((Date)map.get("start_date"));
+            audit.setFireDate((Date)map.get("fire_date"));
+            audit.setHostList((String)map.get("host_list"));
+            audit.setIndexName((String)map.get("index_name"));
+            audit.setJobId((String)map.get("job_id"));
+            audit.setJobName(jobName);
+            audit.setLangList((String)map.get("lang_list"));
+            audit.setFilesCount(((Number)map.get("files_count")).intValue());
+            audit.setPagesCount(((Number)map.get("pages_count")).intValue());
+            audit.setUrlmapsCount(((Number)map.get("urlmaps_count")).intValue());
+            audit.setPath((String)map.get("path"));
+            audit.setPathInclude(DbConnectionFactory.isDBTrue(map.get("path_include").toString()));
+            recents.add(audit);
+        }
+        return recents;
+	}
     
 }
