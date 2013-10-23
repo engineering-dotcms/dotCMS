@@ -12,7 +12,7 @@
 	for(String id : ids){
 		// remove from indicies
 		APILocator.getSiteSearchAPI().deleteFromIndex(current_live, id);
-		APILocator.getSiteSearchAPI().deleteFromIndex(working_live, id);
+		APILocator.getSiteSearchAPI().deleteFromIndex(current_working, id);
 		Logger.info(this.getClass(), "Content " + id + " deleted from indicies: " + current_live + ", " + current_working);
 	}
 	Logger.info(this.getClass(), "End deleting from indicies.");
