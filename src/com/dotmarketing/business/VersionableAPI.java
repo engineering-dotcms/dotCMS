@@ -345,7 +345,7 @@ public interface VersionableAPI {
 	 * @throws DotDataException
 	 * @throws DotStateException
 	 */
-	public void saveContentletVersionInfo(ContentletVersionInfo cvInfo) throws DotDataException, DotStateException;
+	public void saveContentletVersionInfo(ContentletVersionInfo cvInfo, boolean newVersion) throws DotDataException, DotStateException;
 	
 	/**
 	 * Will return the @VersionInfo holder for the given identifier

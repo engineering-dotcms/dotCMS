@@ -51,6 +51,7 @@ public class SiteSearchJobImpl {
         JobDataMap dataMap = jobContext.getJobDetail().getJobDataMap();
         
         String jobId=(String)dataMap.get("JOB_ID");
+        String jobName = jobId=dataMap.getString("QUARTZ_JOB_NAME");
         if(jobId==null) {
             jobId=dataMap.getString("QUARTZ_JOB_NAME");
         }
@@ -94,6 +95,13 @@ public class SiteSearchJobImpl {
                 List<SiteSearchAudit> recentAudits = APILocator.getSiteSearchAuditAPI().findRecentAudits(jobId, 0, 1);
                 if(recentAudits.size()>0)
                     startDate=recentAudits.get(0).getFireDate();
+                else{
+                	recentAudits = APILocator.getSiteSearchAuditAPI().findByJobName(jobName);
+                	if(recentAudits.size()>0)
+                		startDate=recentAudits.get(0).getFireDate();
+                }
+                
+                	
             }
             catch(Exception ex) {
                 Logger.warn(this, "can't determine last audit entry for this job",ex);
@@ -156,8 +164,6 @@ public class SiteSearchJobImpl {
             }
             
             config.setIndexName(indexName);
-    
-            
             
             // if it is going to be an incremental job, write the bundle to the same folder
             // every time.  Otherwise, create a new folder using a date stamp.

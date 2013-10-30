@@ -125,6 +125,5 @@ public final class Constants {
     public static String USER_AGENT_DOTCMS_HTMLPAGEDIFF = "DOTCMS-HTMLPAGEDIFF";
     public static String USER_AGENT_DOTCMS_SITESEARCH = "DOTCMS-SITESEARCH";
     public static String USER_AGENT_DOTCMS_TIMEMACHINE = "DOTCMS-TIMEMACHINE";
-    
 
 }

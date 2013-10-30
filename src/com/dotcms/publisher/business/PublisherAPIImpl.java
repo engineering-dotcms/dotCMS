@@ -490,7 +490,7 @@ public class PublisherAPIImpl extends PublisherAPI{
 			"left join publishing_queue_audit a "+
 			"ON p.bundle_id=a.bundle_id "+
 			"where "+
-			"((a.status != ? and a.status != ?) or a.status is null ) and p.publish_date is not null "+
+			"((a.status != ? and a.status != ? and a.status != ? and a.status != ? and a.status != ? and a.status != ? and a.status != ?) or a.status is null ) and p.publish_date is not null "+
 			"order by publish_date ASC,operation ASC";
 
 
@@ -502,6 +502,11 @@ public class PublisherAPIImpl extends PublisherAPI{
 
 			dc.addParam(Status.BUNDLE_SENT_SUCCESSFULLY.getCode());
 			dc.addParam(Status.PUBLISHING_BUNDLE.getCode());
+			dc.addParam(Status.BUNDLE_REQUESTED.getCode());
+			dc.addParam(Status.BUNDLING.getCode());
+			dc.addParam(Status.SENDING_TO_ENDPOINTS.getCode());
+			dc.addParam(Status.RECEIVED_BUNDLE.getCode());
+			dc.addParam(Status.WAITING_FOR_PUBLISHING.getCode());
 			return dc.loadObjectResults();
 		}catch(Exception e){
 			Logger.error(PublisherUtil.class,e.getMessage(),e);

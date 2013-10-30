@@ -105,5 +105,4 @@ class SiteSearchAuditFactoryImpl implements SiteSearchAuditFactory {
         }
         return recents;
 	}
-    
 }

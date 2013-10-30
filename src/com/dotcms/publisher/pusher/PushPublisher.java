@@ -131,22 +131,24 @@ public class PushPublisher extends Publisher {
 
 	        			//Sending bundle to endpoint
 	        			WebResource resource = client.resource(endpoint.toURL()+"/api/bundlePublisher/publish");
+	        			synchronized(resource){
+	        				ClientResponse response =
+		        					resource.type(MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
 
-	        			ClientResponse response =
-	        					resource.type(MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
 
-
-	        			if(response.getClientResponseStatus().getStatusCode() == HttpStatus.SC_OK)
-	        			{
-	        				detail.setStatus(PublishAuditStatus.Status.BUNDLE_SENT_SUCCESSFULLY.getCode());
-	        				detail.setInfo("Everything ok");
-	        				sent = true;
-	        			} else {
-	        				detail.setStatus(PublishAuditStatus.Status.FAILED_TO_SENT.getCode());
-	        				detail.setInfo(
-	        						"Returned "+response.getClientResponseStatus().getStatusCode()+ " status code " +
-	        								"for the endpoint "+endpoint.getId()+ "with address "+endpoint.getAddress());
+		        			if(response.getClientResponseStatus().getStatusCode() == HttpStatus.SC_OK)
+		        			{
+		        				detail.setStatus(PublishAuditStatus.Status.BUNDLE_SENT_SUCCESSFULLY.getCode());
+		        				detail.setInfo("Everything ok");
+		        				sent = true;
+		        			} else {
+		        				detail.setStatus(PublishAuditStatus.Status.FAILED_TO_SENT.getCode());
+		        				detail.setInfo(
+		        						"Returned "+response.getClientResponseStatus().getStatusCode()+ " status code " +
+		        								"for the endpoint "+endpoint.getId()+ "with address "+endpoint.getAddress());
+		        			}
 	        			}
+	        			
 	        		} catch(Exception e) {
 
 	                    // if the bundle can't be sent after the total num of tries, delete the pushed assets for this bundle

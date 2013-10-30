@@ -4,6 +4,7 @@ package com.dotmarketing.business;
 import com.dotmarketing.beans.Identifier;
 import com.dotmarketing.beans.VersionInfo;
 import com.dotmarketing.cache.StructureCache;
+import com.dotmarketing.db.HibernateUtil;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.portlets.contentlet.model.Contentlet;
@@ -271,7 +272,7 @@ public class VersionableAPIImpl implements VersionableAPI {
         }
 
         ver.setLiveInode( null );
-        vfac.saveContentletVersionInfo( ver );
+        vfac.saveContentletVersionInfo(ver,true);
     }
 
     public void setDeleted(Versionable ver, boolean deleted) throws DotDataException, DotStateException, DotSecurityException {
@@ -284,7 +285,7 @@ public class VersionableAPIImpl implements VersionableAPI {
             if(!UtilMethods.isSet(info.getIdentifier()))
                 throw new DotStateException("No version info. Call setWorking first");
             info.setDeleted(deleted);
-            vfac.saveContentletVersionInfo(info);
+            vfac.saveContentletVersionInfo(info,true);
         }
         else {
             VersionInfo info = vfac.getVersionInfo(ver.getVersionId());
@@ -325,14 +326,14 @@ public class VersionableAPIImpl implements VersionableAPI {
             }
 
             info.setLiveInode( versionable.getInode() );
-            vfac.saveContentletVersionInfo( info );
+            vfac.saveContentletVersionInfo(info,true);
         } else {
             VersionInfo info = vfac.getVersionInfo( versionable.getVersionId() );
             if ( !UtilMethods.isSet( info.getIdentifier() ) ) {
                 throw new DotStateException( "No version info. Call setWorking first" );
             }
             info.setLiveInode( versionable.getInode() );
-            vfac.saveVersionInfo( info );
+            vfac.saveVersionInfo(info);
         }
     }
 
@@ -349,7 +350,7 @@ public class VersionableAPIImpl implements VersionableAPI {
                 info.setLocked(user.getUserId());
             else
                 info.unLock();
-            vfac.saveContentletVersionInfo(info);
+            vfac.saveContentletVersionInfo(info, false);
         }
         else {
             VersionInfo info = vfac.getVersionInfo(ver.getVersionId());
@@ -359,7 +360,8 @@ public class VersionableAPIImpl implements VersionableAPI {
                 info.setLocked(user.getUserId());
             else
                 info.unLock();
-            vfac.saveVersionInfo(info);
+            
+            vfac.saveLock(info);
         }
     }
 
@@ -376,7 +378,7 @@ public class VersionableAPIImpl implements VersionableAPI {
             }
             else {
                 info.setWorkingInode(versionable.getInode());
-                vfac.saveContentletVersionInfo(info);
+                vfac.saveContentletVersionInfo(info,true);
             }
         }
         else {
@@ -445,17 +447,17 @@ public class VersionableAPIImpl implements VersionableAPI {
 	}
 	
 	@Override
-	public void saveContentletVersionInfo( ContentletVersionInfo cvInfo) throws DotDataException, DotStateException {
+	public void saveContentletVersionInfo( ContentletVersionInfo cvInfo, boolean newVersion) throws DotDataException, DotStateException {
 		ContentletVersionInfo info = vfac.findContentletVersionInfoInDB(cvInfo.getIdentifier(), cvInfo.getLang());
 		if(info == null){
-			vfac.saveContentletVersionInfo(cvInfo);
+			vfac.saveContentletVersionInfo(cvInfo,newVersion);
 		}else{
 			info.setDeleted(cvInfo.isDeleted());
 			info.setLiveInode(cvInfo.getLiveInode());
 			info.setLockedBy(cvInfo.getLockedBy());
 			info.setLockedOn(cvInfo.getLockedOn());
 			info.setWorkingInode(cvInfo.getWorkingInode());
-			vfac.saveContentletVersionInfo(info);
+			vfac.saveContentletVersionInfo(info,newVersion);
 		}
 	}
 

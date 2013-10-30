@@ -30,10 +30,6 @@ public class PublisherAPIImpl implements PublisherAPI {
 			List<Class> bundlers = new ArrayList<Class>();
 			List<IBundler> confBundlers = new ArrayList<IBundler>();
 
-
-
-
-
 			// init publishers
 			for (Class<Publisher> c : config.getPublishers()) {
 				Publisher p = c.newInstance();

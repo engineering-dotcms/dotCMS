@@ -179,24 +179,51 @@ public class VersionableFactoryImpl extends VersionableFactory {
         Identifier ident = APILocator.getIdentifierAPI().find(info.getIdentifier());
         VersionInfo vi=(VersionInfo) findVersionInfoFromDb(ident);
         boolean isNew = vi==null || !InodeUtils.isSet(vi.getIdentifier());
+        
         try {
 			BeanUtils.copyProperties(vi, info);
 		} catch (Exception e) {
 			throw new DotDataException(e.getMessage());
 		}
-
         vi.setVersionTs(new Date());
-        
         if(isNew) {
             HibernateUtil.save(vi);
         }
         else {
+        	
             HibernateUtil.saveOrUpdate(vi);
         }
         HibernateUtil.flush();
         icache.removeVersionInfoFromCache(vi.getIdentifier());
 
     }
+    
+    @Override
+    protected void saveLock(VersionInfo info) throws DotDataException, DotStateException {
+
+    	//reload versionInfo from db (JIRA-7203)
+        Identifier ident = APILocator.getIdentifierAPI().find(info.getIdentifier());
+        VersionInfo vi=(VersionInfo) findVersionInfoFromDb(ident);
+        boolean isNew = vi==null || !InodeUtils.isSet(vi.getIdentifier());
+        
+        try {
+			BeanUtils.copyProperties(vi, info);
+		} catch (Exception e) {
+			throw new DotDataException(e.getMessage());
+		}
+
+        if(isNew) {
+            HibernateUtil.save(vi);
+        }
+        else {
+        	
+            HibernateUtil.saveOrUpdate(vi);
+        }
+        HibernateUtil.flush();
+        icache.removeVersionInfoFromCache(vi.getIdentifier());
+
+    }
+    
 
     @Override
     protected ContentletVersionInfo getContentletVersionInfo(String identifier, long lang) throws DotDataException, DotStateException {
@@ -227,7 +254,7 @@ public class VersionableFactoryImpl extends VersionableFactory {
     }
     
     @Override
-    protected void saveContentletVersionInfo(ContentletVersionInfo cvInfo) throws DotDataException, DotStateException {
+    protected void saveContentletVersionInfo(ContentletVersionInfo cvInfo, boolean newVersion) throws DotDataException, DotStateException {
     	Identifier ident = APILocator.getIdentifierAPI().find(cvInfo.getIdentifier());
     	ContentletVersionInfo vi= null;
     	if(ident!=null && InodeUtils.isSet(ident.getId())){
@@ -239,7 +266,8 @@ public class VersionableFactoryImpl extends VersionableFactory {
 		} catch (Exception e) {
 			throw new DotDataException(e.getMessage());
 		}
-    	vi.setVersionTs(new Date());
+        if(newVersion)
+        	vi.setVersionTs(new Date());
     	if(isNew) {
             HibernateUtil.save(vi);
         }

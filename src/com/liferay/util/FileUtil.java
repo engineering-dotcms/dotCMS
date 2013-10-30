@@ -613,7 +613,6 @@ public class FileUtil {
 	  // PRIVATE //
 	  static private List<File> getFileListingNoSort(File aStartingDir, FileFilter filter) throws FileNotFoundException {
 	    List<File> result = new ArrayList<File>();
-
 	    File[] filesAndDirs = null;
 	    if(filter !=null){
 	    	filesAndDirs = aStartingDir.listFiles(filter);
@@ -621,10 +620,12 @@ public class FileUtil {
 	    else{
 	    	filesAndDirs = aStartingDir.listFiles();
 	    }
+
 	    List<File> filesDirs = Arrays.asList(filesAndDirs);
+	    
 	    for(File file : filesDirs) {
 	      result.add(file); //always add, even if directory
-	      if ( ! file.isFile() ) {
+	      if ( file.isDirectory() ) {
 	        //must be a directory
 	        //recursive call!
 	        List<File> deeperList = getFileListingNoSort(file, filter);

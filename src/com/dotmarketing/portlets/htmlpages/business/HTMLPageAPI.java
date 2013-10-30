@@ -1,5 +1,6 @@
 package com.dotmarketing.portlets.htmlpages.business;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -340,6 +341,10 @@ public interface HTMLPageAPI {
     public String getHTML(String uri, Host host,boolean liveMode,String contentId,User user, String userAgent) throws DotStateException, DotDataException, DotSecurityException;
     public String getHTML(String uri, Host host,boolean liveMode,String contentId,User user, long langId, String userAgent) throws DotStateException, DotDataException, DotSecurityException;
 	
+    
+    public String getHTMLFromJSoup(String uri, Host host, User user, long langId, String userAgent, boolean liveMode) throws IOException;
+    
+    public String getHTMLFromJSoup(String uri, Host host, User user, long langId, String userAgent) throws IOException;
 	/**
 	 * Retrieves the working version of a page based on its identifier
 	 * @return

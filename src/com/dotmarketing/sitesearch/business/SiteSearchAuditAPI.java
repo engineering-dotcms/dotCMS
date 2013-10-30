@@ -23,7 +23,7 @@ public interface SiteSearchAuditAPI {
      * @throws DotDataException 
      */
     List<SiteSearchAudit> findRecentAudits(String jobId, int offset, int limit) throws DotDataException;
-    
+
     /**
      * Removes all audits entries for the specified job
      * @param jobId

@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
 import com.dotmarketing.business.DotStateException;
 import com.dotmarketing.util.ConfigUtils;
 import com.dotmarketing.util.Logger;
@@ -45,7 +46,7 @@ public class BundlerUtil {
 	 * write the bundle.xml file to it
 	 * @param config Config with the id of bundle
 	 */
-	public static File getBundleRoot(PublisherConfig config){
+	public static File getBundleRoot(PublisherConfig config) {
 		return getBundleRoot(config.getId());
 	}
 	
@@ -77,7 +78,7 @@ public class BundlerUtil {
 		}
 	}
 	
-	public static void objectToXML(Object obj, File f){
+	public static void objectToXML(Object obj, File f) {
 		objectToXML(obj, f, true);
 	}
 
@@ -87,19 +88,12 @@ public class BundlerUtil {
 	 * @param f File to write to
 	 */
 	public static void objectToXML(Object obj, File f, boolean removeFirst){
-
 		if ( removeFirst && f.exists() )
 			f.delete();
 
 		try {
-			if(!f.exists())f.createNewFile();
-			
-			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(f));
-			synchronized(out){
-				XStreamInstance.INSTANCE.getXStream().toXML(obj, out);
-				out.close();
-			}
-			
+			if(!f.exists())f.createNewFile();			
+			XStreamInstance.INSTANCE.getXStream().toXML(obj, new BufferedOutputStream(new FileOutputStream(f)));
 			
 		} catch (FileNotFoundException e) {
 			Logger.error(PublisherUtil.class,e.getMessage(),e);

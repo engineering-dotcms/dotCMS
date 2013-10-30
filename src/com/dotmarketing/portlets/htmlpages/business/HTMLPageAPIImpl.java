@@ -1,5 +1,6 @@
 package com.dotmarketing.portlets.htmlpages.business;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationHandler;
@@ -13,9 +14,19 @@ import java.util.Map;
 
 import javax.servlet.http.Cookie;
 
+import org.apache.catalina.Server;
+import org.apache.catalina.ServerFactory;
+import org.apache.catalina.Service;
+import org.apache.catalina.connector.Connector;
+import org.apache.coyote.ProtocolHandler;
+import org.apache.coyote.http11.Http11AprProtocol;
+import org.apache.coyote.http11.Http11NioProtocol;
+import org.apache.coyote.http11.Http11Protocol;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ResourceNotFoundException;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
 
 import com.dotcms.enterprise.cmis.QueryResult;
 import com.dotmarketing.beans.Host;
@@ -59,7 +70,6 @@ import com.dotmarketing.portlets.htmlpages.model.HTMLPage;
 import com.dotmarketing.portlets.templates.business.TemplateAPI;
 import com.dotmarketing.portlets.templates.model.Template;
 import com.dotmarketing.util.Config;
-import com.dotmarketing.util.Constants;
 import com.dotmarketing.util.CookieUtil;
 import com.dotmarketing.util.InodeUtils;
 import com.dotmarketing.util.Logger;
@@ -262,7 +272,6 @@ public class HTMLPageAPIImpl extends BaseWebAssetAPI implements HTMLPageAPI {
 		return MultiTreeFactory.getMultiTree(identifierAPI.findFromInode(htmlPage.getIdentifier()));
 	}
 
-	@SuppressWarnings("unchecked")
 	public HTMLPage getWorkingHTMLPageByPageURL(String htmlPageURL, Folder folder) throws DotStateException, DotDataException, DotSecurityException {
 		HTMLPage ret = null;
 		if(folder != null && InodeUtils.isSet(folder.getInode())){
@@ -284,7 +293,6 @@ public class HTMLPageAPIImpl extends BaseWebAssetAPI implements HTMLPageAPI {
 		return ret;
 	}
 
-	@SuppressWarnings("unchecked")
 	protected String getCopyHTMLPageName(String htmlPageName, String fileExtension, Folder folder) throws DotStateException, DotDataException, DotSecurityException {
 		String result = new String(htmlPageName);
 
@@ -546,7 +554,6 @@ public class HTMLPageAPIImpl extends BaseWebAssetAPI implements HTMLPageAPI {
 	 * @throws DotStateException
 	 * @throws DotSecurityException
 	 */
-	@SuppressWarnings({ "deprecation", "unchecked" })
 	public List<HTMLPage> findLiveHTMLPages(Folder folder) throws DotStateException, DotDataException, DotSecurityException {
 		return APILocator.getFolderAPI().getLiveHTMLPages(folder, APILocator.getUserAPI().getSystemUser(),false);
 	}
@@ -560,7 +567,6 @@ public class HTMLPageAPIImpl extends BaseWebAssetAPI implements HTMLPageAPI {
 	 * @throws DotStateException
 	 * @throws DotSecurityException
 	 */
-	@SuppressWarnings("unchecked")
 	public List<HTMLPage> findWorkingHTMLPages(Folder folder) throws DotStateException, DotDataException, DotSecurityException {
 		return APILocator.getFolderAPI().getWorkingHTMLPages(folder,APILocator.getUserAPI().getSystemUser(),false);
 	}
@@ -836,7 +842,98 @@ public class HTMLPageAPIImpl extends BaseWebAssetAPI implements HTMLPageAPI {
 	        return getHTML(uri, host, liveMode, contentId, user, userAgent);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public String getHTMLFromJSoup(String uri, Host host, User user, long langId, String userAgent, boolean liveMode) throws IOException {
+		InvocationHandler dotInvocationHandler = new DotInvocationHandler(new HashMap());
+		
+        DotRequestProxy requestProxy = (DotRequestProxy) Proxy
+                        .newProxyInstance(DotRequestProxy.class.getClassLoader(),
+                                        new Class[] { DotRequestProxy.class },
+                                        dotInvocationHandler);
+        requestProxy.put("host", host);
+        requestProxy.put("host_id", host.getIdentifier());
+        requestProxy.put("uri", uri);
+        
 
+        DotResponseProxy responseProxy = (DotResponseProxy) Proxy
+                .newProxyInstance(DotResponseProxy.class.getClassLoader(),
+                                new Class[] { DotResponseProxy.class },
+                                dotInvocationHandler);
+        if(!liveMode){
+        	requestProxy.put("user", user);
+        	/* Set long lived cookie regardless of who this is */
+	        String _dotCMSID = UtilMethods.getCookieValue(
+	                        requestProxy.getCookies(),
+	                        com.dotmarketing.util.WebKeys.LONG_LIVED_DOTCMS_ID_COOKIE);
+	
+	
+	        if (!UtilMethods.isSet(_dotCMSID)) {
+	                /* create unique generator engine */
+	                Cookie idCookie = CookieUtil.createCookie();
+	                responseProxy.addCookie(idCookie);
+	        }
+            requestProxy.setAttribute(WebKeys.PREVIEW_MODE_SESSION, "true");
+        }
+        requestProxy.getSession().setAttribute(WebKeys.CURRENT_HOST,host);
+        StringBuilder sb = new StringBuilder();
+        sb.append("http://");
+        sb.append("localhost");
+        sb.append(":8080");
+//        sb.append(getServerPort());
+        if(!uri.startsWith("/"))
+        	sb.append("/");
+        sb.append(uri);
+        sb.append("?");
+        sb.append(WebKeys.HTMLPAGE_LANGUAGE);
+        sb.append("=");
+        sb.append(langId);
+        Logger.info(getClass(), "URL da contattare: " + sb.toString());
+		Connection conn = Jsoup.connect(sb.toString()).timeout(Config.getIntProperty("STATIC_HTML_THREAD_POOL_KEEP_ALIVE_TIME")*1000);
+		conn.userAgent(userAgent);
+		String html = conn.get().html();
+		return html;
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public String getHTMLFromJSoup(String uri, Host host, User user, long langId, String userAgent) throws IOException {
+		InvocationHandler dotInvocationHandler = new DotInvocationHandler(new HashMap());
+		
+        DotRequestProxy requestProxy = (DotRequestProxy) Proxy
+                        .newProxyInstance(DotRequestProxy.class.getClassLoader(),
+                                        new Class[] { DotRequestProxy.class },
+                                        dotInvocationHandler);
+        requestProxy.put("host", host);
+        requestProxy.put("host_id", host.getIdentifier());
+        requestProxy.put("uri", uri);
+        
+
+        DotResponseProxy responseProxy = (DotResponseProxy) Proxy
+                .newProxyInstance(DotResponseProxy.class.getClassLoader(),
+                                new Class[] { DotResponseProxy.class },
+                                dotInvocationHandler);
+
+        requestProxy.getSession().setAttribute(WebKeys.CURRENT_HOST,host);
+        StringBuilder sb = new StringBuilder();
+        sb.append("http://");
+        sb.append("localhost");
+        sb.append(":8080");
+//        sb.append(getServerPort());
+        if(!uri.startsWith("/"))
+        	sb.append("/");
+        sb.append(uri);
+        sb.append("?");
+        sb.append(WebKeys.HTMLPAGE_LANGUAGE);
+        sb.append("=");
+        sb.append(langId);
+        Logger.info(getClass(), "URL da contattare: " + sb.toString());
+		Connection conn = Jsoup.connect(sb.toString()).timeout(Config.getIntProperty("STATIC_HTML_THREAD_POOL_KEEP_ALIVE_TIME")*1000);
+		conn.userAgent(userAgent);
+		String html = conn.get().html();
+		return html;
+	}
+	
 	public HTMLPage loadWorkingPageById(String pageId, User user, boolean respectFrontendRoles) throws DotSecurityException, DotDataException {
 		HTMLPage page = htmlPageFactory.loadWorkingPageById(pageId);
 		if(page == null)
