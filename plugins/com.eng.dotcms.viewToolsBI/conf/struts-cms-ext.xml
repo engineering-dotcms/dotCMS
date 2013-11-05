@@ -1,0 +1,5 @@
+			<form-bean name="SearchForm" type="it.bankit.website.struts.SiteSeachForm"></form-bean>
+    
+              <action path="/searchAction" type="it.bankit.website.struts.SiteSearchAction" name="SearchForm" scope="request" input="/homepage/search/simplesearch.html" validate="true" parameter="dispatch">
+                        <forward name="normalSearchPage" path="/homepage/search/simplesearch.html" />
+                </action>

@@ -1,0 +1,384 @@
+
+##Navigazione Menu Primo livello
+#macro (firstLevelNavigation $startLevel $depth)
+	#set ($path = $nav.createMenuByDepth($startLevel, $depth, $request))
+	#if ($path != "")
+		$velutil.mergeTemplate($path)
+		#if ($EDIT_MODE)			 
+			$nav.increaseFormCount()
+		#end
+		#if ($navigationSourceCode)
+			#dotParse($navigationSourceCode)
+
+			##Clearing navigationSourceCode value to fix in edit mode when calling this macro two or more times, will not reuse this value even the variable is declared later.
+			#set ($navigationSourceCode = false)
+
+		#else
+			$velutil.mergeTemplate('/static/navigation/list_menus.vtl')
+		#end
+	#end
+#end
+
+
+#macro (fullScreenMapFolder $startLevel $depth $path)
+	#if(!$UtilMethods.isSet($reverseOrder))
+		#set($reverseOrder = false)
+	#end
+	#if($UtilMethods.isSet($!siteMapIdPrefix))
+		$request.setAttribute("siteMapIdPrefix", $siteMapIdPrefix)
+	#end
+	<div class="siteMap">
+	  #if ($showHome)
+		  $velutil.mergeTemplate($fullScreenNav.createSiteMapMenu($startLevel, $depth, $path, $request, $showHome, $reverseOrder))
+	  #else
+		  $velutil.mergeTemplate($fullScreenNav.createSiteMapMenu($startLevel, $depth, $path, $request, false, $reverseOrder))
+	  #end
+
+	</div>
+
+	#if($UtilMethods.isSet($!siteMapIdPrefix))
+		$request.removeAttribute("siteMapIdPrefix")
+	#end
+
+#end
+
+##MACRO MENU HOMEPAGE
+#macro (footerMenu $startLevel $depth $path $from)
+	#if(!$UtilMethods.isSet($reverseOrder))
+		#set($reverseOrder = false)
+	#end
+	#if($UtilMethods.isSet($!siteMapIdPrefix))
+		$request.setAttribute("siteMapIdPrefix", $siteMapIdPrefix)
+	#end
+	
+	$velutil.mergeTemplate($footerNav.createSiteMapMenu($depth, $path, $request, $reverseOrder))
+
+	#if($from=="search")		
+		#dotParse('/static/vtl/macros/navigation/searchNavigation.vtl')
+	#else
+		#dotParse('/static/vtl/macros/navigation/footerNavigation.vtl')
+	#end
+	 
+	#if($UtilMethods.isSet($!siteMapIdPrefix))
+		$request.removeAttribute("siteMapIdPrefix")
+	#end
+#end
+##MACRO SELETTORE
+#macro (selettoreNav $depth $path)
+	#if(!$UtilMethods.isSet($reverseOrder))
+		#set($reverseOrder = false)
+	#end
+	#if($UtilMethods.isSet($!siteMapIdPrefix))
+		$request.setAttribute("siteMapIdPrefix", $siteMapIdPrefix)
+	#end
+	
+	
+        $velutil.mergeTemplate($selettoreNav.createSiteMapMenu($depth, $path, $request,$reverseOrder))
+	
+	
+        #dotParse('/static/vtl/macros/navigation/selettoreNavigation.vtl')
+	
+	
+	#if($UtilMethods.isSet($!siteMapIdPrefix))
+		$request.removeAttribute("siteMapIdPrefix")
+	#end
+#end
+
+##MACRO SITEMAP
+#macro (siteMapNav $startLevel $depth)
+	#if(!$UtilMethods.isSet($reverseOrder))
+		#set($reverseOrder = false)
+	#end
+	#if($UtilMethods.isSet($!siteMapIdPrefix))
+		$request.setAttribute("siteMapIdPrefix", $siteMapIdPrefix)
+	#end
+	
+		  $velutil.mergeTemplate($siteMapNav.createMenuByDepth($startLevel, $depth, $request))
+
+        #dotParse('/static/vtl/macros/navigation/SiteMap.vtl')
+            
+
+	#if($UtilMethods.isSet($!siteMapIdPrefix))
+		$request.removeAttribute("siteMapIdPrefix")
+	#end
+
+#end
+
+
+#macro (navigationMenu $startLevel $depth $startPath)
+        #if($UtilMethods.isSet($!menuPrefix))
+		$request.setAttribute("menuPrefix", $menuPrefix)
+	#end 
+   #set ($path = $detailMenuNav.createMenuByDepth($startLevel, $depth, $request, $startPath))
+   #if ($path != "")
+    $velutil.mergeTemplate($path)		
+  #dotParse('/static/vtl/macros/navigation/my_navigation.vtl')
+ #end
+#end
+
+#macro (navigationFolder $startLevelF $depthF $startPathF $cFrom)
+        #if($UtilMethods.isSet($!menuPrefix))
+	    $request.setAttribute("menuPrefix", $menuPrefix)
+	#end
+  #set ($pathF = $detailMenuNav.createMenuByDepth($startLevelF, $depthF, $request, $startPathF))
+  #if ($pathF != "")
+      $velutil.mergeTemplate($pathF) 
+
+        #if($cFrom=="Fol")
+            #dotParse('/static/vtl/macros/navigation/folderNavigation.vtl')
+	#else
+	    #dotParse('/static/vtl/macros/navigation/fullScreenNavigation.vtl')
+	#end                                      
+   
+ #end
+#end
+
+#macro (navigationBox $startLevelB $depthB)
+#set ($pathB = $boxMenuNav.createMenuByDepth($startLevelB, $depthB, $request))
+  #if ($pathB != "")       
+      $velutil.mergeTemplate($pathB)                                       
+    #dotParse('/static/vtl/macros/navigation/DetailsBoxNavigation.vtl')
+  #end
+#end
+
+## BEGIN: com.eng.dotcms.mostresearchedterms
+#macro (limitedMostResearchedTerms $urlAddress $searchParameter $limit)
+			##Get all the terms stored into the database
+			#set($allTerms = $mrt.getAllTerms($request,$limit))
+
+			## calculate the ranges
+			#set($tagCountMin = 0)
+			#set($tagCountMax = 0)
+			#foreach($term in $allTerms)
+				#set($occur = $mrt.getOccurByTerm($term,$request))
+				#if($tagCountMin == 0)
+					#set($tagCountMin = $occur)
+				#end
+				#if($tagCountMin > $occur)
+					#set($tagCountMin = $occur)
+				#end
+				#if($tagCountMax < $occur)
+					#set($tagCountMax = $occur)
+				#end
+			#end
+
+			#set($rangeMinMax = $tagCountMax - $tagCountMin)
+
+			#set($interval = 1)
+			#if($rangeMinMax > 5)
+				#set($interval = $rangeMinMax / 5)
+			#end
+
+			#set($range1 = $tagCountMin)
+			#set($range2 = $range1 + $interval)
+			#set($range3 = $range2 + $interval)
+			#set($range4 = $range3 + $interval)
+			#set($range5 = $range4 + $interval)
+
+			#if ($urlAddress.indexOf("?") > 0)
+			    #if($urlAddress.indexOf("&amp;") == -1)
+			    	#set($url = "${urlAddress.replaceAll('&','&amp;')}&amp;$searchParameter=")
+			    #else
+					#set($url = "${urlAddress}&amp;$searchParameter=")
+				#end
+			#else
+				#set($url = "$urlAddress?$searchParameter=")
+			#end
+			
+			<style type="text/css" media="all">
+				.tagCloud .xSmallTag{
+					font-size: .75em;
+				}
+				.tagCloud .smallTag{
+					font-size: .95em;
+				}
+				.tagCloud .mediumTag{
+					font-size: 1.25em;
+				}
+				.tagCloud .largeTag{
+					font-size: 2em;
+				}
+				.tagCloud .xLargeTag{
+					font-size: 3em;
+				}
+			</style>
+			
+			<div class="tagCloud">
+				#foreach($term in $allTerms)
+					#set($tagCount = $mrt.getOccurByTerm($term,$request))
+	
+					#set($class = "xSmallTag")
+					#if($tagCount > $range5)
+						#set($class = "xLargeTag")
+					#elseif($tagCount > $range4)
+						#set($class = "largeTag")
+					#elseif($tagCount > $range3)
+						#set($class = "mediumTag")
+					#elseif($tagCount > $range2)
+						#set($class = "smallTag")
+					#end
+					#if($UtilMethods.isSet($urlAddress) && $UtilMethods.isSet($searchParameter))
+						<a href="$url$term" class="$class" title="$tagCount occ">$term</a>
+					#else
+						<span class="$class">$term</span>
+					#end		
+				#end
+			</div>	
+#end
+
+#macro (mostResearchedTerms $urlAddress $searchParameter)
+			##Get all the terms stored into the database
+			#set($allTerms = $mrt.getAllTerms($request,-1))
+
+			## calculate the ranges
+			#set($tagCountMin = 0)
+			#set($tagCountMax = 0)
+			#foreach($term in $allTerms)
+				#set($occur = $mrt.getOccurByTerm($term,$request))
+				#if($tagCountMin == 0)
+					#set($tagCountMin = $occur)
+				#end
+				#if($tagCountMin > $occur)
+					#set($tagCountMin = $occur)
+				#end
+				#if($tagCountMax < $occur)
+					#set($tagCountMax = $occur)
+				#end
+			#end
+
+			#set($rangeMinMax = $tagCountMax - $tagCountMin)
+
+			#set($interval = 1)
+			#if($rangeMinMax > 5)
+				#set($interval = $rangeMinMax / 5)
+			#end
+
+			#set($range1 = $tagCountMin)
+			#set($range2 = $range1 + $interval)
+			#set($range3 = $range2 + $interval)
+			#set($range4 = $range3 + $interval)
+			#set($range5 = $range4 + $interval)
+
+			#if ($urlAddress.indexOf("?") > 0)
+			    #if($urlAddress.indexOf("&amp;") == -1)
+			    	#set($url = "${urlAddress.replaceAll('&','&amp;')}&amp;$searchParameter=")
+			    #else
+					#set($url = "${urlAddress}&amp;$searchParameter=")
+				#end
+			#else
+				#set($url = "$urlAddress?$searchParameter=")
+			#end
+			
+			<style type="text/css" media="all">
+				.tagCloud .xSmallTag{
+					font-size: .75em;
+				}
+				.tagCloud .smallTag{
+					font-size: .95em;
+				}
+				.tagCloud .mediumTag{
+					font-size: 1.25em;
+				}
+				.tagCloud .largeTag{
+					font-size: 2em;
+				}
+				.tagCloud .xLargeTag{
+					font-size: 3em;
+				}
+			</style>
+			
+			<div class="tagCloud">
+				#foreach($term in $allTerms)
+					#set($tagCount = $mrt.getOccurByTerm($term,$request))
+	
+					#set($class = "xSmallTag")
+					#if($tagCount > $range5)
+						#set($class = "xLargeTag")
+					#elseif($tagCount > $range4)
+						#set($class = "largeTag")
+					#elseif($tagCount > $range3)
+						#set($class = "mediumTag")
+					#elseif($tagCount > $range2)
+						#set($class = "smallTag")
+					#end
+					#if($UtilMethods.isSet($urlAddress) && $UtilMethods.isSet($searchParameter))
+						<a href="$url$term" class="$class" title="$tagCount occ">$term</a>
+					#else
+						<span class="$class">$term</span>
+					#end		
+				#end
+			</div>	
+#end
+## END: com.eng.dotcms.mostresearchedterms
+
+## BEGIN: com.eng.dotcms.polls
+
+#macro (viewPoll $title $showVotes)
+
+			<script type='text/javascript' src='/dwr/engine.js'></script>
+			<script type='text/javascript' src='/dwr/interface/PollsManAjax.js'></script>			
+			<script type="text/javascript">
+				var choice_identifier;
+
+				function updateChoiceIdentifier(id) {
+					var choice = document.getElementById(id);
+					choice_identifier = choice.value;
+				}
+			
+				function goToVote(pollIdentifier) {
+					document.getElementById("answers").innerHTML = "Loading...";  
+					PollsManAjax.vote('$title',pollIdentifier,choice_identifier,$showVotes,
+						function(data) {
+							var htmlCode = data.htmlCode;
+							document.getElementById("answers").innerHTML = htmlCode;
+						}
+					);
+				}
+			</script>
+			<style type="text/css">
+				#answers {
+					margin: 5px 0 5px 0;
+				}
+			</style>			
+			#set($poll = $pollsMan.getPollByTitle($title))
+			#set($choices = $poll.getChoices())
+			#set($prefix = "_voted")
+			#set($sessionAttr = "$title$prefix")
+			
+			#if(!$poll.isExpired())
+				<span>$poll.getQuestion()</span>
+				<br />										
+				#foreach($choice in $choices)					
+					<input type="radio" name="vote" id="$choice.getIdentifier()" value="$choice.getIdentifier()" onclick="updateChoiceIdentifier(this.id)"/>&nbsp;$choice.getText()<br />
+				#end
+				#if(!$UtilMethods.isSet($request.session.getAttribute($sessionAttr)))	
+					<input type="button" value="Vote" onclick="javascript: goToVote('$poll.getIdentifier()')" />
+				#else
+					<div>$text.get('You-have-already-voted-on-this-poll').</div>						
+				#end	
+			#else
+				<div>
+					$text.get('This-poll-does-not-exists-or-it-has-expired').
+				</div>
+			#end
+			<div id="answers">
+				#if($UtilMethods.isSet($request.session.getAttribute($sessionAttr)) && $showVotes)
+					#set($htmlCode = $pollsMan.getVotesHtmlCode($poll.getIdentifier(),$request.session.getAttribute("com.dotmarketing.htmlpage.language")))
+					$htmlCode
+				#end
+			</div>
+#end
+
+#macro (viewPollVotes $title)
+	<script type='text/javascript' src='/dwr/engine.js'></script>
+	<script type='text/javascript' src='/dwr/interface/PollsManAjax.js'></script>
+	
+	#set($poll = $pollsMan.getPollByTitle($title))	
+	#set($htmlCode = $pollsMan.getVotesHtmlCode($poll.getIdentifier(),$request.session.getAttribute("com.dotmarketing.htmlpage.language")))
+	
+	<div>
+		$htmlCode
+	</div>
+#end
+
+## END: com.eng.dotcms.polls

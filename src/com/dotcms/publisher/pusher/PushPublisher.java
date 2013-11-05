@@ -41,6 +41,7 @@ import com.dotcms.publishing.BundlerUtil;
 import com.dotcms.publishing.DotPublishingException;
 import com.dotcms.publishing.PublishStatus;
 import com.dotcms.publishing.Publisher;
+import com.dotcms.publisher.business.PublisherAPI;
 import com.dotcms.publishing.PublisherConfig;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.cms.factories.PublicEncryptionFactory;
@@ -57,7 +58,12 @@ import com.sun.jersey.multipart.FormDataMultiPart;
 import com.sun.jersey.multipart.file.FileDataBodyPart;
 
 public class PushPublisher extends Publisher {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8786682705198758608L;
 	private PublishAuditAPI pubAuditAPI = PublishAuditAPI.getInstance();
+	private PublisherAPI pubAPI = PublisherAPI.getInstance();
 	private TrustFactory tFactory;
 
 	@Override
@@ -190,9 +196,11 @@ public class PushPublisher extends Publisher {
 				if(errorCounter == environments.size()) {
 					pubAuditAPI.updatePublishAuditStatus(config.getId(),
 							PublishAuditStatus.Status.FAILED_TO_SEND_TO_ALL_GROUPS, currentStatusHistory);
+//					pubAPI.deleteElementsFromPublishQueueTable(config.getId());
 				} else {
 					pubAuditAPI.updatePublishAuditStatus(config.getId(),
 							PublishAuditStatus.Status.FAILED_TO_SEND_TO_SOME_GROUPS, currentStatusHistory);
+//					pubAPI.deleteElementsFromPublishQueueTable(config.getId());
 				}
 			}
 

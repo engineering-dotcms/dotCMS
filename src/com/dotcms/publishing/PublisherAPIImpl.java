@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.util.ConfigUtils;
 import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.PushPublishLogger;
+import com.thoughtworks.xstream.converters.ConversionException;
 
 public class PublisherAPIImpl implements PublisherAPI {
 
@@ -90,9 +92,13 @@ public class PublisherAPIImpl implements PublisherAPI {
 			}
 
 			PushPublishLogger.log(this.getClass(), "Completed Publishing Task", config.getId());
-		} catch (Exception e) {
+		} catch (ConversionException e) {
+			throw new ConversionException(e.getMessage(),e);
+		}  catch (Exception e) {
 			Logger.error(PublisherAPIImpl.class, e.getMessage(), e);
 			throw new DotPublishingException(e.getMessage(),e);
+		} finally {
+			DbConnectionFactory.closeConnection();
 		}
 
 		return status;

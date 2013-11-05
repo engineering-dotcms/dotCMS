@@ -1,9 +1,10 @@
 package com.dotcms.publishing;
 
+import java.io.Serializable;
 import java.util.List;
 
 
-public interface IPublisher {
+public interface IPublisher extends Serializable{
 
 
 	public PublisherConfig process(PublishStatus status) throws DotPublishingException;

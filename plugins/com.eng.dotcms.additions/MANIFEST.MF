@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Plugin-Name: Publisher ENG. Sostituisce il Job di pubblicazione
+Deploy-Class: com.eng.dotcms.additions.publisher.AdditionsDeployer
+Plugin-Version: 1
+Author: Graziano Aliberti - Engineering Ingegneria Informatica S.p.a

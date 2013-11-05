@@ -1,8 +1,13 @@
 package com.dotcms.publisher.business;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class PublishQueueElement {
+public class PublishQueueElement implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1825701802837402980L;
 	private Integer id;
 	private Integer operation;
 	private String asset;

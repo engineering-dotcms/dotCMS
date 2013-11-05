@@ -13,7 +13,7 @@ public class XStreamInstance {
 		xstream = new XStream(new DomDriver());
 	}
 	
-	public synchronized XStream getXStream() {
+	public XStream getXStream() {
 		return xstream;
 	}
 	

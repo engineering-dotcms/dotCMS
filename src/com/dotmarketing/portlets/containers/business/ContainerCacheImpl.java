@@ -19,7 +19,7 @@ public class ContainerCacheImpl extends ContainerCache {
 	}
 
 	@Override
-	protected Container add(String key, Container container) {
+	public Container add(String key, Container container) {
 		key = primaryGroup + key;
 
         // Add the key to the cache

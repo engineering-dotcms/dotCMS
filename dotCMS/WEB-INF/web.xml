@@ -87,7 +87,8 @@
 			<param-value>axis.servlet.</param-value>
 		</init-param>
 	</filter>
-    <filter>
+    
+<filter>
         <filter-name>UrlRewriteFilter</filter-name>
         <filter-class>com.dotmarketing.filters.DotUrlRewriteFilter</filter-class>
     </filter>
@@ -121,7 +122,6 @@
  <!-- END FILTER-MAPPINGS -->
 	<!--DOTMARKETING FILTER-MAPPINGS-->
 	
-
 	<filter-mapping>
 		<filter-name>SalesForceFilter</filter-name>
 		<url-pattern>/dotCMS/login</url-pattern>
@@ -291,6 +291,9 @@
 	<listener>
 	  <listener-class>com.dotmarketing.listeners.HibernateSessionsListener</listener-class>
 	</listener>
+	<listener>
+		<listener-class>com.dotcms.enterprise.threadPool.ThreadPoolListener</listener-class>
+	</listener>	
 	<!-- END DOTMARKETING LISTENERS -->
 	<!-- DOTMARKETING SERVLETS -->
 	<servlet>

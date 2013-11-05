@@ -1,10 +1,12 @@
 package com.dotcms.publisher.business;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import com.dotcms.publisher.business.PublishAuditStatus.Status;
+import com.dotcms.publisher.endpoint.bean.PublishingEndPoint;
 import com.dotcms.publisher.mapper.PublishAuditStatusMapper;
 import com.dotcms.publisher.util.PublisherUtil;
 import com.dotmarketing.common.db.DotConnect;
@@ -83,6 +85,8 @@ public class PublishAuditAPIImpl extends PublishAuditAPI {
 				}			
 				Logger.debug(PublishAuditAPIImpl.class,e.getMessage(),e);
 				throw new DotPublisherException("Unable to add element to publish queue audit table:" + e.getMessage(), e);
+			} finally {
+				DbConnectionFactory.closeConnection();
 			}
 		}
 	}
@@ -133,6 +137,8 @@ public class PublishAuditAPIImpl extends PublishAuditAPI {
 			throw new DotPublisherException(
 					"Unable to update element in publish queue audit table:" +
 					"with the following bundle_id "+bundleId+" "+ e.getMessage(), e);
+		}finally{
+			DbConnectionFactory.closeConnection();
 		}
 	}
 	
@@ -299,6 +305,8 @@ public class PublishAuditAPIImpl extends PublishAuditAPI {
 		}catch(Exception e){
 			Logger.debug(PublisherUtil.class,e.getMessage(),e);
 			throw new DotPublisherException("Unable to get list of elements with error:"+e.getMessage(), e);
+		}finally{
+			DbConnectionFactory.closeConnection();
 		}
 	}
 	

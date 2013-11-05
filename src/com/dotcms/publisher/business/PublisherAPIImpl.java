@@ -740,6 +740,8 @@ public class PublisherAPIImpl extends PublisherAPI{
 			}
 			Logger.error(PublisherUtil.class,e.getMessage(),e);
 			throw new DotPublisherException("Unable to delete element(s) "+bundleId+" :"+e.getMessage(), e);
+		}finally{
+			DbConnectionFactory.closeConnection();
 		}
 	}
 

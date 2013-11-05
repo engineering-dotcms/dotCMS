@@ -9,6 +9,7 @@ import com.dotcms.publisher.endpoint.bean.PublishingEndPoint;
 import com.dotcms.publisher.util.PublisherUtil;
 import com.dotmarketing.business.CacheLocator;
 import com.dotmarketing.common.db.DotConnect;
+import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.exception.DotDataException;
 
 public class PublishingEndPointFactoryImpl extends PublishingEndPointFactory {
@@ -26,19 +27,23 @@ public class PublishingEndPointFactoryImpl extends PublishingEndPointFactory {
 	}
 
 	public List<PublishingEndPoint> getEndPoints() throws DotDataException {
-		if(cache.isLoaded())
-			return cache.getEndPoints();
-
 		List<PublishingEndPoint> endPoints = new ArrayList<PublishingEndPoint>();
-		DotConnect dc = new DotConnect();
-		dc.setSQL(GET_END_POINTS);
-		List<Map<String, Object>> res = dc.loadObjectResults();
-		for(Map<String, Object> row : res){
-			PublishingEndPoint endPoint = PublisherUtil.getObjectByMap(row);
-			endPoints.add(endPoint);
-			cache.add(endPoint);
+		try{
+			if(cache.isLoaded())
+				return cache.getEndPoints();
+			
+			DotConnect dc = new DotConnect();
+			dc.setSQL(GET_END_POINTS);
+			List<Map<String, Object>> res = dc.loadObjectResults();
+			for(Map<String, Object> row : res){
+				PublishingEndPoint endPoint = PublisherUtil.getObjectByMap(row);
+				endPoints.add(endPoint);
+				cache.add(endPoint);
+			}
+			cache.setLoaded(true);
+		}finally{
+			DbConnectionFactory.closeConnection();
 		}
-		cache.setLoaded(true);
 		return endPoints;
 	}
 

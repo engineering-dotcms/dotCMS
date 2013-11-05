@@ -11,6 +11,8 @@ import java.io.IOException;
 import com.dotmarketing.business.DotStateException;
 import com.dotmarketing.util.ConfigUtils;
 import com.dotmarketing.util.Logger;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.DomDriver;
 
 public class BundlerUtil {
 
@@ -90,10 +92,10 @@ public class BundlerUtil {
 	public static void objectToXML(Object obj, File f, boolean removeFirst){
 		if ( removeFirst && f.exists() )
 			f.delete();
-
+		XStream xstream = new XStream(new DomDriver());
 		try {
 			if(!f.exists())f.createNewFile();			
-			XStreamInstance.INSTANCE.getXStream().toXML(obj, new BufferedOutputStream(new FileOutputStream(f)));
+			xstream.toXML(obj, new BufferedOutputStream(new FileOutputStream(f)));
 			
 		} catch (FileNotFoundException e) {
 			Logger.error(PublisherUtil.class,e.getMessage(),e);
@@ -111,8 +113,9 @@ public class BundlerUtil {
 	public static Object xmlToObject(File f){
 		BufferedInputStream input = null;
 		try {
+			XStream xstream = new XStream(new DomDriver());
 			input = new BufferedInputStream(new FileInputStream(f));
-			Object ret = XStreamInstance.INSTANCE.getXStream().fromXML(input);
+			Object ret = xstream.fromXML(input);
 			return ret;
 		} catch (FileNotFoundException e) {
 			Logger.error(BundlerUtil.class,e.getMessage(),e);
