@@ -1,5 +1,8 @@
 package com.dotmarketing.factories;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import com.dotmarketing.beans.Identifier;
 import com.dotmarketing.beans.Inode;
 import com.dotmarketing.beans.MultiTree;
@@ -23,10 +26,8 @@ public class MultiTreeFactory {
 		Inode inode1 = (Inode) o1;
 		Inode inode2 = (Inode) o2;
 		Inode inode3 = (Inode) o3;
-
 		try {
-
-
+			
 			DotConnect db = new DotConnect();
 			db.setSQL("delete from multi_tree where parent1 =? and parent2 = ? and child = ? ");
 			db.addParam(inode1.getInode());
@@ -71,18 +72,22 @@ public class MultiTreeFactory {
 		}
 	}
 	
-	public static void deleteContainerMultiTree(Container container) {
+	public static void deleteContainerMultiTree(Container container) throws SQLException {
+		Connection conn = null;
 		try {
+			conn = DbConnectionFactory.getConnection();
+			conn.setAutoCommit(true);
 			DotConnect db = new DotConnect();
 			db.setSQL("delete from multi_tree where parent1 =? or parent2 = ? or child = ? ");
 			db.addParam(container.getIdentifier());
 			db.addParam(container.getIdentifier());
 			db.addParam(container.getIdentifier());
-			db.loadResult();
+			db.getResult(conn);
 		} catch (Exception e) {
 			throw new DotRuntimeException(e.getMessage());
 		} finally {
-			DbConnectionFactory.closeConnection();
+			if(null!=conn)
+				conn.close();
 		}
 	}
 	
@@ -231,22 +236,24 @@ public class MultiTreeFactory {
 		}
 	}
 	
-	public static void saveContainerMultiTree(MultiTree o) {
+	@SuppressWarnings("deprecation")
+	public static void saveContainerMultiTree(MultiTree o) throws SQLException {
 	    if(!InodeUtils.isSet(o.getChild()) | !InodeUtils.isSet(o.getParent1()) || !InodeUtils.isSet(o.getParent2())) throw new DotRuntimeException("Make sure your Multitree is set!");
+	    Connection conn = null;
 		try {
+			conn = DbConnectionFactory.getConnection();
+			conn.setAutoCommit(true);
 			DotConnect db = new DotConnect();
 			db.setSQL("insert into multi_tree (child,parent1,parent2,relation_type,tree_order) values (?,?,?,NULL,?) ");
 			db.addParam(o.getChild());
 			db.addParam(o.getParent1());
 			db.addParam(o.getParent2());
 			db.addParam(o.getTreeOrder());
-			db.loadResult();
+			db.getResult(conn);
 
-		} catch (DotDataException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} finally {
-			DbConnectionFactory.closeConnection();
+			if(null!=conn)
+				conn.close();
 		}
 	}
 
