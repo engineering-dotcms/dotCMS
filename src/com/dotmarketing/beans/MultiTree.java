@@ -89,6 +89,7 @@ public class MultiTree implements Serializable {
             .append(this.parent1, castOther.parent1)
             .append(this.parent2, castOther.parent2)
             .append(this.child, castOther.child)
+            .append(this.treeOrder, castOther.treeOrder)
             .isEquals();
     }
 
@@ -97,6 +98,7 @@ public class MultiTree implements Serializable {
             .append(parent1)
             .append(parent2)
             .append(child)
+            .append(treeOrder)
             .toHashCode();
     }
 	/**
