@@ -515,12 +515,16 @@ public class HTMLPageFactory {
 			dc.setSQL(buffy.toString());
 			dc.addParam(container.getIdentifier());
 			List<Map<String, Object>> res = dc.loadObjectResults();
-			for(Map<String, Object> singleId : res){
+			for(Map<String, Object> singleId : res) {
 				String ident = (String)singleId.get("identifier");
-				htmlPages.add((HTMLPage)HibernateUtil.load(HTMLPage.class, ident));
+				HTMLPage html = APILocator.getHTMLPageAPI().loadLivePageById(ident, APILocator.getUserAPI().getSystemUser(), false);				
+				htmlPages.add(html);
 			}
 			return htmlPages;
     	}catch(DotDataException e){
+    		Logger.error(HTMLPageFactory.class, "Error load HTMLPage from container: " + e.getMessage());
+    		return null;
+    	}catch(DotSecurityException e){
     		Logger.error(HTMLPageFactory.class, "Error load HTMLPage from container: " + e.getMessage());
     		return null;
     	}finally{
