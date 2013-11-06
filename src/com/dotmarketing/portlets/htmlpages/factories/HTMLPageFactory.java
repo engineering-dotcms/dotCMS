@@ -35,6 +35,7 @@ import com.dotmarketing.services.PageServices;
 import com.dotmarketing.util.Config;
 import com.dotmarketing.util.InodeUtils;
 import com.dotmarketing.util.Logger;
+import com.dotmarketing.util.UtilMethods;
 import com.dotmarketing.util.WebKeys;
 import com.liferay.portal.model.User;
 import com.liferay.portal.struts.ActionException;
@@ -517,8 +518,9 @@ public class HTMLPageFactory {
 			List<Map<String, Object>> res = dc.loadObjectResults();
 			for(Map<String, Object> singleId : res) {
 				String ident = (String)singleId.get("identifier");
-				HTMLPage html = APILocator.getHTMLPageAPI().loadLivePageById(ident, APILocator.getUserAPI().getSystemUser(), false);				
-				htmlPages.add(html);
+				HTMLPage html = APILocator.getHTMLPageAPI().loadLivePageById(ident, APILocator.getUserAPI().getSystemUser(), false);
+				if(null!=html && UtilMethods.isSet(html.getInode()))
+					htmlPages.add(html);
 			}
 			return htmlPages;
     	}catch(DotDataException e){
