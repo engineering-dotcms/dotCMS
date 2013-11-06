@@ -45,15 +45,20 @@ import com.dotmarketing.beans.Identifier;
 import com.dotmarketing.beans.MultiTree;
 import com.dotmarketing.beans.WebAsset;
 import com.dotmarketing.business.APILocator;
+import com.dotmarketing.business.CacheLocator;
 import com.dotmarketing.business.DotStateException;
 import com.dotmarketing.business.PermissionAPI;
 import com.dotmarketing.business.Permissionable;
+import com.dotmarketing.business.Treeable;
+import com.dotmarketing.cache.LiveCache;
+import com.dotmarketing.cache.WorkingCache;
 import com.dotmarketing.db.HibernateUtil;
 import com.dotmarketing.exception.DotRuntimeException;
 import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.factories.InodeFactory;
 import com.dotmarketing.factories.MultiTreeFactory;
 import com.dotmarketing.factories.WebAssetFactory;
+import com.dotmarketing.menubuilders.RefreshMenus;
 import com.dotmarketing.portal.struts.DotPortletAction;
 import com.dotmarketing.portlets.containers.model.Container;
 import com.dotmarketing.portlets.contentlet.business.ContentletAPI;
@@ -67,6 +72,7 @@ import com.dotmarketing.portlets.structure.model.Structure;
 import com.dotmarketing.portlets.templates.model.Template;
 import com.dotmarketing.portlets.user.factories.UserPreferencesFactory;
 import com.dotmarketing.portlets.user.model.UserPreference;
+import com.dotmarketing.services.PageServices;
 import com.dotmarketing.util.Config;
 import com.dotmarketing.util.InodeUtils;
 import com.dotmarketing.util.Logger;
@@ -539,11 +545,30 @@ public class DirectorAction extends DotPortletAction {
 	                htmlPage.setModDate(new Date());
 	                htmlPage.setModUser(user.getUserId());
 					HibernateUtil.saveOrUpdate(htmlPage);
+					LiveCache.removeAssetFromCache((WebAsset) htmlPage);
+					 LiveCache.addToLiveAssetToCache((WebAsset) htmlPage);
+					 WorkingCache.removeAssetFromCache((WebAsset) htmlPage);
+					 WorkingCache.addToWorkingAssetToCache((WebAsset) htmlPage);
+					 //writes the htmlpage to a live directory under velocity folder
+					 PageServices.invalidate(htmlPage);
+
+					 //Refreshing the menues
+						
+						
+					 if(RefreshMenus.shouldRefreshMenus(htmlPage)){
+						Folder folder = (Folder) APILocator.getFolderAPI().findParentFolder((Treeable)htmlPage,user,false);
+							if(folder != null){
+								RefreshMenus.deleteMenu(folder);
+								CacheLocator.getNavToolCache().removeNav(folder.getHostId(),folder.getInode());
+							}
+						}
+					 CacheLocator.getHTMLPageCache().remove(htmlPage);						
 				} catch (DotRuntimeException e) {
 					Logger.error(this, "Unable to remove content from page", e);
 				} finally {
 					HibernateUtil.commitTransaction();
 				}
+				 			
 				_sendToReferral(req, res, referer);
 				return;
 
@@ -646,6 +671,24 @@ public class DirectorAction extends DotPortletAction {
 	
 					}
 				}
+				 LiveCache.removeAssetFromCache((WebAsset) htmlPage);
+				 LiveCache.addToLiveAssetToCache((WebAsset) htmlPage);
+				 WorkingCache.removeAssetFromCache((WebAsset) htmlPage);
+				 WorkingCache.addToWorkingAssetToCache((WebAsset) htmlPage);
+				 //writes the htmlpage to a live directory under velocity folder
+				 PageServices.invalidate(htmlPage);
+
+				 //Refreshing the menues
+					
+					
+				 if(RefreshMenus.shouldRefreshMenus(htmlPage)){
+					Folder folder = (Folder) APILocator.getFolderAPI().findParentFolder((Treeable)htmlPage,user,false);
+						if(folder != null){
+							RefreshMenus.deleteMenu(folder);
+							CacheLocator.getNavToolCache().removeNav(folder.getHostId(),folder.getInode());
+						}
+					}
+				 CacheLocator.getHTMLPageCache().remove(htmlPage);
 				_sendToReferral(req, res, referer);
 				return;
 			}
@@ -715,7 +758,24 @@ public class DirectorAction extends DotPortletAction {
 	
 					}
 				}
+				 LiveCache.removeAssetFromCache((WebAsset) htmlPage);
+				 LiveCache.addToLiveAssetToCache((WebAsset) htmlPage);
+				 WorkingCache.removeAssetFromCache((WebAsset) htmlPage);
+				 WorkingCache.addToWorkingAssetToCache((WebAsset) htmlPage);
+				 //writes the htmlpage to a live directory under velocity folder
+				 PageServices.invalidate(htmlPage);
 
+				 //Refreshing the menues
+					
+					
+				 if(RefreshMenus.shouldRefreshMenus(htmlPage)){
+					Folder folder = (Folder) APILocator.getFolderAPI().findParentFolder((Treeable)htmlPage,user,false);
+						if(folder != null){
+							RefreshMenus.deleteMenu(folder);
+							CacheLocator.getNavToolCache().removeNav(folder.getHostId(),folder.getInode());
+						}
+					}
+				 CacheLocator.getHTMLPageCache().remove(htmlPage);
 				_sendToReferral(req, res, referer);
 				return;
 

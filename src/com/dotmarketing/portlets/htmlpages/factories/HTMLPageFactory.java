@@ -3,7 +3,9 @@ package com.dotmarketing.portlets.htmlpages.factories;
 
 import static com.dotmarketing.business.PermissionAPI.PERMISSION_WRITE;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.dotmarketing.beans.Host;
 import com.dotmarketing.beans.Identifier;
@@ -501,4 +503,29 @@ public class HTMLPageFactory {
    		}
     	return true;
 	}
+    
+    public static List<HTMLPage> getHTMLPageFromContainer(Container container) {
+    	try{
+    		List<HTMLPage> htmlPages = new ArrayList<HTMLPage>();
+			DotConnect dc = new DotConnect();
+			StringBuffer buffy = new StringBuffer();
+			buffy.append("select distinct hvi.identifier from multi_tree mt, htmlpage_version_info hvi ");
+			buffy.append("where mt.parent1 = hvi.identifier ");
+			buffy.append("and mt.parent2 = ?");
+			dc.setSQL(buffy.toString());
+			dc.addParam(container.getIdentifier());
+			List<Map<String, Object>> res = dc.loadObjectResults();
+			for(Map<String, Object> singleId : res){
+				String ident = (String)singleId.get("identifier");
+				htmlPages.add((HTMLPage)HibernateUtil.load(HTMLPage.class, ident));
+			}
+			return htmlPages;
+    	}catch(DotDataException e){
+    		Logger.error(HTMLPageFactory.class, "Error load HTMLPage from container: " + e.getMessage());
+    		return null;
+    	}finally{
+    		DbConnectionFactory.closeConnection();
+    	}
+		
+    }
 }
