@@ -486,6 +486,24 @@ public class DirectorAction extends DotPortletAction {
 	                    htmlPage.setModUser(user.getUserId());
 	    				HibernateUtil.saveOrUpdate(htmlPage);
 	
+	    				LiveCache.removeAssetFromCache((WebAsset) htmlPage);
+						 LiveCache.addToLiveAssetToCache((WebAsset) htmlPage);
+						 WorkingCache.removeAssetFromCache((WebAsset) htmlPage);
+						 WorkingCache.addToWorkingAssetToCache((WebAsset) htmlPage);
+						 //writes the htmlpage to a live directory under velocity folder
+						 PageServices.invalidate(htmlPage);
+
+						 //Refreshing the menues
+							
+							
+						 if(RefreshMenus.shouldRefreshMenus(htmlPage)){
+							Folder folder = (Folder) APILocator.getFolderAPI().findParentFolder((Treeable)htmlPage,user,false);
+								if(folder != null){
+									RefreshMenus.deleteMenu(folder);
+									CacheLocator.getNavToolCache().removeNav(folder.getHostId(),folder.getInode());
+								}
+							}
+						 CacheLocator.getHTMLPageCache().remove(htmlPage);
 	                } else {
 	                    Logger.error(this, "Error found trying to associate the contentlet inode: " + contentlet.getInode() + "(iden: " + identifier.getInode() + ") " +
 	                            "to the container: " + container.getInode() + "(iden: " + containerIdentifier.getInode() + ") " +
