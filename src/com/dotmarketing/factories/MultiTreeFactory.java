@@ -4,7 +4,9 @@ import com.dotmarketing.beans.Identifier;
 import com.dotmarketing.beans.Inode;
 import com.dotmarketing.beans.MultiTree;
 import com.dotmarketing.common.db.DotConnect;
+import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.db.HibernateUtil;
+import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotHibernateException;
 import com.dotmarketing.exception.DotRuntimeException;
 import com.dotmarketing.portlets.containers.model.Container;
@@ -68,7 +70,22 @@ public class MultiTreeFactory {
 			throw new DotRuntimeException(e.getMessage());
 		}
 	}
-
+	
+	public static void deleteContainerMultiTree(Container container) {
+		try {
+			DotConnect db = new DotConnect();
+			db.setSQL("delete from multi_tree where parent1 =? or parent2 = ? or child = ? ");
+			db.addParam(container.getIdentifier());
+			db.addParam(container.getIdentifier());
+			db.addParam(container.getIdentifier());
+			db.loadResult();
+		} catch (Exception e) {
+			throw new DotRuntimeException(e.getMessage());
+		} finally {
+			DbConnectionFactory.closeConnection();
+		}
+	}
+	
 	public static MultiTree getMultiTree(Inode parent1, Inode parent2, Inode child) {
 		try {
 			HibernateUtil dh = new HibernateUtil(MultiTree.class);
@@ -211,6 +228,25 @@ public class MultiTreeFactory {
 		} catch (DotHibernateException e) {
 			Logger.error(MultiTreeFactory.class, "saveMultiTree failed:" + e, e);
 			throw new DotRuntimeException(e.getMessage());
+		}
+	}
+	
+	public static void saveContainerMultiTree(MultiTree o) {
+	    if(!InodeUtils.isSet(o.getChild()) | !InodeUtils.isSet(o.getParent1()) || !InodeUtils.isSet(o.getParent2())) throw new DotRuntimeException("Make sure your Multitree is set!");
+		try {
+			DotConnect db = new DotConnect();
+			db.setSQL("insert into multi_tree (child,parent1,parent2,relation_type,tree_order) values (?,?,?,NULL,?) ");
+			db.addParam(o.getChild());
+			db.addParam(o.getParent1());
+			db.addParam(o.getParent2());
+			db.addParam(o.getTreeOrder());
+			db.loadResult();
+
+		} catch (DotDataException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			DbConnectionFactory.closeConnection();
 		}
 	}
 
