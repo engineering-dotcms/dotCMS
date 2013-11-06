@@ -10,6 +10,27 @@
       "content_stemmer": {
         "type" : "stemmer",
         "name" : "english"
+      },
+      "bankit_stemmer": {
+        "type" : "stemmer",
+        "name" : "italian"
+      },      
+      "graziano_test_delimiter_filter" : {
+		"type" : "word_delimiter",
+        "catenate_all" : true,
+        "catenate_numbers" : true,
+        "catenate_words" : true,
+		"generate_word_parts" : true,
+        "generate_number_parts" : true,
+        "preserve_original" : true,
+        "split_on_case_change" : true,
+        "split_on_numerics" : true,
+        "stem_english_possessive" : true
+      },
+      "translation" : {
+      	"type" : "nGram",
+      	"min_gram" : "1",
+      	"max_gram" : "10"
       }
     },
     "analyzer": {
@@ -18,7 +39,9 @@
           "standard",
           "lowercase",
           "asciifolding",
-          "content_stemmer"
+          "content_stemmer",
+          "bankit_stemmer",
+          "graziano_test_delimiter_filter"
         ],
         "type": "custom",
         "tokenizer": "standard"
@@ -28,7 +51,8 @@
           "standard",
           "lowercase",
           "asciifolding",
-          "content_ngrams"
+          "content_ngrams",
+          "graziano_test_delimiter_filter"
         ],
         "type": "custom",
         "tokenizer": "standard"
@@ -36,7 +60,7 @@
       "comma_analyzer": {
          "type": "pattern",
          "pattern":","
-      }
+      }      
     }
   }
 }

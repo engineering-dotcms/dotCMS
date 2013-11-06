@@ -67,7 +67,7 @@ public class LanguageUtil implements ViewTool {
 					language = langAPI.getDefaultLanguage();
 				}				
 			}
-			if(languageId == null ||  UtilMethods.isSet( languageId )) {
+			if(languageId == null || !UtilMethods.isSet( languageId )) {
 				language = getRequestLanguage();
 			}
 			return language;
