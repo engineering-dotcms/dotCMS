@@ -1,0 +1,5 @@
+	<tool>
+		<key>mrt</key>
+		<scope>application</scope>
+		<class>com.eng.dotcms.mostresearchedterms.util.MostResearchedTermsViewTool</class>
+	</tool>

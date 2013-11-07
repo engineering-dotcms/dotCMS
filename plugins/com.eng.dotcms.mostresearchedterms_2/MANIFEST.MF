@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Plugin-Name: Most Researched Terms
+Deploy-Class: com.eng.dotcms.mostresearchedterms.MostResearchedTermsDeployer
+Plugin-Version: 1.0
+Author: Graziano Aliberti - Engineering Ingegneria Informatica S.p.A

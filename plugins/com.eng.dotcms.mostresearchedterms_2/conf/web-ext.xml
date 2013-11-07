@@ -1,0 +1,27 @@
+<filter>
+	<filter-name>MostResearchedTermsFilter</filter-name>
+	<filter-class>com.eng.dotcms.mostresearchedterms.MostResearchedTermsFilter</filter-class>
+	<!-- 
+		 This parameter give us the query input text name. This is mandatory. 
+		 Can be also a comma separated list: in that case the plugin, for every URL, try to keep these parameters.
+ 	-->	
+	<init-param>
+      <param-name>query.htmlFieldName</param-name>
+      <param-value>test1,q</param-value>
+    </init-param> 	
+</filter>
+
+<filter-mapping>
+	<filter-name>MostResearchedTermsFilter</filter-name>
+	<url-pattern>/testUno/*</url-pattern>
+</filter-mapping>
+
+<filter-mapping>
+	<filter-name>MostResearchedTermsFilter</filter-name>
+	<url-pattern>/testDue/*</url-pattern>
+</filter-mapping>
+
+<filter-mapping>
+	<filter-name>MostResearchedTermsFilter</filter-name>
+	<url-pattern>/home/*</url-pattern>
+</filter-mapping>
