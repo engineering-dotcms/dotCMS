@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Plugin-Name: Test case per la Pubblicazione Remota
+Plugin-Version: 1.0
+Author: Graziano Aliberti - Engineering Ingegneria Informatica S.p.A
