@@ -1,0 +1,8 @@
+<servlet>
+	<servlet-name>CambiServlet</servlet-name>
+	<servlet-class>it.eng.bankit.servlet.CambiServlet</servlet-class>
+</servlet>
+<servlet-mapping>
+	<servlet-name>CambiServlet</servlet-name>
+	<url-pattern>/servlets/cambi</url-pattern>
+</servlet-mapping>
