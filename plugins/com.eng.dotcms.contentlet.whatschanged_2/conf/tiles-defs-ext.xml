@@ -1,0 +1,10 @@
+<!-- You this file to override or add tiles for backend struts actions. 
+It will add definition tags looking for the name attribute as the key if override is needed-->
+
+<definition name="portlet.ext.contentlet.view_whats_changed" extends="portal">
+	<put name="content" value="/plugins/com.eng.dotcms.contentlet.whatschanged/view_whats_changed.jsp" />
+</definition>
+
+<definition name="portlet.ext.contentlet.view_whats_changed_versions" extends="portal">
+	<put name="content" value="/plugins/com.eng.dotcms.contentlet.whatschanged/view_whats_changed_versions.jsp" />
+</definition>

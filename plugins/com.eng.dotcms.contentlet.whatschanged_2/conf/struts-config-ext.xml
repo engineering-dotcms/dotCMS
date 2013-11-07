@@ -1,0 +1,10 @@
+<!-- Use this file to add front end struts actions. You override backend portal struts action by providing an 
+Action with the same path attribute or a form-bean with the same name  -->
+<action path="/ext/contentlet/view_whats_changed" type="com.eng.dotcms.contentlet.whatschanged.portlet.WhatsChangedAction">
+	<forward name="portlet.ext.contentlet.view_whats_changed" path="portlet.ext.contentlet.view_whats_changed" />
+</action>
+
+<action path="/ext/contentlet/view_whats_changed_versions" type="com.eng.dotcms.contentlet.whatschanged.portlet.WhatsChangedVersionsAction">
+	<forward name="portlet.ext.contentlet.view_whats_changed_versions" path="portlet.ext.contentlet.view_whats_changed_versions" />
+</action>
+     

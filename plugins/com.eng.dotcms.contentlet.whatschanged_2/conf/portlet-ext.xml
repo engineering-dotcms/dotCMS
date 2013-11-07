@@ -1,0 +1,41 @@
+	<portlet>
+		<portlet-name>EXT_CONTENTLET_WHATS_CHANGED</portlet-name>
+		<display-name>Contentlet What's Changed</display-name>
+		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
+		<init-param>
+			<name>view-action</name>
+			<value>/ext/contentlet/view_whats_changed</value>
+		</init-param>
+		<expiration-cache>0</expiration-cache>
+		<supports>
+			<mime-type>text/html</mime-type>
+		</supports>
+		<resource-bundle>com.liferay.portlet.StrutsResourceBundle</resource-bundle>
+		<security-role-ref>
+			<role-name>CMS Administrator</role-name>
+		</security-role-ref>
+		<security-role-ref>
+			<role-name>CMS User</role-name>
+		</security-role-ref>
+	</portlet>
+	
+	<portlet>
+		<portlet-name>EXT_CONTENTLET_WHATS_CHANGED_VER</portlet-name>
+		<display-name>Content What's Changed Versions</display-name>
+		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
+		<init-param>
+			<name>view-action</name>
+			<value>/ext/contentlet/view_whats_changed_versions</value>
+		</init-param>
+		<expiration-cache>0</expiration-cache>
+		<supports>
+			<mime-type>text/html</mime-type>
+		</supports>
+		<resource-bundle>com.liferay.portlet.StrutsResourceBundle</resource-bundle>
+		<security-role-ref>
+			<role-name>CMS Administrator</role-name>
+		</security-role-ref>
+		<security-role-ref>
+			<role-name>CMS User</role-name>
+		</security-role-ref>
+	</portlet>					
