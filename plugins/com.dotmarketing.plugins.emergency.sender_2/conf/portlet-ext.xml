@@ -1,0 +1,24 @@
+
+<!-- BEGIN: PORTLET EMERGENCY SENDER -->	
+<portlet>
+	<portlet-name>EXT_EMERGENCY_SENDER_TOOL</portlet-name>
+	<display-name>Emergency sender Tool</display-name>
+	<portlet-class>com.liferay.portlet.JSPPortlet</portlet-class>
+	<init-param>
+			<name>view-jsp</name>
+			<value>/plugins/com.dotmarketing.plugins.emergency.sender/view_emergency_sender.jsp</value>
+	</init-param>
+	<init-param>
+			<name>useWEBINFDIR</name>
+			<value>false</value>
+	</init-param>
+	<expiration-cache>0</expiration-cache>
+	<supports>
+		<mime-type>text/html</mime-type>
+	</supports>
+	<resource-bundle>com.liferay.portlet.StrutsResourceBundle</resource-bundle>
+	<security-role-ref>
+		<role-name>CMS Administrator</role-name>
+	</security-role-ref>
+</portlet>	
+<!-- END: PORTLET EMERGENCY SENDER -->
