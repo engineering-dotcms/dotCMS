@@ -91,7 +91,7 @@ public class PublisherQueueJob implements StatefulJob {
 				for(Map<String,Object> bundle: bundles) {
 					pconf = new PushPublisherConfig();
 					try{
-						if(i==1)
+						if(i>0)
 							throw new ConversionException("Prova di errore autoscatenato al secondo giro!!!!");
 						Date publishDate = (Date) bundle.get("publish_date");
 	
@@ -150,7 +150,6 @@ public class PublisherQueueJob implements StatefulJob {
 	                            pubAuditAPI.updatePublishAuditStatus( pconf.getId(), PublishAuditStatus.Status.WAITING_FOR_BUNDLING, historyPojo );
 	                            PushPublishLogger.log(PublisherAPIImpl.class, "Completed Publishing Task in waiting for bundling", pconf.getId());
 	                            break;
-	//                            pubAPI.deleteElementsFromPublishQueueTable( pconf.getId() );
 	                        } catch ( DotPublishingException e ) {
 	                            /*
 	                            If we are getting errors creating the bundle we should stop trying to publish it, this is not just a connection error,
@@ -294,11 +293,12 @@ public class PublisherQueueJob implements StatefulJob {
 	        		pubAuditAPI.updatePublishAuditStatus(pendingAudit.getBundleId(),
 	        				PublishAuditStatus.Status.PUBLISHING_BUNDLE,
 		        			localHistory);
-	        	} else {
-	        		pubAuditAPI.updatePublishAuditStatus(pendingAudit.getBundleId(),
-	        				PublishAuditStatus.Status.WAITING_FOR_PUBLISHING,
-		        			localHistory);
-	        	}
+	        	} 
+//	        	else {
+//	        		pubAuditAPI.updatePublishAuditStatus(pendingAudit.getBundleId(),
+//	        				PublishAuditStatus.Status.WAITING_FOR_PUBLISHING,
+//		        			localHistory);
+//	        	}
 	        }
 		}finally {
 			DbConnectionFactory.closeConnection();
