@@ -89,77 +89,85 @@ public class PublisherQueueJob implements StatefulJob {
 				String tempBundleId = null;
 				int i=0;
 				for(Map<String,Object> bundle: bundles) {
-					if(i==1)
-						throw new ConversionException("Prova di errore autoscatenato al secondo giro!!!!");
-					Date publishDate = (Date) bundle.get("publish_date");
-
-					if(publishDate.before(new Date())) {
-						tempBundleId = (String)bundle.get("bundle_id");
-						tempBundleContents = pubAPI.getQueueElementsByBundleId(tempBundleId);
-
-						//Setting Audit objects
-						//History
-						historyPojo = new PublishAuditHistory();
-						//Retriving assets
-						Map<String, String> assets = new HashMap<String, String>();
-						List<PublishQueueElement> assetsToPublish = new ArrayList<PublishQueueElement>(); // all assets but contentlets
-
-						for(PublishQueueElement c : tempBundleContents) {
-							assets.put((String) c.getAsset(), c.getType());
-							if(!c.getType().equals("contentlet"))
-								assetsToPublish.add(c);
-						}
-						historyPojo.setAssets(assets);
-
-						// all types of assets in the queue but contentlets are passed here, which are passed through lucene queries
-						pconf.setAssets(assetsToPublish);
-
-						//Status
-						status =  new PublishAuditStatus(tempBundleId);
-						status.setStatusPojo(historyPojo);
-
-						//Insert in Audit table
-						pubAuditAPI.insertPublishAuditStatus(status);
-                    	
-						//Queries creation
-						pconf.setLuceneQueries(PublisherUtil.prepareQueries(tempBundleContents));
-						pconf.setId(tempBundleId);
-						pconf.setUser(APILocator.getUserAPI().getSystemUser());
-						pconf.setStartDate(new Date());
-						pconf.runNow();
-
-						pconf.setPublishers(clazz);
-//						pconf.setEndpoints(endpoints);
-
-                        if ( Integer.parseInt( bundle.get( "operation" ).toString() ) == PublisherAPI.ADD_OR_UPDATE_ELEMENT ) {
-                            pconf.setOperation( PushPublisherConfig.Operation.PUBLISH );
-                        } else {
-                            pconf.setOperation( PushPublisherConfig.Operation.UNPUBLISH );
-                        }
-
-                        try {
-                        	Host bundleHost = PublisherHostUtil.getBundleHost(tempBundleContents);
-                        	if(bundleHost != null)
-                        		PushPublishLogger.log(this.getClass(), "Publishing bundle from host: "+bundleHost.getHostname());
-                        	else
-                        		PushPublishLogger.log(this.getClass(), "Publishing bundle from host: no host found");
-                            APILocator.getPublisherAPI().publish( pconf );
-                        } catch ( ConversionException e ) {
-                            pubAuditAPI.updatePublishAuditStatus( pconf.getId(), PublishAuditStatus.Status.WAITING_FOR_BUNDLING, historyPojo );
-                            PushPublishLogger.log(PublisherAPIImpl.class, "Completed Publishing Task in waiting for bundling", pconf.getId());
-                            break;
-//                            pubAPI.deleteElementsFromPublishQueueTable( pconf.getId() );
-                        } catch ( DotPublishingException e ) {
-                            /*
-                            If we are getting errors creating the bundle we should stop trying to publish it, this is not just a connection error,
-                            there is something wrong with a bundler or creating the bundle.
-                             */
-                            Logger.error( PublisherQueueJob.class, "Unable to publish Bundle: " + e.getMessage(), e );
-                            pubAuditAPI.updatePublishAuditStatus( pconf.getId(), PublishAuditStatus.Status.FAILED_TO_BUNDLE, historyPojo );
-//                            pubAPI.deleteElementsFromPublishQueueTable( pconf.getId() );
-                        } 
-                    }
-					i++;
+					pconf = new PushPublisherConfig();
+					try{
+						if(i==1)
+							throw new ConversionException("Prova di errore autoscatenato al secondo giro!!!!");
+						Date publishDate = (Date) bundle.get("publish_date");
+	
+						if(publishDate.before(new Date())) {
+							tempBundleId = (String)bundle.get("bundle_id");
+							tempBundleContents = pubAPI.getQueueElementsByBundleId(tempBundleId);
+	
+							//Setting Audit objects
+							//History
+							historyPojo = new PublishAuditHistory();
+							//Retriving assets
+							Map<String, String> assets = new HashMap<String, String>();
+							List<PublishQueueElement> assetsToPublish = new ArrayList<PublishQueueElement>(); // all assets but contentlets
+	
+							for(PublishQueueElement c : tempBundleContents) {
+								assets.put((String) c.getAsset(), c.getType());
+								if(!c.getType().equals("contentlet"))
+									assetsToPublish.add(c);
+							}
+							historyPojo.setAssets(assets);
+	
+							// all types of assets in the queue but contentlets are passed here, which are passed through lucene queries
+							pconf.setAssets(assetsToPublish);
+	
+							//Status
+							status =  new PublishAuditStatus(tempBundleId);
+							status.setStatusPojo(historyPojo);
+	
+							//Insert in Audit table
+							pubAuditAPI.insertPublishAuditStatus(status);
+	                    	
+							//Queries creation
+							pconf.setLuceneQueries(PublisherUtil.prepareQueries(tempBundleContents));
+							pconf.setId(tempBundleId);
+							pconf.setUser(APILocator.getUserAPI().getSystemUser());
+							pconf.setStartDate(new Date());
+							pconf.runNow();
+	
+							pconf.setPublishers(clazz);
+	//						pconf.setEndpoints(endpoints);
+	
+	                        if ( Integer.parseInt( bundle.get( "operation" ).toString() ) == PublisherAPI.ADD_OR_UPDATE_ELEMENT ) {
+	                            pconf.setOperation( PushPublisherConfig.Operation.PUBLISH );
+	                        } else {
+	                            pconf.setOperation( PushPublisherConfig.Operation.UNPUBLISH );
+	                        }
+	
+	                        try {
+	                        	Host bundleHost = PublisherHostUtil.getBundleHost(tempBundleContents);
+	                        	if(bundleHost != null)
+	                        		PushPublishLogger.log(this.getClass(), "Publishing bundle from host: "+bundleHost.getHostname());
+	                        	else
+	                        		PushPublishLogger.log(this.getClass(), "Publishing bundle from host: no host found");
+	                            APILocator.getPublisherAPI().publish( pconf );
+	                        } catch ( ConversionException e ) {
+	                            pubAuditAPI.updatePublishAuditStatus( pconf.getId(), PublishAuditStatus.Status.WAITING_FOR_BUNDLING, historyPojo );
+	                            PushPublishLogger.log(PublisherAPIImpl.class, "Completed Publishing Task in waiting for bundling", pconf.getId());
+	                            break;
+	//                            pubAPI.deleteElementsFromPublishQueueTable( pconf.getId() );
+	                        } catch ( DotPublishingException e ) {
+	                            /*
+	                            If we are getting errors creating the bundle we should stop trying to publish it, this is not just a connection error,
+	                            there is something wrong with a bundler or creating the bundle.
+	                             */
+	                            Logger.error( PublisherQueueJob.class, "Unable to publish Bundle: " + e.getMessage(), e );
+	                            pubAuditAPI.updatePublishAuditStatus( pconf.getId(), PublishAuditStatus.Status.FAILED_TO_BUNDLE, historyPojo );
+	//                            pubAPI.deleteElementsFromPublishQueueTable( pconf.getId() );
+	                        } 
+	                    }
+						i++;
+					}catch ( ConversionException e ) {
+						Logger.info(getClass(), "Errore indotto!!");
+                        pubAuditAPI.updatePublishAuditStatus( pconf.getId(), PublishAuditStatus.Status.WAITING_FOR_BUNDLING, historyPojo );
+                        PushPublishLogger.log(PublisherAPIImpl.class, "Completed Publishing Task in waiting for bundling", pconf.getId());
+                        break;
+					}
 				}
 
 				Logger.debug(PublisherQueueJob.class, "Finished PublishQueue Job");
