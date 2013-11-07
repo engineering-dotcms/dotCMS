@@ -1,0 +1,78 @@
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script type="text/javascript">
+
+function setSubmitContentForm() {
+	if(dojo.byId("submitContentForm")){
+		dojo.byId("submitContentForm").setAttribute("action", "/dotCMS/submitForumContent");
+	}
+}
+	
+function showForm(){
+		$('#addReply').show('normal', function() {
+		window.location.href="#addReply";
+		setSubmitContentForm();
+		});
+}
+
+</script>
+
+#if(!$URLMapContent)
+  #if($UtilMethods.isSet($request.getParameter('id')))  
+    #getContentMapDetail($request.getParameter('id'))  
+    #set($URLMapContent = $content)
+  #end
+#end
+
+#if($URLMapContent)
+
+	#if(!$UtilMethods.isSet($orderByDate))
+	 #set($orderByDate = "desc")
+	#end
+	
+	<br>
+	<br>
+	<h2>$URLMapContent.title</h2>
+	&nbsp;
+	<button data-dojo-type="dijit.form.Button" type="button" onClick="">Subscribe</button>
+	&nbsp;
+	<button dojoType="dijit.form.Button" type="button" onclick="showForm();">Add Reply</button>
+	<br>
+	<br>
+	<h3>$URLMapContent.description</h3>
+	<br>
+
+	#set($relatedReplies = $dotcontent.pullRelated("Parent_Thread-Child_Reply","${URLMapContent.identifier}",false,0,"modDate desc"))
+		#if($relatedList.size() == 0)
+	   		#if($EDIT_MODE)
+				No replies added to this thread.
+			#end
+		#else
+			<ul>
+			#foreach($reply in $relatedReplies)
+				<li>
+				#set($lastPostTitle = $reply.title)
+				#set($lastPostCreationDate = " on $UtilMethods.dateToShortJDBC($reply.modDate)")
+				<h4>${lastPostTitle} <i>${lastPostCreationDate}</i></h4>
+				<br>
+				<p>$reply.description</p>
+				</li>
+				<br>
+			#end
+			</ul>
+		#end  
+		<br>
+		<hr>
+		<br>
+		<div id="addReply" style="display:none">
+		<h3>Add Reply to this topic</h3>
+		#set($contentAutoPublish=true)
+		#set($contentUseCaptcha=true)
+		#set($showOnlyRequiredFields=true)
+		#set($contentFormReferer="/forum/thread/${URLMapContent.urlTitle}")
+		#set($Parent_Thread-Child_Reply = "$URLMapContent.identifier")
+		#submitContent('Reply')
+		</div>
+
+#else
+	<p>Please pass a valid identifier or URL Map on url.</p>
+#end

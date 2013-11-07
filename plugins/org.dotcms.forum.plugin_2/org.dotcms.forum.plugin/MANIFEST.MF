@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Plugin-Name: Forum Feature for dotCMS
+Deploy-Class: org.dotcms.forum.ForumDeployer
+Plugin-Version: 1
+Author: dotCMS

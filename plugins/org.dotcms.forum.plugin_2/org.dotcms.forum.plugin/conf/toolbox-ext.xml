@@ -1,0 +1,5 @@
+<tool>
+	<key>forumtool</key>
+	<scope>application</scope>
+	<class>org.dotcms.forum.velocity.SubmitForumViewTool</class>
+</tool>

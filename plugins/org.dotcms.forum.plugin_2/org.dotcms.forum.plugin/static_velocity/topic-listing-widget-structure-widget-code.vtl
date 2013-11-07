@@ -1,0 +1,168 @@
+#set($currentPage = $request.getParameter("currentPage"))
+#set($languageId = '1')
+
+#if($request.session.getAttribute("com.dotmarketing.htmlpage.language"))
+	#set($languageId = $request.session.getAttribute("com.dotmarketing.htmlpage.language"))
+#else if($request.getParameter("com.dotmarketing.htmlpage.language"))
+	#set($languageId = $request.getParameter("com.dotmarketing.htmlpage.language"))	
+#end
+
+#if($UtilMethods.isSet($currentPage))
+ #set($currentPage = $currentPage)
+#else
+ #set($currentPage = 1)
+#end
+
+#if(!$UtilMethods.isSet($maxTopicsPerPage))
+ #set($offset = 20)
+#else
+ #set($offset = $math.toInteger($maxTopicsPerPage))
+#end
+
+
+#if(!$UtilMethods.isSet($orderByDate))
+ #set($orderByDate = "desc")
+#end
+
+#set($catSubQuery = "")
+
+#if($UtilMethods.isSet($forumCategories) && $forumCategories.size() > 0)
+ #set($catSubQuery = "+(")
+ #foreach($catInode in $forumCategories)
+  #set($cat = $categories.getCategoryByInode(${catInode}))
+  #set($catSubQuery = "${catSubQuery} categories:${cat.categoryVelocityVarName}")
+ #end
+ #set($catSubQuery = "${catSubQuery} )")
+#end
+
+
+
+#set($query = "+structureName:topic +languageId:${languageId} +deleted:false +live:true ${catSubQuery}")
+#set($sortBy = "topic.lastModified ${orderByDate}")
+
+##set the number of Contentlets to display per page
+
+#set($page = $math.toInteger($currentPage))
+
+#if($EDIT_MODE)
+ $text.get("Sort-By"): ${sortBy}
+ <br>
+ $text.get("Max-Topics-per-page"): ${offset}
+ <br>
+ $text.get("Current-page") : ${page}
+ <br>
+ $text.get("Query") : ${query}
+#end
+
+
+## prova Graziano
+
+#if($request.session.getAttribute("org.dotcms.forum.plugin.totalCount"))
+	#set($totalCount = $request.session.getAttribute("org.dotcms.forum.plugin.totalCount"))
+#else
+	#set($totalCount = $forumtool.countTopics("${query}",true))
+	#set($mySession = $request.getSession())
+	$mySession.setAttribute("org.dotcms.forum.plugin.totalCount","${totalCount}")
+#end
+
+#set($totalCount = $math.toInteger($totalCount))
+
+#set($limit = $offset)
+#set($offsetQuery = 0)
+#if($page > 1)
+	#set($offsetQuery = $math.mul($offset,$math.sub($page,1)))
+#end
+	
+#set($pagedList = $forumtool.getFullTopics("${query}",$limit,$offsetQuery,"${sortBy}"))
+
+<link rel="stylesheet" href="/html/plugins/org.dotcms.forum.plugin/css/forum.css" type="text/css" />
+
+<div class="forum-wrapper">
+	<h2>
+		#if($UtilMethods.isSet(${listingHeader}))
+			${listingHeader}
+		#else
+			$text.get("Forum-Index")
+		#end
+</h2>
+
+<br />
+#if($UtilMethods.isSet(${forumDescription}))
+	<p>${forumDescription}</p>
+#end
+<br />
+	#macro(paginate)
+	  <div class="pagination"> 
+	   #if($page > 1)
+	    #set($previousPage = $math.sub($page,1))
+	    <a href="?currentPage=$previousPage">< $text.get("previous")</a>
+
+	       | 
+
+	   #else
+	    
+	   #end
+	   
+	   #set($totalPages = 1)
+	   
+	   #if($pagedList.size()>$offset)
+	   	#set($totalPages = $math.div($pagedList.size(),$offset))
+	   #end		
+
+	   #if($page < $totalCount)
+	    #set($nextPage = $math.add($page,1))
+
+	     |   
+
+	    <a href="?currentPage=$nextPage">$text.get("next") ></a>
+	   #else 
+	   #end
+
+	  </div><!-- end .pagination -->
+	#end	
+	
+	#set($detailPagePath = $forumtool.getDetailPagePath("Topic"))
+	<table class="forum-topics" width="100%">
+	  <tr>
+  	  	<th>$text.get("forum-name-description")</th>
+	    <th>$text.get("Threads")</th>
+	    <th>$text.get("Last-Post")</th>
+	  </tr>
+	
+	#foreach($con in $pagedList)
+		<tr>
+	    	<td>
+	      		<h3><a href="$detailPagePath$!{con.urlTitle}">$!con.title</a></h3>#editContentlet($con.inode)
+	      		#set($contentOwner = $cmsuser.getUserByUserId($con.owner))
+	     		#if($UtilMethods.isSet($contentOwner)) 
+					#set($topicAuthor = "${contentOwner.firstName} ${contentOwner.lastName}")
+				#end
+	      		<small>$text.get("by") <strong>$topicAuthor</strong>, $text.get("on") <strong>$UtilMethods.dateToShortJDBC($con.lastModified)</strong></small>
+	      		<br />
+	      		$UtilMethods.prettyShortenString("$con.description", 250)	      		
+	    	</td>
+	    	
+	    	#set($relatedList = $dotcontent.pullRelated("Parent_Topic-Child_Thread","${con.identifier}",false,0,"modDate desc"))
+	    	<td>$relatedList.size()</td>
+	    	<td width="200">
+	      		#set($relatedList = $dotcontent.pullRelated("Parent_Topic-Child_Thread","${con.identifier}",false,1,"modDate desc"))
+	      		#if($relatedList.size() > 0)
+	        		#foreach($content in $relatedList)
+	          			<h3><a href="$detailPagePath$!{con.urlTitle}">$!content.title</a></h3>
+	          			<small>$text.get("by")  <strong>$content.owner</strong>, $text.get("on") <strong>$UtilMethods.dateToShortJDBC($content.lastModified)</strong></small>	          			
+	        		#end
+	      		#else
+	      			#if($EDIT_MODE)
+	      				$text.get("no-threads-added-to-this-topic")
+	      			#end
+	      		#end
+	    	</td>
+	  	</tr>
+			
+			##<button data-dojo-type="dijit.form.Button" type="button" onClick="javascript:window.location='$detailPagePath$!{con.urlTitle}'">View Threads</button>
+			##<span class="meta">Created: $UtilMethods.dateToShortJDBC($con.lastModified)</span>	
+	#end
+	</table>
+	##To show pagination controls at the bottom of the content
+	#paginate()
+</div>

@@ -1,0 +1,349 @@
+#macro(manageForum )
+	<script type='text/javascript' src='/dwr/engine.js'></script>
+	<script type='text/javascript' src='/dwr/interface/ForumAjax.js'></script>
+	<script type='text/javascript'>
+		
+		function closeThread(threadId,isLive,langId,topicId) {
+			var messageDiv = document.getElementById("msg"+threadId);
+			var topicDiv = document.getElementById("mainDivTopic"+topicId);
+			topicDiv.setAttribute("style","cursor: wait !important");
+			messageDiv.style.color="#FFCC33";
+			messageDiv.innerHTML='<span class="spanDetail2">$text.get("msg-closing-thread")</span>';		
+			ForumAjax.closeThread(threadId,isLive,langId,
+				function(data){
+					topicDiv.removeAttribute("style");
+					if(data=="LOCKED"){
+						messageDiv.innerHTML='';
+						alert('$text.get("msg-wait-for-another-operation")');
+					}else{
+						if(data.indexOf("ERROR")<0){
+							alert(data);
+							document.location.reload(true);
+						}else{
+							messageDiv.style.color="#CC3333";
+							messageDiv.innerHTML='<span class="spanDetail2">'+data+'</span>';						
+						}
+					}
+				}
+			);	
+		}
+		
+		function openThread(threadId,isLive,langId,topicId) {
+			var messageDiv = document.getElementById("msg"+threadId);
+			var topicDiv = document.getElementById("mainDivTopic"+topicId);
+			topicDiv.setAttribute("style","cursor: wait !important");
+			messageDiv.style.color="#FFCC33";
+			messageDiv.innerHTML='<span class="spanDetail2">$text.get("msg-opening-thread")</span>';		
+			ForumAjax.openThread(threadId,isLive,langId,
+				function(data){
+					topicDiv.removeAttribute("style");
+					if(data=="LOCKED"){
+						messageDiv.innerHTML='';
+						alert('$text.get("msg-wait-for-another-operation")');
+					}else{
+						if(data.indexOf("ERROR")<0){
+							alert(data);
+							document.location.reload(true);
+						}else{
+							messageDiv.style.color="#CC3333";
+							messageDiv.innerHTML='<span class="spanDetail2">'+data+'</span>';						
+						}
+					}
+				}
+			);	
+		}
+		
+		function publishThread(threadId,isLive,langId,topicId) {
+			var messageDiv = document.getElementById("msg"+threadId);
+			var topicDiv = document.getElementById("mainDivTopic"+topicId);
+			topicDiv.setAttribute("style","cursor: wait !important");
+			messageDiv.style.color="#FFCC33";
+			messageDiv.innerHTML='<span class="spanDetail2">$text.get("msg-publishing-thread")</span>';
+			ForumAjax.publishThread(threadId,isLive,langId,
+				function(data){
+					topicDiv.removeAttribute("style");
+					if(data=="LOCKED"){
+						messageDiv.innerHTML='';
+						alert('$text.get("msg-wait-for-another-operation")');
+					}else{
+						if(data.indexOf("ERROR")<0){
+							alert(data);
+							document.location.reload(true);
+						}else{
+							messageDiv.style.color="#CC3333";
+							messageDiv.innerHTML='<span class="spanDetail2">'+data+'</span>';						
+						}
+					}
+				}
+			);	
+		}				
+		
+		function deleteThread(threadId,isLive,langId,topicId) {
+			if(isLive){
+				if(confirm('$text.get("msg-thread-to-delete-public")')){
+					var messageDiv = document.getElementById("msg"+threadId);
+					var topicDiv = document.getElementById("mainDivTopic"+topicId);
+					topicDiv.setAttribute("style","cursor: wait !important");
+					messageDiv.style.color="#FFCC33";
+					messageDiv.innerHTML='<span class="spanDetail2">$text.get("msg-deleting-thread")</span>';				
+					ForumAjax.deleteThread(threadId,isLive,langId,
+						function(data){
+							topicDiv.removeAttribute("style");
+							if(data=="LOCKED"){
+								messageDiv.innerHTML='';
+								alert('$text.get("msg-wait-for-another-operation")');
+							}else{
+								if(data.indexOf("ERROR")<0){
+									alert(data);
+									document.location.reload(true);
+								}else{
+									messageDiv.style.color="#CC3333";
+									messageDiv.innerHTML='<span class="spanDetail2">'+data+'</span>';						
+								}
+							}
+						}
+					);	
+				 }				
+			}
+		}
+		
+		function publishReply(replyId,isLive,langId,topicId) {
+			var messageDiv = document.getElementById("msg"+replyId);
+			var topicDiv = document.getElementById("mainDivTopic"+topicId);
+			topicDiv.setAttribute("style","cursor: wait !important");
+			messageDiv.style.color="#FFCC33";
+			messageDiv.innerHTML='<span class="spanDetail2">$text.get("msg-publishing-reply")</span>';		
+			ForumAjax.publishReply(replyId,isLive,langId,
+				function(data){
+					topicDiv.removeAttribute("style");
+					if(data=="LOCKED"){
+						messageDiv.innerHTML='';
+						alert('$text.get("msg-wait-for-another-operation")');
+					}else{
+						if(data.indexOf("ERROR")<0){
+							alert(data);
+							document.location.reload(true);
+						}else{
+							messageDiv.style.color="#CC3333";
+							messageDiv.innerHTML='<span class="spanDetail2">'+data+'</span>';						
+						}
+					}
+				}
+			);	
+		}
+		
+		function deleteReply(replyId,isLive,langId,topicId) {
+			var messageDiv = document.getElementById("msg"+replyId);
+			var topicDiv = document.getElementById("mainDivTopic"+topicId);
+			topicDiv.setAttribute("style","cursor: wait !important");
+			messageDiv.style.color="#FFCC33";
+			messageDiv.innerHTML='<span class="spanDetail2">$text.get("msg-deleting-reply")</span>';
+			ForumAjax.deleteReply(replyId,isLive,langId,
+				function(data){
+					topicDiv.removeAttribute("style");
+					if(data=="LOCKED"){
+						messageDiv.innerHTML='';
+						alert('$text.get("msg-wait-for-another-operation")');
+					}else{
+						if(data.indexOf("ERROR")<0){
+							alert(data);
+							document.location.reload(true);
+						}else{
+							messageDiv.style.color="#CC3333";
+							messageDiv.innerHTML='<span class="spanDetail2">'+data+'</span>';						
+						}
+					}
+				}
+			);	
+		}		
+		
+		
+	</script>	
+	<style>
+		
+		.topicTitle {
+			font-style: italic;
+		}
+      	
+      	.mainDivTopic {
+      		border: 1px solid #808080; 
+      		padding: 10px 20px 10px 20px; 
+      		margin: 10px 0 10px 0; 
+      		font-family: Verdana,Geneva,Arial,sans-serif; 
+      	}
+      	
+      	.showRepliesForAdmin {
+      		width: 100%
+      	}
+      	
+      	.showTopicsForAdmin {
+      		margin: 1.5em 0; 
+      		width: 100%;
+      	}
+      	
+      	.showTopicsForAdmin tr:nth-child(even) {
+      		background: #f2f2f2;
+      	}
+      	
+      	.showTopicsForAdmin th, .showTopicsForAdmin td {
+      		border: 1px solid lightGrey; 
+      		padding: 5px 10px;
+      	}
+      	
+      	.showTopicsForAdmin th {
+      		font-weight: bold;
+      	}
+      	
+      	.showTopicsForAdmin td h3, .showTopicsForAdmin td p {
+      		margin-bottom: 0;
+      	}
+      	
+      	.showTopicsForAdmin small {
+      		color: #999;
+      	}      
+      	
+      	.spanDetail{
+      		font-size: 0.6em;
+      		padding-left: 50px;
+      	}
+      	
+      	.spanDetail2{
+      		font-size: 0.8em;
+      	}    
+      	
+      	.spanDetail2 p {
+      		padding-left: 38px;
+      	}
+      	
+      	.spanSpace {
+      		height: 2px;
+      		min-height: 2px;
+      	}  	
+      	
+      	.cursorLink {
+      		cursor: pointer;
+      	}
+      	
+		A.disabled {
+ 			text-decoration:line-through;
+ 			color:grey;
+ 			cursor:default;
+ 		}
+ 		
+ 		.messageDiv {
+ 			float: right;
+ 			font-weight: bold;
+      		padding-left: 38px;
+ 		}      
+
+    </style> 
+	
+	#set($language = '')
+	#if($request.session.getAttribute("com.dotmarketing.htmlpage.language"))
+		#set($language = $request.session.getAttribute("com.dotmarketing.htmlpage.language"))
+	#end			
+	
+	#if(!$UtilMethods.isSet($orderByDate))
+ 		#set($orderByDate = "desc")
+	#end
+
+	#set($query = "+structureName:topic +languageId:${language} +deleted:false +live:true")
+	#set($sortBy = "topic.lastModified ${orderByDate}")
+	
+	#set($topics = $forumtool.getFullTopics(${query},0,0,${sortBy}))
+	
+	#if($topics.size()>0)
+		#foreach($topic in $topics)
+		<div id="mainDivTopic$topic.getIdentifier()" class="mainDivTopic">
+			#set($threads = $topic.getThreads())
+			<span class="topicTitle"><h3>$text.get('Topic'): $topic.getTitle()</h3></span>
+			<span class="topicDescription"><h3>$text.get('Description'):</h3> $topic.getDescription()</span>
+			<table class="showTopicsForAdmin">
+				<thead>
+					<tr>
+						<th style="width: 33%">$text.get('Thread')</th>
+						<th style="width: 67%">$text.get('Replies')</th>
+					</tr>
+				</thead>
+				<tbody>
+				#if($threads.size()>0)				
+					#foreach($thread in $threads)
+						#set($replies = $thread.getReplies())					
+						<tr>
+							<td style="width: 40%">
+								<div style="float: left;">
+									#if($thread.isLive())
+										<img src='/html/images/icons/status-offline.png' /><img src='/html/images/icons/status.png' title='$text.get('Public-version')' />&nbsp;&nbsp;
+									#else
+										<img src='/html/images/icons/status-away.png' title='$text.get('Working-version')' /><img src='/html/images/icons/status-offline.png' />&nbsp;&nbsp;
+									#end														
+									$thread.getTitle()
+									<span class="spanSpace">&nbsp;</span>
+									<span class="spanDetail2">$thread.getDescription()</span>
+									<span class="spanSpace">&nbsp;</span>
+									<span class="spanDetail">($text.get('posted-by')&nbsp;<strong>$thread.getUser()</strong>&nbsp;$text.get('at')&nbsp;<strong>$thread.getLastModified()</strong>)</span>
+								</div>
+								<div style="float: right;">
+									#if($thread.isOpen())
+										<a onclick="closeThread('$thread.getIdentifier()','$thread.isLive()','$language','$topic.getIdentifier()')" title="$text.get('close-thread')" class="cursorLink"><img src="/html/images/icons/door.png" alt="$text.get('close-thread')" /></a>
+									#else
+										<a onclick="openThread('$thread.getIdentifier()','$thread.isLive()','$language','$topic.getIdentifier()')" title="$text.get('open-thread')" class="cursorLink"><img src="/html/images/icons/door-open.png" alt="$text.get('open-thread')" /></a>&nbsp;
+										<a onclick="deleteThread('$thread.getIdentifier()','$thread.isLive()','$language','$topic.getIdentifier()')" title="$text.get('delete-thread')" class="cursorLink"><img src="/html/images/icons/cross.png" alt="$text.get('delete-thread')" /></a>
+									#end
+									#if(!$thread.isLive())
+										<a onclick="publishThread('$thread.getIdentifier()','$thread.isLive()','$language', '$topic.getIdentifier()')" title="$text.get('publish-thread')" class="cursorLink"><img src="/html/images/icons/web.png" alt="$text.get('publish-thread')" /></a>
+									#end	
+								</div>
+								<div id="msg$thread.getIdentifier()" class="messageDiv">
+								</div>								
+							</td>
+							<td style="width: 60%">
+								<table class="showRepliesForAdmin">
+									#if($replies.size()>0)
+										#foreach($reply in $replies)
+											<tr>
+												<td style="width: 90%">
+													#if($reply.isLive())
+														<img src='/html/images/icons/status-offline.png' /><img src='/html/images/icons/status.png' title='$text.get('Public-version')' />&nbsp;&nbsp;
+													#else
+														<img src='/html/images/icons/status-away.png' title='$text.get('Working-version')' /><img src='/html/images/icons/status-offline.png' />&nbsp;&nbsp;
+													#end
+													$reply.getTitle()
+													<span class="spanSpace">&nbsp;</span>
+													<span class="spanDetail2">$reply.getDescription()</span>
+													<span class="spanSpace">&nbsp;</span>
+													<span class="spanDetail">($text.get('posted-by')&nbsp;<strong>$reply.getUser()</strong>&nbsp;$text.get('at')&nbsp;<strong>$reply.getLastModified()</strong>)</span>
+													<span class="spanSpace">&nbsp;</span>
+													<div style="clear: both;"></div>
+													<div id="msg$reply.getIdentifier()" class="messageDiv"></div>
+												</td>
+												<td style="width: 10%">
+													<a onclick="deleteReply('$reply.getIdentifier()','$reply.isLive()','$language','$topic.getIdentifier()')" title="$text.get('delete-reply')" class="cursorLink"><img src="/html/images/icons/cross.png" alt="$text.get('delete-reply')" /></a>
+													#if(!$reply.isLive())
+														&nbsp;<a onclick="publishReply('$reply.getIdentifier()','$reply.isLive()','$language','$topic.getIdentifier()')" title="$text.get('publish-reply')" class="cursorLink"><img src="/html/images/icons/web.png" alt="$text.get('publish-reply')" /></a>
+													#end
+												</td>
+											</tr>
+										#end
+									#else
+										<tr>
+											<td>$text.get('no-replies-added-to-this-thread').</td>										
+										</tr>	
+									#end	
+								</table>
+							</td>					
+						</tr>
+					#end
+				#else
+					<tr>
+						<td colspan="2">
+							$text.get('no-threads-added-to-this-topic').
+						</td>	
+					</tr>	
+				#end	
+				</tbody>
+			</table>
+		</div>		
+		#end		
+	#end
+#end

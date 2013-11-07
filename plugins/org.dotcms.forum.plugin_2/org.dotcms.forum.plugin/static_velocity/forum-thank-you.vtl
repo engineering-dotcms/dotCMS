@@ -1,0 +1,13 @@
+<p>$text.get("Thank-you").</p>
+<br />
+<form>
+	#if($UtilMethods.isSet($session.getAttribute("forwardPageAfterSubmit")))
+    	#set($forwardURL = $session.getAttribute("forwardPageAfterSubmit"))
+    	<a href="$!{forwardURL}">
+    		<button data-dojo-type="dijit.form.Button" type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false"><span class="ui-button-text">$text.get("go-to-Forum-Page")</span></button>
+    	</a>
+  	#else
+    	<button data-dojo-type="dijit.form.Button" type="button" onclick="javascript:history.go(-2);" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false"><span class="ui-button-text">$text.get("go-to-Forum-Page-reload")</span></button>
+  	#end
+</form>
+<p></p>
