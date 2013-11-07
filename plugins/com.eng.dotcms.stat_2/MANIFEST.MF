@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Plugin-Name: Clickstream statistics plugins
+Plugin-Version: 1.0
+Author: Alberto Montichiara - Graziano Aliberti -- Engineering s.p.a.

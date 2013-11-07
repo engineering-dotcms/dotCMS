@@ -1,0 +1,2 @@
+<!-- Use this file to add portlets and extend the portlet file -->
+<portlet id="PLUGIN_CLICKSTREAM_STAT_BANKIT" struts-path="ext/tool/clickstream/stat/tool" narrow="true" />
