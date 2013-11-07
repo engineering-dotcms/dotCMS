@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Plugin-Name: Import Plugin
+Plugin-Version: 1.0
+Author: Nevia Roscigno / Christian Barigelli  - Engineering s.p.a.

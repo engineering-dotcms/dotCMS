@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:integration="http://www.springframework.org/schema/integration"
+	xmlns:ftp="http://www.springframework.org/schema/integration/ftp"
+	xmlns:batch="http://www.springframework.org/schema/batch"
+	xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-2.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/integration
+    http://www.springframework.org/schema/integration/spring-integration-2.0.xsd
+		http://www.springframework.org/schema/integration/ftp 
+    http://www.springframework.org/schema/integration/ftp/spring-integration-ftp-2.0.xsd">
+
+	<description>Import Job</description>
+
+	<!--<bean id="incrementer" class="it.eng.bankitalia.sequenzialIncrementer" 
+		/> -->
+
+	<job id="importJob" xmlns="http://www.springframework.org/schema/batch"
+		restartable="true">
+		<step id="init" next="mainStep">
+			<tasklet ref="initTasklet" />
+		</step>
+		<step id="mainStep" parent="prototypeStep">
+			<tasklet>
+				<chunk reader="directoryReader" processor="folderProcessor"
+					writer="dotCmsWriter">
+					<skippable-exception-classes>
+						<include class="java.lang.Exception" />
+						<exclude
+							class="org.springframework.beans.factory.BeanCreationNotAllowedException" />
+						<exclude class="java.lang.IllegalStateException" />
+						<exclude class="javax.naming.NameNotFoundException" />
+					</skippable-exception-classes>
+					<retryable-exception-classes>
+						<exclude class="java.lang.NullPointerException" />
+					</retryable-exception-classes>
+				</chunk>
+				<listeners>
+					<listener ref="stepListener" />
+				</listeners>
+			</tasklet>
+		</step>
+		<listeners>
+			<listener ref="executionListener" />
+		</listeners>
+	</job>
+
+	<bean id="prototypeStep"
+		class="org.springframework.batch.core.step.item.FaultTolerantStepFactoryBean"
+		abstract="true">
+		<property name="jobRepository" ref="jobRepository" />
+		<property name="startLimit" value="1" />
+		<property name="skipLimit" value="999" />
+		<property name="retryLimit" value="1" />
+		<property name="retryPolicy">
+			<bean class="org.springframework.batch.retry.policy.SimpleRetryPolicy">
+				<property name="maxAttempts" value="3" />
+			</bean>
+		</property>
+		<property name="backOffPolicy">
+			<bean class="org.springframework.batch.retry.backoff.FixedBackOffPolicy">
+				<property name="backOffPeriod" value="5000" /><!--5 seconds-retry -->
+			</bean>
+		</property>
+		<property name="retryListeners">
+			<bean class="org.springframework.batch.retry.listener.RetryListenerSupport" />
+		</property>
+	</bean>
+	
+	<bean id="initTasklet" class="it.eng.bankit.InitTasklet" />
+
+	<bean id="directoryReader" class="it.eng.bankit.parser.FolderHyperParser"
+		scope="step">
+		<property name="currentDir" value="#{jobParameters['import.directory']}" />
+	</bean>
+
+	<bean id="folderProcessor" class="it.eng.bankit.processor.HwItemProcessor">
+		<property name="sysWriter" ref="sysWriter" />
+	</bean>
+
+	<bean id="dotCmsWriter" class="it.eng.bankit.writer.DotcmsContWriter">
+		<property name="multilanguageWriter">
+			<bean class="it.eng.bankit.writer.DotcmsMultilanguageWriter">
+				<property name="translateMode" value="${import.multilanguage.translationMode}" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="stepListener"
+		class="org.springframework.batch.core.listener.StepListenerSupport" />
+
+	<bean id="executionListener"
+		class="it.eng.bankit.JobExecutionListner" />
+</beans>
