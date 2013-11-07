@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Deploy-Class: com.dotmarketing.plugins.integrity.checker.IntegrityCheckerPluginDeployer
+Plugin-Name: Data Integrity checker
+Plugin-Version: 1.0
+Author: Alberto Montichiara - Engineering s.p.a.
