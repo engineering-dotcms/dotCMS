@@ -1,0 +1,136 @@
+<rule>
+	<name>SiteMapActionRewrite</name>
+	<note>Rewrite della action del site map link</note>
+	<from>^(.*?);internal&amp;action=mappa_sito.action$</from>
+	<to type="forward" last="true">$1footer/mappa/index.html</to>
+</rule>
+<rule>
+	<name>AdavancedSearch</name>
+	<note>Rewrite della action della ricerca avanzata con parametri</note>
+	<from>^(.*?)dotCMS/;internal&amp;action=ricerca.action(.*?)$</from>
+	<to type="forward" last="true">$1homepage/search/advancedsearchresult.html$2
+	</to>
+</rule>
+<rule>
+	<name>SearchResultActionRewrite</name>
+	<note>Rewrite della action del form di ricerca</note>
+	<from>^(.*?);internal&amp;action=search_result.action$</from>
+	<to type="redirect" last="true">$1homepage/search/simplesearch.html</to>
+</rule>
+<rule>
+	<name>Rewrite della action della ricerca avanzata</name>
+	<note>Rewrite della action del site map link</note>
+	<from>^(.*?);internal&amp;action=ricerca.action$</from>
+	<to type="redirect" last="true">$1homepage/search/advancedsearchresult.html
+	</to>
+</rule>
+<rule>
+	<name>Traduzione Italiano html</name>
+	<note>Rewrite del vecchio link di traduzione alla lingua Italiano
+	</note>
+	<condition type="query-string">LANGUAGE=it</condition>
+	<from>^(.*)(\.txt|\.htm|\.html);internal&amp;action=_setlanguage\.action(.*)$</from>
+	<to type="redirect" last="true">$1.html?lang=it</to>
+</rule>
+<rule>
+	<name>Traduzione Inglese html</name>
+	<note>Rewrite del vecchio link di traduzione alla lingua Inglese</note>
+	<condition type="query-string">LANGUAGE=en</condition>
+	<from>^(.*)(\.txt|\.htm|\.html);internal&amp;action=_setlanguage\.action(.*)$</from>
+	<to type="redirect" last="true">$1.html?lang=en</to>
+</rule>
+<rule>
+	<name>Traduzione Italiano path</name>
+	<note>Rewrite del vecchio link di traduzione alla lingua Italiano
+	</note>
+	<condition type="query-string">LANGUAGE=it</condition>
+	<from>^(.*);internal&amp;action=_setlanguage\.action(.*)$</from>
+	<to type="redirect" last="true">$1?com.dotmarketing.htmlpage.language=1</to>
+</rule>
+<rule>
+	<name>Traduzione Inglese path</name>
+	<note>Rewrite del vecchio link di traduzione alla lingua Inglese</note>
+	<condition type="query-string">LANGUAGE=en</condition>
+	<from>^(.*);internal&amp;action=_setlanguage\.action(.*)$</from>
+	<to type="redirect" last="true">$1?com.dotmarketing.htmlpage.language=103</to>
+</rule>
+<rule>
+	<name>Traduzione Italiano hp</name>
+	<note>Rewrite del vecchio link di traduzione alla lingua Italiano dell'hp
+	</note>
+	<condition type="query-string">LANGUAGE=it</condition>
+	<from>^(http\://[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3})\;internal&amp;action=_setlanguage\.action(.*)$</from>
+	<to type="forward" last="true">$1?lang=it</to>
+</rule>
+<rule>
+	<name>Traduzione Inglese hp</name>
+	<note>Rewrite del vecchio link di traduzione alla lingua Inglese dell'hp</note>
+	<condition type="query-string">LANGUAGE=en</condition>
+	<from>^(http\://[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3})\;internal&amp;action=_setlanguage\.action(.*)$</from>
+	<to type="forward" last="true">$1?lang=en</to>
+</rule>
+<rule>
+	<name>RSS Homepage</name>
+	<note>RSS Homepage</note>
+	<from>^([^/]*)(/)?(rootcollection)?;internal&amp;action=rss1\.action&amp;lingua=(it|en)$</from>
+	<to type="forward" last="true">$1/homepage/rss.html?lang=$4</to>
+</rule>
+<rule>
+	<name>RSS Homepage data</name>
+	<note>RSS Homepage con data di partenza</note>
+	<from>^([^/]*)(/)?(rootcollection)?;internal&amp;action=rss1\.action&amp;datada=(\d{14})&amp;lingua=(it|en)$</from>
+	<to type="forward" last="true">$1/homepage/rss.html?data=$4&amp;lang=$5</to>
+</rule>
+<rule>
+	<name>RSS</name>
+	<note>RSS</note>
+	<from>^(.*)(/)?;internal&amp;action=rss1\.action&amp;lingua=(it|en)$</from>
+	<to type="forward" last="true">$1/rss.html?lang=$3</to>
+</rule>
+<rule>
+	<name>RSS data</name>
+	<note>RSS con data</note>
+	<from>^(.*)(/)?;internal&amp;action=rss1\.action&amp;datada=(\d{14})&amp;lingua=(it|en)$</from>
+	<to type="forward" last="true">$1/rss.html?data=$3&amp;lang=$4</to>
+</rule>
+<rule>
+	<name>PlayVideo</name>
+	<note>Redirect to page video player</note>
+	<from>^(.*/)([\w\-\.]+[^#?\s]+);internal&amp;action=video\.action$
+	</from>
+	<to type="forward" last="true">$1playVideo.html?fileName=$2</to>
+</rule>
+<rule>
+	<name>Rewrite txt fotogallery</name>
+	<note>Trasformazione del prefisso txt nel prefisso html</note>
+	<from>^(.*/media/fotogallery/)(.*/)(.*\.txt)$</from>
+	<to type="forward" last="true">$1$2index.html</to>
+</rule>
+<rule>
+	<name>Rewrite txt</name>
+	<note>Trasformazione del prefisso txt nel prefisso html</note>
+	<from>^(.*)\.txt$</from>
+	<to type="forward" last="true">$1.html</to>
+</rule>
+<!-- <rule> <name>Rewrite Htm</name> <note>Trasformazione del prefisso htm 
+	nel prefisso html</note> <from>^(.*)\.htm$</from> <to type="redirect" last="true">$1.html</to> 
+	</rule> -->
+<rule>
+	<name>Rewrite Htm</name>
+	<note>Trasformazione del prefisso htm nel prefisso html</note>
+	<from>(^((?!/html/js/tinymce/).)*)\.htm$</from>
+	<to type="redirect" last="true">$1.html</to>
+</rule>
+<rule>
+        <name>NC Rewrite Htm</name>
+        <note>Trasformazione del prefisso htm nel prefisso html</note>
+        <from>(^((?!/html/js/tinymce/).)*)\.htm\?(.*?)</from>
+        <to type="redirect" last="true">$1.html?$3</to>
+</rule>
+<rule>
+	<name>QueryString</name>
+	<note>Rewrite della query string secondo lo standard questionmark
+	</note>
+	<from>^(.*?);(.*?)$</from>
+	<to type="redirect" last="true">$1?$2</to>
+</rule>

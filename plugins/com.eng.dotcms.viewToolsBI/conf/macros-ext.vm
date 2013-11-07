@@ -1,0 +1,223 @@
+#macro(isRealAttachedLink $link)
+	#if($UtilMethods.isSet($link) && $UtilMethods.isSet($link.linkType) && $link.linkType=='A')
+	        
+		#getAllegatoDettaglio($link)
+
+		#if($UtilMethods.isSet($objAD) && $objAD.fileAsset.Uri.indexOf("/")==0)
+			#set($linkInternoBis = $objAD.fileAsset.Uri.substring( 0,$math.add($objAD.fileAsset.Uri.substring(1).lastIndexOf("/"),1)))
+		#else
+                        #set($linkInternoBis = false)
+                #end
+
+		#if($UtilMethods.isSet($link.iconaInterno) && $link.iconaInterno.selectedValues.size()>0)
+                  	#set($ritorno = true)
+                #end
+	#end
+
+#end
+
+#macro(getAllegatoDettaglio $linkAll )
+ #if($UtilMethods.isSet( $linkAll ))
+    #if($UtilMethods.isSet($linkAll.linkType ) &&  $linkAll.linkType.equalsIgnoreCase('A') )
+	#if($UtilMethods.isSet($linkAll.allegato) && $UtilMethods.isSet($linkAll.allegato.identifier))
+          #set($objAD = $dotcontent.find($linkAll.allegato.identifier))
+         #elseif($UtilMethods.isSet($linkAll.allegatoId))
+          #set($objAD = $dotcontent.find($linkAll.allegatoId))
+         #end
+    #end
+ #end
+#end
+
+#macro(checkForTitle $list $translation)
+   #if($UtilMethods.isSet($list) && $list.size()>0)
+    #set($titolo = $list.get(0).titolo)
+    #if($UtilMethods.isSet($list.get(0).titoloLungo))
+        #set($titolo = $list.get(0).titoloLungo )
+    #end
+      <h2>$titolo</h2>
+   #elseif($UtilMethods.isSet($translation) && !$translation.equals(""))
+     <h2>$translation</h2>
+   #end
+#end   ##macrocheckForTitle
+
+
+#macro(checkTranslation $query $language $size)
+	#if($language==1)
+		#set($transList = $dotcontent.pull("${query} +languageId:103" ,1,"modDate desc"))
+	#else
+		#set($transList = $dotcontent.pull("${query} +languageId:1" ,1,"modDate desc"))
+	#end
+
+	#set($transSize = $transList.size())
+
+	#if($size==0 && $transSize>0)
+                <h2></h2>
+		<p>$messagesTool.get("warning.message.no.traslation")</p>  
+	#end
+#end  ##macro-checkTranslation
+
+#macro (displaySommario $dettaglioToDis )       
+       #if($UtilMethods.isSet($dettaglioToDis.sommario) &&  
+           $UtilMethods.isSet($dettaglioToDis.mostraSommario) &&         
+           $dettaglioToDis.mostraSommario.selectedValues.size()>0 &&
+           (  $dettaglioToDis.mostraSommario.selectedValues.get(0).equals("True")
+             || $dettaglioToDis.mostraSommario.selectedValues.get(0).equals("S") )
+         )
+         <br/>$!{dettaglioToDis.sommario}
+        #end   
+#end ##macro-displaySommario
+
+
+#macro (addList $listA $dlistB  $listTotale )
+  #if( $listA.size()>0 && $dlistB.size()>0 )
+       #set($miaDummy = $listTotale.addAll( $contentUtil.getSortedList($listA,$dlistB) ) )
+   #elseif( $listA.size()>0 )  
+       #set($miaDummy = $listTotale.addAll( $contentUtil.getSortedList($listA,$dlistB) ) )
+   #else
+       #set( $miaDummy = $listTotale.addAll( $contentUtil.getSortedList( $listA,$dlistB ) ) )    
+   #end    
+#end  
+
+
+
+##Navigazione Menu Primo livello
+#macro (firstLevelNavigation $startLevel $depth)
+	#set ($path = $nav.createMenuByDepth($startLevel, $depth, $request))
+	#if ($path != "")
+		$velutil.mergeTemplate($path)
+		#if ($EDIT_MODE)			 
+			$nav.increaseFormCount()
+		#end
+		#if ($navigationSourceCode)
+			#dotParse($navigationSourceCode)
+
+			##Clearing navigationSourceCode value to fix in edit mode when calling this macro two or more times, will not reuse this value even the variable is declared later.
+			#set ($navigationSourceCode = false)
+
+		#else
+			$velutil.mergeTemplate('/static/navigation/list_menus.vtl')
+		#end
+	#end
+#end
+
+
+#macro (fullScreenMapFolder $startLevel $depth $path)
+	#if(!$UtilMethods.isSet($reverseOrder))
+		#set($reverseOrder = false)
+	#end
+	#if($UtilMethods.isSet($!siteMapIdPrefix))
+		$request.setAttribute("siteMapIdPrefix", $siteMapIdPrefix)
+	#end
+	<div class="siteMap">
+	  #if ($showHome)
+		  $velutil.mergeTemplate($fullScreenNav.createSiteMapMenu($startLevel, $depth, $path, $request, $showHome, $reverseOrder))
+	  #else
+		  $velutil.mergeTemplate($fullScreenNav.createSiteMapMenu($startLevel, $depth, $path, $request, false, $reverseOrder))
+	  #end
+
+	</div>
+
+	#if($UtilMethods.isSet($!siteMapIdPrefix))
+		$request.removeAttribute("siteMapIdPrefix")
+	#end
+
+#end
+
+##MACRO MENU HOMEPAGE
+#macro (footerMenu $startLevel $depth $path $from)
+	#if(!$UtilMethods.isSet($reverseOrder))
+		#set($reverseOrder = false)
+	#end
+	#if($UtilMethods.isSet($!siteMapIdPrefix))
+		$request.setAttribute("siteMapIdPrefix", $siteMapIdPrefix)
+	#end
+	
+	#if($from=="search")		
+		#dotParse('/static/vtl/macros/navigation/searchNavigation.vtl')
+	#else
+                $velutil.mergeTemplate($footerNav.createSiteMapMenu($depth, $path, $request, $reverseOrder))
+		#dotParse('/static/vtl/macros/navigation/footerNavigation.vtl')
+	#end
+	 
+	#if($UtilMethods.isSet($!siteMapIdPrefix))
+		$request.removeAttribute("siteMapIdPrefix")
+	#end
+#end
+
+##MACRO SELETTORE
+#macro (selettoreNav $depth $path)
+	#if(!$UtilMethods.isSet($reverseOrder))
+		#set($reverseOrder = false)
+	#end
+	#if($UtilMethods.isSet($!siteMapIdPrefix))
+		$request.setAttribute("siteMapIdPrefix", $siteMapIdPrefix)
+	#end
+	
+	
+        ##$velutil.mergeTemplate($selettoreNav.createSiteMapMenu($depth, $path, $request,$reverseOrder))
+	
+	
+        #dotParse('/static/vtl/macros/navigation/selettoreNavigationOptimized.vtl')
+	
+	
+	#if($UtilMethods.isSet($!siteMapIdPrefix))
+		$request.removeAttribute("siteMapIdPrefix")
+	#end
+#end
+
+##MACRO SITEMAP
+#macro (siteMapNav $startLevel $depth)
+	#if(!$UtilMethods.isSet($reverseOrder))
+		#set($reverseOrder = false)
+	#end
+	#if($UtilMethods.isSet($!siteMapIdPrefix))
+		$request.setAttribute("siteMapIdPrefix", $siteMapIdPrefix)
+	#end
+	
+		  $velutil.mergeTemplate($siteMapNav.createMenuByDepth($startLevel, $depth, $request))
+
+        #dotParse('/static/vtl/macros/navigation/SiteMap.vtl')
+            
+
+	#if($UtilMethods.isSet($!siteMapIdPrefix))
+		$request.removeAttribute("siteMapIdPrefix")
+	#end
+
+#end
+
+
+#macro (navigationMenu $startLevel $depth $startPath)
+        #if($UtilMethods.isSet($!menuPrefix))
+		$request.setAttribute("menuPrefix", $menuPrefix)
+	#end 
+   #set ($path = $detailMenuNav.createMenuByDepth($startLevel, $depth, $request, $startPath))
+   #if ($path != "")
+    $velutil.mergeTemplate($path)		
+  #dotParse('/static/vtl/macros/navigation/my_navigation.vtl')
+ #end
+#end
+
+#macro (navigationFolder $startLevelF $depthF $startPathF $cFrom)
+        #if($UtilMethods.isSet($!menuPrefix))
+	    $request.setAttribute("menuPrefix", $menuPrefix)
+	#end
+  #set ($pathF = $detailMenuNav.createMenuByDepth($startLevelF, $depthF, $request, $startPathF))
+  #if ($pathF != "")
+      $velutil.mergeTemplate($pathF) 
+
+        #if($cFrom=="Fol")
+            #dotParse('/static/vtl/macros/navigation/folderNavigation.vtl')
+	#else
+	    #dotParse('/static/vtl/macros/navigation/fullScreenNavigation.vtl')
+	#end                                      
+   
+ #end
+#end
+
+#macro (navigationBox $startLevelB $depthB)
+#set ($pathB = $boxMenuNav.createMenuByDepth($startLevelB, $depthB, $request))
+  #if ($pathB != "")       
+      $velutil.mergeTemplate($pathB)                                       
+    #dotParse('/static/vtl/macros/navigation/DetailsBoxNavigation.vtl')
+  #end
+#end

@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Plugin-Name: TinyMCE ENG configuration
+Plugin-Version: 1
+Author: Engineering Ingegneria Informatica S.p.a

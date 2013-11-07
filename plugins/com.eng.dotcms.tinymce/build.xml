@@ -1,0 +1,3 @@
+<project name="TinyMCE CONFIG" default="build">	
+	<import file="../common.xml"/>	
+</project>

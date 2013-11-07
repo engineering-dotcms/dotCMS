@@ -1,0 +1,10 @@
+<create creator="new" javascript="BiBrowserAjax" scope="session">
+	<param name="class" value="it.bankit.website.viewtool.BiBrowserAjax" />
+</create>
+<create creator="new" javascript="ReadMediaFile" scope="session">
+	<param name="class" value="it.bankit.website.ajax.ReadMediaFiles" />
+</create>
+<create creator="new" javascript="Selettore" scope="session">
+	<param name="class" value="it.bankit.website.viewtool.Selettore" />
+</create>
+ 
