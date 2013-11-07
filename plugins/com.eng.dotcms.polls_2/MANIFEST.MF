@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Plugin-Name: Polls Management
+Deploy-Class: com.eng.dotcms.polls.PollsDeployer
+Plugin-Version: 1.0
+Author: Graziano Aliberti - Engineering Ingegneria Informatica S.p.A

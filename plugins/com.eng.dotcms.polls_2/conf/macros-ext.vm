@@ -1,0 +1,88 @@
+## Macros for view the vote form given a specific poll
+##
+##  
+## The usage of this mechanism make sense only if, by specific requirements, the receiver servers are only in frontend mode and all the 
+##  activity are doing from the sender servers. 
+  
+##  This file is part of Poll Management for dotCMS.
+##  Poll Management for dotCMS is free software: you can redistribute it and/or modify
+##  it under the terms of the GNU Lesser General Public License as published by
+##  the Free Software Foundation, either version 3 of the License, or
+##  (at your option) any later version.
+ 
+##  Poll Management for dotCMS is distributed in the hope that it will be useful,
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##  GNU Lesser General Public License for more details.
+ 
+##  You should have received a copy of the GNU Lesser General Public License
+##  along with Poll Management for dotCMS.  If not, see <http://www.gnu.org/licenses/>  
+
+
+#macro (viewPoll $title $showVotes)
+
+			<script type='text/javascript' src='/dwr/engine.js'></script>
+			<script type='text/javascript' src='/dwr/interface/PollsManAjax.js'></script>			
+			<script type="text/javascript">
+				var choice_identifier;
+
+				function updateChoiceIdentifier(id) {
+					var choice = document.getElementById(id);
+					choice_identifier = choice.value;
+				}
+			
+				function goToVote(pollIdentifier) {
+					document.getElementById("answers").innerHTML = "Loading...";  
+					PollsManAjax.vote('$title',pollIdentifier,choice_identifier,$showVotes,
+						function(data) {
+							var htmlCode = data.htmlCode;
+							document.getElementById("answers").innerHTML = htmlCode;
+						}
+					);
+				}
+			</script>
+			<style type="text/css">
+				#answers {
+					margin: 5px 0 5px 0;
+				}
+			</style>			
+			#set($poll = $pollsMan.getPollByTitle($title))
+			#set($choices = $poll.getChoices())
+			#set($prefix = "_voted")
+			#set($sessionAttr = "$title$prefix")
+			
+			#if(!$poll.isExpired())
+				<span>$poll.getQuestion()</span>
+				<br />										
+				#foreach($choice in $choices)					
+					<input type="radio" name="vote" id="$choice.getIdentifier()" value="$choice.getIdentifier()" onclick="updateChoiceIdentifier(this.id)"/>&nbsp;$choice.getText()<br />
+				#end
+				#if(!$UtilMethods.isSet($request.session.getAttribute($sessionAttr)))	
+					<input type="button" value="Vote" onclick="javascript: goToVote('$poll.getIdentifier()')" />
+				#else
+					<div>$text.get('You-have-already-voted-on-this-poll').</div>						
+				#end	
+			#else
+				<div>
+					$text.get('This-poll-does-not-exists-or-it-has-expired').
+				</div>
+			#end
+			<div id="answers">
+				#if($UtilMethods.isSet($request.session.getAttribute($sessionAttr)) && $showVotes)
+					#set($htmlCode = $pollsMan.getVotesHtmlCode($poll.getIdentifier(),$request.session.getAttribute("com.dotmarketing.htmlpage.language")))
+					$htmlCode
+				#end
+			</div>
+#end
+
+#macro (viewPollVotes $title)
+	<script type='text/javascript' src='/dwr/engine.js'></script>
+	<script type='text/javascript' src='/dwr/interface/PollsManAjax.js'></script>
+	
+	#set($poll = $pollsMan.getPollByTitle($title))	
+	#set($htmlCode = $pollsMan.getVotesHtmlCode($poll.getIdentifier(),$request.session.getAttribute("com.dotmarketing.htmlpage.language")))
+	
+	<div>
+		$htmlCode
+	</div>
+#end
