@@ -26,6 +26,7 @@ import com.dotmarketing.exception.DotRuntimeException;
 import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.menubuilders.RefreshMenus;
 import com.dotmarketing.portlets.containers.model.Container;
+import com.dotmarketing.portlets.contentlet.model.Contentlet;
 import com.dotmarketing.portlets.contentlet.business.HostAPI;
 import com.dotmarketing.portlets.folders.model.Folder;
 import com.dotmarketing.portlets.htmlpages.model.HTMLPage;
@@ -528,6 +529,36 @@ public class HTMLPageFactory {
     		return null;
     	}catch(DotSecurityException e){
     		Logger.error(HTMLPageFactory.class, "Error load HTMLPage from container: " + e.getMessage());
+    		return null;
+    	}finally{
+    		DbConnectionFactory.closeConnection();
+    	}
+		
+    }
+    
+    public static List<HTMLPage> getHTMLPageFromContentlet(Contentlet contentlet) {
+    	try{
+    		List<HTMLPage> htmlPages = new ArrayList<HTMLPage>();
+			DotConnect dc = new DotConnect();
+			StringBuffer buffy = new StringBuffer();
+			buffy.append("select distinct hvi.identifier from multi_tree mt, htmlpage_version_info hvi ");
+			buffy.append("where mt.parent1 = hvi.identifier ");
+			buffy.append("and mt.child = ?");
+			dc.setSQL(buffy.toString());
+			dc.addParam(contentlet.getIdentifier());
+			List<Map<String, Object>> res = dc.loadObjectResults();
+			for(Map<String, Object> singleId : res) {
+				String ident = (String)singleId.get("identifier");
+				HTMLPage html = APILocator.getHTMLPageAPI().loadLivePageById(ident, APILocator.getUserAPI().getSystemUser(), false);
+				if(null!=html && UtilMethods.isSet(html.getInode()))
+					htmlPages.add(html);
+			}
+			return htmlPages;
+    	}catch(DotDataException e){
+    		Logger.error(HTMLPageFactory.class, "Error load HTMLPage from contentlet: " + e.getMessage());
+    		return null;
+    	}catch(DotSecurityException e){
+    		Logger.error(HTMLPageFactory.class, "Error load HTMLPage from contentlet: " + e.getMessage());
     		return null;
     	}finally{
     		DbConnectionFactory.closeConnection();

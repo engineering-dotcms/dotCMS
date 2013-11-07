@@ -13,6 +13,7 @@ import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotHibernateException;
 import com.dotmarketing.exception.DotRuntimeException;
 import com.dotmarketing.portlets.containers.model.Container;
+import com.dotmarketing.portlets.contentlet.model.Contentlet;
 import com.dotmarketing.portlets.htmlpages.model.HTMLPage;
 import com.dotmarketing.util.InodeUtils;
 import com.dotmarketing.util.Logger;
@@ -82,6 +83,25 @@ public class MultiTreeFactory {
 			db.addParam(container.getIdentifier());
 			db.addParam(container.getIdentifier());
 			db.addParam(container.getIdentifier());
+			db.getResult(conn);
+		} catch (Exception e) {
+			throw new DotRuntimeException(e.getMessage());
+		} finally {
+			if(null!=conn)
+				conn.close();
+		}
+	}
+	
+	public static void deleteContentletMultiTree(Contentlet contentlet) throws SQLException {
+		Connection conn = null;
+		try {
+			conn = DbConnectionFactory.getConnection();
+			conn.setAutoCommit(true);
+			DotConnect db = new DotConnect();
+			db.setSQL("delete from multi_tree where parent1 =? or parent2 = ? or child = ? ");
+			db.addParam(contentlet.getIdentifier());
+			db.addParam(contentlet.getIdentifier());
+			db.addParam(contentlet.getIdentifier());
 			db.getResult(conn);
 		} catch (Exception e) {
 			throw new DotRuntimeException(e.getMessage());
@@ -236,8 +256,7 @@ public class MultiTreeFactory {
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
-	public static void saveContainerMultiTree(MultiTree o) throws SQLException {
+	public static void saveContainerContentletMultiTree(MultiTree o) throws SQLException {
 	    if(!InodeUtils.isSet(o.getChild()) | !InodeUtils.isSet(o.getParent1()) || !InodeUtils.isSet(o.getParent2())) throw new DotRuntimeException("Make sure your Multitree is set!");
 	    Connection conn = null;
 		try {
