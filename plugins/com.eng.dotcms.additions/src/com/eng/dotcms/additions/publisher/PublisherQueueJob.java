@@ -87,8 +87,10 @@ public class PublisherQueueJob implements StatefulJob {
 				PublishAuditStatus status = null;
 				PublishAuditHistory historyPojo = null;
 				String tempBundleId = null;
-
+				int i=0;
 				for(Map<String,Object> bundle: bundles) {
+					if(i==1)
+						throw new ConversionException("Prova di errore autoscatenato al secondo giro!!!!");
 					Date publishDate = (Date) bundle.get("publish_date");
 
 					if(publishDate.before(new Date())) {
@@ -157,6 +159,7 @@ public class PublisherQueueJob implements StatefulJob {
 //                            pubAPI.deleteElementsFromPublishQueueTable( pconf.getId() );
                         } 
                     }
+					i++;
 				}
 
 				Logger.debug(PublisherQueueJob.class, "Finished PublishQueue Job");
