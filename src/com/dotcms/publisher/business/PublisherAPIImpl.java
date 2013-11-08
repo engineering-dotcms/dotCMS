@@ -493,12 +493,24 @@ public class PublisherAPIImpl extends PublisherAPI{
 			"((a.status != ? and a.status != ? and a.status != ? and a.status != ? and a.status != ? and a.status != ? and a.status != ?) or a.status is null ) and p.publish_date is not null "+
 			"order by publish_date ASC,operation ASC";
 
+	private String SQLGETSINGLEBUNDLESTOPROCESS =
+			"select * from (" +
+			"	select distinct(p.bundle_id) as bundle_id, " +
+			"		   publish_date, operation, a.status "+
+			"	from publishing_queue p "+
+			"		 left join publishing_queue_audit a "+
+			"	ON p.bundle_id=a.bundle_id "+
+			"	where "+
+			"		((a.status != ? and a.status != ? and a.status != ? and a.status != ? and a.status != ? and a.status != ? and a.status != ?) or a.status is null ) and p.publish_date is not null "+
+			"		order by publish_date ASC,operation ASC ) " +
+			"where rownum = 1";
+
 
 	public List<Map<String, Object>> getQueueBundleIdsToProcess() throws DotPublisherException {
 		try{
 			DotConnect dc = new DotConnect();
 
-			dc.setSQL(SQLGETBUNDLESTOPROCESS);
+			dc.setSQL(SQLGETSINGLEBUNDLESTOPROCESS);
 
 			dc.addParam(Status.BUNDLE_SENT_SUCCESSFULLY.getCode());
 			dc.addParam(Status.PUBLISHING_BUNDLE.getCode());
