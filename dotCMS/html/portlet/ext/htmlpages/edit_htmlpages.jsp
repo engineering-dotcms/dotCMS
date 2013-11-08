@@ -14,7 +14,7 @@
 
 <%
 	PermissionAPI perAPI = APILocator.getPermissionAPI();
-HTMLPage htmlpage=null;
+	HTMLPage htmlpage=null;
 
 if (request.getAttribute(com.dotmarketing.util.WebKeys.HTMLPAGE_EDIT)!=null) {
 	htmlpage = (HTMLPage) request.getAttribute(com.dotmarketing.util.WebKeys.HTMLPAGE_EDIT);

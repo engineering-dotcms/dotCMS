@@ -162,6 +162,8 @@ function setDates(){
 							 	data-dojo-type="dijit.form.TimeTextBox"
 								required="true" style="width: 100px;"/>
 						</div>
+						<input name="wfPublishDate" id="wfPublishDate" type="hidden" value="">
+						<input name="wfPublishTime" id="wfPublishTime" type="hidden" value="">
 						<div class="clear"></div>
 					</div>			
 					<div class="fieldWrapper">		
@@ -183,8 +185,10 @@ function setDates(){
 							    	data-dojo-type="dijit.form.TimeTextBox"	
 									style="width: 100px;"
 									  />
-								
+								<input name="wfExpireDate" id="wfExpireDate" type="hidden" value="">
+								<input name="wfExpireTime" id="wfExpireTime" type="hidden" value="">	
 							&nbsp;&nbsp;<input type="checkbox" onclick="toggleExpire()" dojoType="dijit.form.CheckBox" value="true" name="wfNeverExpire" checked="true" id="wfNeverExpire" > <label for="wfNeverExpire"><%= LanguageUtil.get(pageContext, "publisher_Never_Expire") %></label>
+							
 						</div>
 						<div class="clear"></div>
 					</div>

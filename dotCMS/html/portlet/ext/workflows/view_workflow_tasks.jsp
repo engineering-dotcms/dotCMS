@@ -436,7 +436,8 @@
     				
     			}
     			myCp = new dojox.layout.ContentPane({
-    				id 			: "contentletWfCP"
+    				id 			: "contentletWfCP",
+    				style		: "minwidth:500px;min-height:250px;margin:auto;"
     			}).placeAt("contentletWfDialog");
 				
     			dia.show();
