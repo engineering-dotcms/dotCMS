@@ -111,6 +111,12 @@ public class WfTaskAjax extends WfBaseAction {
 		String wfActionComments = request.getParameter("wfActionComments");
 		String wfActionId = request.getParameter("wfActionId");
 		String wfCons = request.getParameter("wfCons");
+		String wfPublishDate = request.getParameter("wfPublishDate");
+		String wfPublishTime = request.getParameter("wfPublishTime");
+		String wfExpireDate = request.getParameter("wfExpireDate");
+		String wfExpireTime = request.getParameter("wfExpireTime");
+		String wfNeverExpire = request.getParameter("wfNeverExpire");
+		String whereToSend = request.getParameter("whereToSend");
 		WorkflowAPI wapi = APILocator.getWorkflowAPI();
 		WorkflowAction action = null;
 		try{
@@ -164,12 +170,26 @@ public class WfTaskAjax extends WfBaseAction {
 					c.setStringProperty("wfActionComments", wfActionComments);
 					c.setStringProperty("wfActionAssign", wfActionAssign);
 					
+					c.setStringProperty("wfPublishDate", wfPublishDate);
+					c.setStringProperty("wfPublishTime", wfPublishTime);
+					c.setStringProperty("wfExpireDate", wfExpireDate);
+					c.setStringProperty("wfExpireTime", wfExpireTime);
+					c.setStringProperty("wfNeverExpire", wfNeverExpire);
+					c.setStringProperty("whereToSend", whereToSend);
+					
 					c = APILocator.getContentletAPI().checkin(c, getUser(), true);
 				}
 				else{
 					con.setStringProperty("wfActionId", action.getId());
 					con.setStringProperty("wfActionComments", wfActionComments);
 					con.setStringProperty("wfActionAssign", wfActionAssign);
+					
+					con.setStringProperty("wfPublishDate", wfPublishDate);
+					con.setStringProperty("wfPublishTime", wfPublishTime);
+					con.setStringProperty("wfExpireDate", wfExpireDate);
+					con.setStringProperty("wfExpireTime", wfExpireTime);
+					con.setStringProperty("wfNeverExpire", wfNeverExpire);
+					con.setStringProperty("whereToSend", whereToSend);
 					
 					wapi.fireWorkflowNoCheckin(con, getUser());
 					

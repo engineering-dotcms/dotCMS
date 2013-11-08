@@ -368,7 +368,53 @@
 		
 		
 		dojo.byId("wfCons").value=cons;
-	
+
+		// BEGIN: PUSH PUBLISHING ACTIONLET
+		var publishDate = (dijit.byId("wfPublishDateAux"))
+			? dojo.date.locale.format(dijit.byId("wfPublishDateAux").getValue(),{datePattern: "yyyy-MM-dd", selector: "date"})
+				: (dojo.byId("wfPublishDateAux"))
+					? dojo.date.locale.format(dojo.byId("wfPublishDateAux").value,{datePattern: "yyyy-MM-dd", selector: "date"})
+							: "";
+
+		var publishTime = (dijit.byId("wfPublishTimeAux"))
+			? dojo.date.locale.format(dijit.byId("wfPublishTimeAux").getValue(),{timePattern: "H-m", selector: "time"})
+				: (dojo.byId("wfPublishTimeAux"))
+					? dojo.date.locale.format(dojo.byId("wfPublishTimeAux").value,{timePattern: "H-m", selector: "time"})
+							: "";
+
+
+		var expireDate = (dijit.byId("wfExpireDateAux"))
+			? dijit.byId("wfExpireDateAux").getValue()!=null ? dojo.date.locale.format(dijit.byId("wfExpireDateAux").getValue(),{datePattern: "yyyy-MM-dd", selector: "date"}) : ""
+				: (dojo.byId("wfExpireDateAux"))
+					? dojo.byId("wfExpireDateAux").value!=null ? dojo.date.locale.format(dojo.byId("wfExpireDateAux").value,{datePattern: "yyyy-MM-dd", selector: "date"}) : ""
+							: "";
+
+		var expireTime = (dijit.byId("wfExpireTimeAux"))
+			? dijit.byId("wfExpireTimeAux").getValue()!=null ? dojo.date.locale.format(dijit.byId("wfExpireTimeAux").getValue(),{timePattern: "H-m", selector: "time"}) : ""
+				: (dojo.byId("wfExpireTimeAux"))
+					? dojo.byId("wfExpireTimeAux").value!=null ? dojo.date.locale.format(dojo.byId("wfExpireTimeAux").value,{timePattern: "H-m", selector: "time"}) : ""
+							: "";
+		var neverExpire = (dijit.byId("wfNeverExpire"))
+			? dijit.byId("wfNeverExpire").getValue()
+				: (dojo.byId("wfNeverExpire"))
+					? dojo.byId("wfNeverExpire").value
+							: "";
+
+		var whereToSend = (dijit.byId("whereToSend"))
+			? dijit.byId("whereToSend").getValue()
+				: (dojo.byId("whereToSend"))
+					? dojo.byId("whereToSend").value
+							: "";
+		// END: PUSH PUBLISHING ACTIONLET
+		
+		// BEGIN: PUSH PUBLISHING ACTIONLET
+		dojo.byId("wfPublishDate").value=publishDate;
+		dojo.byId("wfPublishTime").value=publishTime;
+		dojo.byId("wfExpireDate").value=expireDate;
+		dojo.byId("wfExpireTime").value=expireTime;
+		dojo.byId("wfNeverExpire").value=neverExpire;
+		dojo.byId("whereToSend").value=whereToSend;
+		// END: PUSH PUBLISHING ACTIONLET
 
 		actionStore.fetch({query: {id:actionId}, onComplete:function(item){
 			if(item[0].assignable =="true" || item[0].commentable == "true"){
@@ -379,7 +425,8 @@
     			}
     			dia = new dijit.Dialog({
     				id			:	"contentletWfDialog",
-    				title		: 	"<%=LanguageUtil.get(pageContext, "Workflow-Actions")%>"
+    				title		: 	"<%=LanguageUtil.get(pageContext, "Workflow-Actions")%>",
+    				style		:	"min-width:500px;min-height:250px;"
     				});
     			
     			

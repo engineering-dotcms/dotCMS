@@ -257,6 +257,14 @@
 		<input name="wfActionComments" id="wfActionComments" type="hidden"" value="">
 		<input name="wfActionId" id="wfActionId" type="hidden" value="">
 		<input name="wfCons" id="wfCons" type="hidden" value="">
+		
+		<!-- PUSH PUBLISHING ACTIONLET -->
+		<input name="wfPublishDate" id="wfPublishDate" type="hidden" value="">
+		<input name="wfPublishTime" id="wfPublishTime" type="hidden" value="">
+		<input name="wfExpireDate" id="wfExpireDate" type="hidden" value="">
+		<input name="wfExpireTime" id="wfExpireTime" type="hidden" value="">
+		<input name="wfNeverExpire" id="wfNeverExpire" type="hidden" value="">
+		<input name="whereToSend" id="whereToSend" type="hidden" value="">
 	</form>
 <%-- 
 <%=request.getQueryString() %>
