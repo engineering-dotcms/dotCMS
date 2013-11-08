@@ -22,6 +22,7 @@ import com.dotmarketing.cache.StructureCache;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.factories.MultiTreeFactory;
+import com.dotmarketing.portlets.containers.factories.ContainerFactory;
 import com.dotmarketing.portlets.containers.model.Container;
 import com.dotmarketing.portlets.contentlet.model.Contentlet;
 import com.dotmarketing.portlets.folders.business.FolderAPI;
@@ -486,6 +487,12 @@ public class DependencyManager {
                             structures.add(container.getStructureInode());
                         }
                     }
+                }
+                
+                if(Config.getBooleanProperty("PUSH_PUBLISHING_PUSH_ALL_CONTAINERS_RELATED_TO_CONTENT",false)) {
+                	Set<Container> containersSet = ContainerFactory.getContainerByContentlet(con);
+                	for(Container c:containersSet)
+                		containers.add(c.getIdentifier());
                 }
             } catch (Exception e) {
                 Logger.debug(this, e.toString());

@@ -87,7 +87,6 @@ public class PublisherQueueJob implements StatefulJob {
 				PublishAuditStatus status = null;
 				PublishAuditHistory historyPojo = null;
 				String tempBundleId = null;
-				Logger.info(getClass(), "Number of bundles: " + bundles.size());
 				for(Map<String,Object> bundle: bundles) {
 					pconf = new PushPublisherConfig();
 					Date publishDate = (Date) bundle.get("publish_date");

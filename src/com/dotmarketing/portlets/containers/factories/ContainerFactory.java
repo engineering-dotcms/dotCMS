@@ -1,14 +1,19 @@
 package com.dotmarketing.portlets.containers.factories;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.dotmarketing.beans.Host;
 import com.dotmarketing.beans.Identifier;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.business.DotStateException;
-import com.dotmarketing.business.IdentifierFactory;
 import com.dotmarketing.business.PermissionAPI;
 import com.dotmarketing.cache.StructureCache;
+import com.dotmarketing.common.db.DotConnect;
+import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.db.HibernateUtil;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotHibernateException;
@@ -17,9 +22,12 @@ import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.factories.InodeFactory;
 import com.dotmarketing.portlets.containers.model.Container;
 import com.dotmarketing.portlets.contentlet.business.HostAPI;
+import com.dotmarketing.portlets.contentlet.model.Contentlet;
+import com.dotmarketing.portlets.htmlpages.factories.HTMLPageFactory;
 import com.dotmarketing.portlets.structure.model.Structure;
 import com.dotmarketing.services.ContainerServices;
 import com.dotmarketing.util.Logger;
+import com.dotmarketing.util.UtilMethods;
 /**
  *
  * @author  will
@@ -146,5 +154,34 @@ public class ContainerFactory {
     {
     	Structure structure = StructureCache.getStructureByInode(container.getStructureInode());
     	return structure;
+    }
+    
+    public static Set<Container> getContainerByContentlet(Contentlet contentlet) {
+    	Set<Container> containers = new HashSet<Container>();
+    	try{
+			DotConnect dc = new DotConnect();
+			StringBuffer buffy = new StringBuffer();
+			buffy.append("select distinct cvi.identifier from multi_tree mt, container_version_info cvi ");
+			buffy.append("where mt.parent2 = cvi.identifier ");
+			buffy.append("and mt.child = ?");
+			dc.setSQL(buffy.toString());
+			dc.addParam(contentlet.getIdentifier());
+			List<Map<String, Object>> res = dc.loadObjectResults();
+			for(Map<String, Object> singleId : res) {
+				String ident = (String)singleId.get("identifier");
+				Container container = APILocator.getContainerAPI().getLiveContainerById(ident, APILocator.getUserAPI().getSystemUser(), false);
+				if(null!=container && UtilMethods.isSet(container.getInode()))
+					containers.add(container);
+			}
+			return containers;
+    	}catch(DotDataException e){
+    		Logger.error(HTMLPageFactory.class, "Error load Containers from contentlet: " + e.getMessage());
+    		return null;
+    	}catch(DotSecurityException e){
+    		Logger.error(HTMLPageFactory.class, "Error load Containers from contentlet: " + e.getMessage());
+    		return null;
+    	}finally{
+    		DbConnectionFactory.closeConnection();
+    	}
     }
 }
