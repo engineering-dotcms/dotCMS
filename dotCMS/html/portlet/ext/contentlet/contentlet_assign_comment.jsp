@@ -107,7 +107,7 @@ function setDates(){
 
 <% if(mustShow){ %>
 	<div id="wfDivWrapperForDojo">
-		<div style="margin:auto;width:500px;">
+		<div style="margin:0;width:500px;">
 			<div class="fieldWrapper">
 				<div class="fieldName" style="width: 120px"><%= LanguageUtil.get(pageContext, "Perform-Workflow") %>:</div> 
 				<div class="fieldValue"><%=action.getName() %></div>
