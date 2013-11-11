@@ -18,8 +18,6 @@ import com.dotmarketing.business.DotStateException;
 import com.dotmarketing.cache.StructureCache;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotSecurityException;
-import com.dotmarketing.exception.WebAssetException;
-import com.dotmarketing.factories.WebAssetFactory;
 import com.dotmarketing.portlets.fileassets.business.FileAssetAPI;
 import com.dotmarketing.portlets.folders.model.Folder;
 import com.dotmarketing.portlets.htmlpages.model.HTMLPage;
@@ -42,7 +40,7 @@ public class DotFolderUtil {
 		try {
 			INDEX_PAGE = "index." + com.dotmarketing.util.Config.getStringProperty( "VELOCITY_PAGE_EXTENSION" );
 			User user = APILocator.getUserAPI().getSystemUser();
-			String hostName =	APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId , "bankit.host_name");			
+			String hostName =	APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID , "bankit.host_name");			
 			defaultHost = APILocator.getHostAPI().find(hostName , user, true ); 
 			listaTemplates = APILocator.getTemplateAPI().findTemplatesAssignedTo( defaultHost );
 			initialized = true;
@@ -152,9 +150,10 @@ public class DotFolderUtil {
 	}
 	
 	public static HTMLPage createIndexOnFolder( String title, String templateName, Folder folder ) throws DotDataException, DotStateException, DotSecurityException {
-		return createPageOnFolder(INDEX_PAGE,title,templateName,folder);
+		
+		return createPageOnFolder(INDEX_PAGE,title,templateName,folder ,APILocator.getUserAPI().getSystemUser()  );
 	}
-	public static HTMLPage createPageOnFolder( String pageUrl,String title, String templateName, Folder folder) throws DotDataException, DotStateException, DotSecurityException {
+	public static HTMLPage createPageOnFolder( String pageUrl,String title, String templateName, Folder folder , User user ) throws DotDataException, DotStateException, DotSecurityException {
 		HTMLPage pageCreated=null;
 		Template template = findTemplate( templateName );
 		if ( template != null ) {
@@ -166,7 +165,7 @@ public class DotFolderUtil {
 			}
 			HTMLPage workingPage = APILocator.getHTMLPageAPI().getWorkingHTMLPageByPageURL(pageUrl, folder );
 			if (  workingPage == null ) {
-				User user = APILocator.getUserAPI().getSystemUser();
+				//User user = APILocator.getUserAPI().getSystemUser();
 				HTMLPage htmlPage = new HTMLPage();
 				htmlPage.setParent( folder.getInode() );
 				htmlPage.setFriendlyName( title );

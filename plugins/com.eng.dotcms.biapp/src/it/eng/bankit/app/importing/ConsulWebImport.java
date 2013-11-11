@@ -61,7 +61,7 @@ public class ConsulWebImport extends AbstractImport {
 			stDettaglio = StructureCache.getStructureByVelocityVarName( dettaglioStructureName );
 			stAllegato = StructureCache.getStructureByVelocityVarName( allegatoStructureName );
 			stLink = StructureCache.getStructureByVelocityVarName( linkStructureName );
-			relationName = pluginAPI.loadProperty( IDeployConst.pluginId, "consWeb.link.relazione" );
+			relationName = pluginAPI.loadProperty( IDeployConst.PLUGIN_ID, "consWeb.link.relazione" );
 			fileAsserWorkArround = readBooleanProperty( "dotCms.fileAssetWorkArround" );
 			if ( !updateMode ) {
 				checkBackupDir();
@@ -105,7 +105,6 @@ public class ConsulWebImport extends AbstractImport {
 				}
 			}
 		}
-
 		if ( allegato == null ) {
 			allegato = createContentlet( stAllegato, language );
 			if ( fileAsserWorkArround && !language.equals( languageApi.getDefaultLanguage() ) ) {

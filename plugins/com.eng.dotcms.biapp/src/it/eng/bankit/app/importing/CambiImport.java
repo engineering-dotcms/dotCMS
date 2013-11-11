@@ -56,7 +56,7 @@ public class CambiImport extends AbstractImport {
 			if ( UtilMethods.isSet( indicatoriPath ) ) {
 				folderIndicatori = DotFolderUtil.findOrCreateFolder( indicatoriPath, false, host, user );
 			}
-			String dolbyRemotePubblishingProp = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "cambi.dolbyRemotePubblishing" );
+			String dolbyRemotePubblishingProp = APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID, "cambi.dolbyRemotePubblishing" );
 			if ( UtilMethods.isSet( dolbyRemotePubblishingProp ) ) {
 				dolbyRemotePubblishing = Boolean.parseBoolean( dolbyRemotePubblishingProp );
 			}
@@ -76,7 +76,7 @@ public class CambiImport extends AbstractImport {
 	 * .File, com.dotmarketing.portlets.folders.model.Folder,
 	 * com.dotmarketing.portlets.languagesmanager.model.Language)
 	 */
-	public void importFiles( String cambiPath, String selettorePath, String indicatoriPath, File cambiFileIt, File cambiFileEn, File indicatoriFileIt, File indicatoriFileEn, File selettoreFileIt, File selettoreFileEn )
+	public void importFiles(  String cambiPath, String selettorePath, String indicatoriPath, File cambiFileIt, File cambiFileEn, File indicatoriFileIt, File indicatoriFileEn, File selettoreFileIt, File selettoreFileEn )
 			throws Exception {
 		init( cambiPath, selettorePath , indicatoriPath );
 		
@@ -88,14 +88,6 @@ public class CambiImport extends AbstractImport {
 		contentToPublish.addAll( cambiInsert.contentToPublish );
 		contentToUnPublish.addAll( cambiInsert.contentToUnPublish );
 		Logger.info( CambiThread.class, "Inseriti i cambi di riferimento della giornata " );
-		indicatoriInsert.saveContentletsFile( indicatoriFileIt, null, langIt );
-		checkRunning();
-		indicatoriInsert.saveContentletsFile( indicatoriFileEn, null, langEn );
-		checkRunning();
-		// contentToBackup.addAll( indicatoriInsert.contentToBackup );
-		contentToPublish.addAll( indicatoriInsert.contentToPublish );
-		contentToUnPublish.addAll( indicatoriInsert.contentToUnPublish );
-		Logger.info( CambiThread.class, "Aggiornati Indicatori in homepage " );
 
 		simpleContentInsert.saveContentletsFile( selettoreFileIt, folderSelettore, langIt );
 		checkRunning();
@@ -105,6 +97,17 @@ public class CambiImport extends AbstractImport {
 		contentToPublish.addAll( simpleContentInsert.contentToPublish );
 		contentToUnPublish.addAll( simpleContentInsert.contentToUnPublish );
 		Logger.info( CambiThread.class, "Aggiornati i cambi presenti nel selettore " );
+		
+		
+		indicatoriInsert.saveContentletsFile( indicatoriFileIt, folderIndicatori, langIt );
+		checkRunning();
+		indicatoriInsert.saveContentletsFile( indicatoriFileEn, folderIndicatori , langEn );
+		checkRunning();
+		// contentToBackup.addAll( indicatoriInsert.contentToBackup );
+		contentToPublish.addAll( indicatoriInsert.contentToPublish );
+		contentToUnPublish.addAll( indicatoriInsert.contentToUnPublish );
+		Logger.info( CambiThread.class, "Aggiornati Indicatori in homepage " );
+
 	}
 
 	public String startRemotePublish() throws Exception {
@@ -113,11 +116,11 @@ public class CambiImport extends AbstractImport {
 			if ( !contentToPublish.isEmpty() ) {
 				publishBundleId = rPublisher.publish( contentToPublish );
 				publishStartTime = new Date();
-				if (dolbyRemotePubblishing){//Pezzotto doppia pubblicazione per essere sicuri che il remote publisher vada a buon fine
-					Logger.info( this.getClass(), "Remote Pubblishing ping bundle (" + publishBundleId + ")" );
-					Thread.sleep( 90000 );
-					publishBundleId = rPublisher.publish( contentToPublish );
-				}//Fine pezzotto
+//				if (dolbyRemotePubblishing){//Pezzotto doppia pubblicazione per essere sicuri che il remote publisher vada a buon fine
+//					Logger.info( this.getClass(), "Remote Pubblishing ping bundle (" + publishBundleId + ")" );
+//					Thread.sleep( 90000 );
+//					publishBundleId = rPublisher.publish( contentToPublish );
+//				}//Fine pezzotto
 				Logger.info( this.getClass(), "Remote Pubblishing avviato (Bundle-id:" + publishBundleId + ")" );
 			}
 		} else {

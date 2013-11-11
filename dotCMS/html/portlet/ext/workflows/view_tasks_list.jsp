@@ -1,3 +1,5 @@
+<%@page import="com.dotmarketing.portlets.workflows.actionlet.PushPublishActionlet"%>
+<%@page import="com.dotmarketing.portlets.workflows.model.WorkflowActionClass"%>
 <%@page import="com.dotmarketing.portlets.contentlet.model.Contentlet"%>
 <%@page import="com.dotmarketing.util.Logger"%>
 <%@page import="org.apache.commons.beanutils.BeanUtils"%>
@@ -21,7 +23,7 @@
 	String assignedTo = searcher.getAssignedTo();
 	Role aRole = APILocator.getRoleAPI().loadRoleById(assignedTo);	
 	List<WorkflowTask> tasks = searcher.findTasks();
-	
+	boolean hasPushPublishActionlet = false; 
 
 
 	java.util.Map params = new java.util.HashMap();
@@ -80,11 +82,18 @@
 	 	label: 'name',
 	  	items: [
 		{ id:'',  name:'' }
-		<%for(WorkflowAction action : availableActions){%>
+		<%for(WorkflowAction action : availableActions){
+			List<WorkflowActionClass> actionlets = APILocator.getWorkflowAPI().findActionClasses(action);
+			for(WorkflowActionClass actionlet : actionlets){ 
+				if(actionlet.getActionlet().getClass().getCanonicalName().equals(PushPublishActionlet.class.getCanonicalName())){ 
+					hasPushPublishActionlet = true; 
+				}
+			} 
+		 %>
 			  ,{ id:'<%=action.getId()%>', 
 				  name:'<%=action.getName()%>', 
 				  assignable:'<%=action.isAssignable()%>',
-				  commentable:'<%=action.isCommentable() ||  UtilMethods.isSet(action.getCondition())%>'
+				  commentable:'<%=action.isCommentable() ||  UtilMethods.isSet(action.getCondition()) || hasPushPublishActionlet%>'
 				  
 			  }
 		  

@@ -69,7 +69,7 @@ public class ApplicationPluginDeployer implements PluginDeployer {
 		boolean override = false;
 		try {
 			InputStream is = null;
-			is = ClassLoader.getSystemClassLoader().getResourceAsStream( IDeployConst.pluginId + File.separatorChar + "plugin.properties" );
+			is = ClassLoader.getSystemClassLoader().getResourceAsStream( IDeployConst.PLUGIN_ID + File.separatorChar + "plugin.properties" );
 			if ( is != null ) {
 
 				Properties props = new Properties();
@@ -78,9 +78,9 @@ public class ApplicationPluginDeployer implements PluginDeployer {
 				for ( Object curKeyObj : props.keySet() ) {// Override keys
 					String key = (String) curKeyObj;
 					String value = props.getProperty( key );
-					String curValue = pAPI.loadProperty( IDeployConst.pluginId, key );
+					String curValue = pAPI.loadProperty( IDeployConst.PLUGIN_ID, key );
 					if ( curValue == null || !curValue.equals( value ) ) {
-						pAPI.saveProperty( IDeployConst.pluginId, key, value );
+						pAPI.saveProperty( IDeployConst.PLUGIN_ID, key, value );
 						override = true;
 					}
 
@@ -93,12 +93,12 @@ public class ApplicationPluginDeployer implements PluginDeployer {
 	}
 
 	private static void jobConfig() throws Exception {
-
-		String cronExpression = pAPI.loadProperty( IDeployConst.pluginId, "consWeb.job.cron.expression" );
-
-		CronScheduledTask cronScheduledTask = new CronScheduledTask( "ConsulWebJob", null, "Aggiornamento giornaliero allegati Consulenze", ConsulWebJob.class.getName(), new Date(), null,
-				CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW, new HashMap<String, Object>(), cronExpression );
-
-		QuartzUtils.scheduleTask( cronScheduledTask );
+		boolean enabled = Boolean.parseBoolean(pAPI.loadProperty(IDeployConst.PLUGIN_ID, "consWeb.job.enabled"));
+		if(enabled){
+			String cronExpression = pAPI.loadProperty( IDeployConst.PLUGIN_ID, "consWeb.job.cron.expression" );
+			CronScheduledTask cronScheduledTask = new CronScheduledTask( "ConsulWebJob", null, "Aggiornamento giornaliero allegati Consulenze", ConsulWebJob.class.getName(), new Date(), null,
+					CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW, new HashMap<String, Object>(), cronExpression );
+			QuartzUtils.scheduleTask( cronScheduledTask );
+		}
 	}
 }

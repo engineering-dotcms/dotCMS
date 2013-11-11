@@ -177,6 +177,11 @@
 		<level value="info"/>
 		<appender-ref ref="ASYNC-SITESEARCH" />
 	</logger>
+
+	<logger name="it.bankit.website.struts.SiteSearchAction" additivity="false">
+		<level value="info"/>
+		<appender-ref ref="ASYNC-SITESEARCH" />
+	</logger>	
 	
 	<logger name="com.dotmarketing.util.SecurityLogger" additivity="false">
 		<level value="info"/>

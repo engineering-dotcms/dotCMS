@@ -81,6 +81,7 @@ public abstract class AbstractImport {
 	protected boolean remoteBackup = false;
 	protected boolean remotePublished = false;
 	protected boolean updateMode = false;
+	protected String structureName;
 
 	public AbstractImport( User userImport, Host host ) {
 		this.user = userImport;
@@ -95,9 +96,7 @@ public abstract class AbstractImport {
 	}
 
 	protected Contentlet createContentlet( Structure structure, Language lang ) throws Exception {
-
 		Contentlet contentlet = null;
-
 		contentlet = new Contentlet();
 		Date data = new Date();
 		contentlet.setStructureInode( structure.getInode() );
@@ -132,50 +131,52 @@ public abstract class AbstractImport {
 		}
 
 		contentlet.setProperty( FileAssetAPI.DESCRIPTION, description );
-		// contentletAllegato.setBinary( FileAssetAPI.BINARY_FIELD,
-		// file);//Delete afther checkin
 		addFile( contentlet, FileAssetAPI.BINARY_FIELD, file );// Do not delete
-																// afther
-																// checkin
+		// afther
+		// checkin
 		contentlet.setProperty( FileAssetAPI.FILE_NAME_FIELD, fileName );
 		contentlet.setDateProperty( "importDate", new Date() );
 		contentlet.setLongProperty( FileAssetAPI.SORT_ORDER, 10L );
 		return contentlet;
 	}
 
-	protected Contentlet persistContentlet( Contentlet contentlet, String contextIdentifier ) throws DotDataException, DotContentletValidationException, DotContentletStateException,
-			IllegalArgumentException, DotSecurityException {
+	protected Contentlet persistContentlet(   Contentlet contentlet, String contextIdentifier ) throws DotDataException, DotContentletValidationException, DotContentletStateException,
+	IllegalArgumentException, DotSecurityException {
 		return persistContentlet( contentlet, contextIdentifier, null );
 	}
 
-	protected Contentlet persistContentlet( Contentlet contentlet, String contextIdentifier, Category category ) throws DotDataException, DotContentletValidationException,
-			DotContentletStateException, IllegalArgumentException, DotSecurityException {
+	protected Contentlet persistContentlet(  Contentlet contentlet, String contextIdentifier, Category category ) throws DotDataException, DotContentletValidationException,
+	DotContentletStateException, IllegalArgumentException, DotSecurityException {
 		Contentlet returnContentlet = null;
+		User insertUser = user;
 		String identifier = idMap.get( contextIdentifier );
 		if ( UtilMethods.isSet( identifier ) ) {
 			contentlet.setIdentifier( identifier );
+			Logger.info( this.getClass(), "Inserisco la traduzione della contentlet. Struttura  " +  contentlet.getStructure().getVelocityVarName() );
 		}
-		List<Permission> permissionList = permissionApi.getPermissions( contentlet.getStructure() );
+		List<Permission> permissionList = permissionApi.getPermissions( getStructure( getStructureName() ));
+		Logger.info( this.getClass(), " permissionList  " +  permissionList  );
 		if ( category != null ) {
 			List<Category> categories = Collections.singletonList( category );
-			returnContentlet = contentletApi.checkin( contentlet, categories, permissionList, user, true );
+			Logger.info( this.getClass(), " category getKey  " +  category.getKey()   );				
+			returnContentlet = contentletApi.checkin( contentlet, categories, permissionList, insertUser, true );
 		} else {
-			returnContentlet = contentletApi.checkin( contentlet, permissionList, user, true );
+			returnContentlet = contentletApi.checkin( contentlet, permissionList, insertUser, true );
 		}
 
 		if ( returnContentlet.isLocked() ) {
-			contentletApi.unlock( returnContentlet, user, true );
+			contentletApi.unlock( returnContentlet, insertUser, true );
 		}
 
 		if ( returnContentlet.getStructure().getVelocityVarName().equalsIgnoreCase( "Link" ) && returnContentlet.getLanguageId() != languageApi.getDefaultLanguage().getId() ) {
 			try {// Pezzotto per gestire errore pubblicazione eventuale x
-					// linguagio non di default
-				contentletApi.publish( returnContentlet, user, false );
+				// linguagio non di default
+				contentletApi.publish( returnContentlet, insertUser, true );
 			} catch ( Exception e ) {
 				Logger.warn( this.getClass(), "Pubblicazione Link con errore gestito in language non di default ", e );
 			}
-		} else {
-			contentletApi.publish( returnContentlet, user, true );
+		} else {			
+			contentletApi.publish( returnContentlet, insertUser , true );
 		}
 
 		String newIdentifier = returnContentlet.getIdentifier();
@@ -357,7 +358,7 @@ public abstract class AbstractImport {
 	}
 
 	protected boolean readBooleanProperty( String key ) throws DotDataException {
-		String property = pluginAPI.loadProperty( IDeployConst.pluginId, key );
+		String property = pluginAPI.loadProperty( IDeployConst.PLUGIN_ID, key );
 		if ( UtilMethods.isSet( property ) ) {
 			return Boolean.parseBoolean( property );
 		} else {
@@ -372,4 +373,14 @@ public abstract class AbstractImport {
 	public void setUpdateMode( boolean updateMode ) {
 		this.updateMode = updateMode;
 	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public String getStructureName() {
+		return structureName;
+	}
+
+
 }

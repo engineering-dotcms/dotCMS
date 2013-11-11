@@ -7,7 +7,6 @@ import java.util.List;
 
 import com.dotmarketing.beans.Host;
 import com.dotmarketing.cache.StructureCache;
-import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.portlets.contentlet.model.Contentlet;
 import com.dotmarketing.portlets.fileassets.business.FileAssetAPI;
 import com.dotmarketing.portlets.folders.model.Folder;
@@ -18,12 +17,11 @@ import com.dotmarketing.util.UtilMethods;
 import com.liferay.portal.model.User;
 
 public class SimpleContentInsert extends AbstractImport {
-	private String structureName = "SimpleContent";
+	protected String structureName = "SimpleContent";
 	private Structure structure;
 
 	public SimpleContentInsert( User user, Host host ) {
 		super( user, host );
-
 	}
 
 	@Override
@@ -84,12 +82,14 @@ public class SimpleContentInsert extends AbstractImport {
 				query.append( lang.getId() );
 			}
 			query.append( " +deleted:false +working:true +live:true" );
-			List<Contentlet> results = contentletApi.checkoutWithQuery( query.toString(), user, true );
-			if ( results != null && results.size() > 0 ) {
-				contentlet = results.get( 0 );
-			}
+			 
+				List<Contentlet> results = contentletApi.checkoutWithQuery( query.toString(), user, true );
+				if ( results != null && results.size() > 0 ) {
+					contentlet = results.get( 0 );
+				}
+			 
 		} catch ( Exception e ) {
-			Logger.warn( AbstractImport.class, "Error quering content", e );
+			Logger.warn( this.getClass() , "checkoutSelettore -> Error quering content", e );
 		}
 		return contentlet;
 	}

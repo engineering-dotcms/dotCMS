@@ -2,7 +2,6 @@ package it.eng.bankit.servlet;
 
 import it.eng.bankit.app.util.DisplayUtil;
 import it.eng.bankit.app.util.MailUtil;
-import it.eng.bankit.deploy.ApplicationPluginDeployer;
 import it.eng.bankit.deploy.IDeployConst;
 
 import java.io.IOException;
@@ -14,12 +13,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.util.Assert;
-
 import com.dotmarketing.beans.Host;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotSecurityException;
+import com.dotmarketing.plugin.business.PluginAPI;
 import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.UtilMethods;
 import com.liferay.portal.model.User;
@@ -64,47 +62,39 @@ public class CambiServlet extends HttpServlet {
 	public void init( ServletConfig config ) throws ServletException {
 		Logger.info( CambiServlet.class, "INIT della servlet Importazione Cambi" );
 		try {
-			ApplicationPluginDeployer.initialize();
+			PluginAPI plgApi =  APILocator.getPluginAPI();
 			user = APILocator.getUserAPI().getSystemUser();
-			String httpGetProp = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "cambi.http.get" );
-			String httpPostProp = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "cambi.http.post" );
+			String httpGetProp = APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID, "cambi.http.get" );
+			String httpPostProp = APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID, "cambi.http.post" );
 			if ( UtilMethods.isSet( httpGetProp ) ) {
 				getEnabled = Boolean.parseBoolean( httpGetProp );
 			}
 			if ( UtilMethods.isSet( httpPostProp ) ) {
 				postEnabled = Boolean.parseBoolean( httpPostProp );
 			}
-			Assert.isTrue( getEnabled || postEnabled, "Nessuna interfaccia di rete abilitata, inpossibile avviare la servlet" );
-
-			String hostName = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "bankit.host_name" );
-			importDir = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "cambi.import_dir" );
-			selettorePath = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "cambi.selettore.path" );
-			cambiPath = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "cambi.path" );
-			indicatoriPath = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "indicatori.path" );			
-			String remotePubblishingProp = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "cambi.remotePubblishing" );
+	//		Assert.isTrue( getEnabled || postEnabled, "Nessuna interfaccia di rete abilitata, inpossibile avviare la servlet" );
+			String hostName = plgApi.loadProperty( IDeployConst.PLUGIN_ID, IDeployConst.HOST_NAME  );
+			importDir = plgApi.loadProperty( IDeployConst.PLUGIN_ID, IDeployConst.CAMBI_IMPORT_DIR  );
+			selettorePath = plgApi.loadProperty( IDeployConst.PLUGIN_ID, IDeployConst.CAMBI_SELETTORE_PATH  );
+			cambiPath = plgApi.loadProperty( IDeployConst.PLUGIN_ID, IDeployConst.CAMBI_PATH  );
+			indicatoriPath = plgApi.loadProperty( IDeployConst.PLUGIN_ID, IDeployConst.CAMBI_INDICATORE_PATH  );			
+			String remotePubblishingProp = plgApi.loadProperty( IDeployConst.PLUGIN_ID, IDeployConst.CAMBI_REMOTE_PUBLISH  );
 			if ( UtilMethods.isSet( remotePubblishingProp ) ) {
 				remotePublishing = Boolean.parseBoolean( remotePubblishingProp );
 			}
-			String updateModeProp = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "cambi.updateMode" );
+			String updateModeProp = plgApi.loadProperty( IDeployConst.PLUGIN_ID, IDeployConst.CAMBI_UPDATE_MODE );
 			if ( UtilMethods.isSet( updateModeProp ) ) {
 				updateMode = Boolean.parseBoolean( updateModeProp );
 			}
-
-			//Assert.hasText( importDir, "Parametro cambi.import_dir non impostato" );
-			//Assert.hasText( selettorePath, "Parametro cambi.selettore.path non impostato" );
-			//Assert.hasText( cambiPath, "Parametro cambi.path non impostato" );
-
 			if ( UtilMethods.isSet( hostName ) ) {
 				host = APILocator.getHostAPI().find( hostName, user, true );
 			}
 			if ( host == null ) {
 				host = APILocator.getHostAPI().findDefaultHost( user, true );
 			}
-			Assert.notNull( host, "Errore nel recuperare l'host:" + hostName );
-
-			emailFrom = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "cambi.email.from" );
-			emailFromName = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "cambi.email.from.name" );
-			emailAddres = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "cambi.email.addres" );
+			emailFrom = plgApi.loadProperty( IDeployConst.PLUGIN_ID, "cambi.email.from" );
+			emailFromName = plgApi.loadProperty( IDeployConst.PLUGIN_ID, "cambi.email.from.name" );
+			emailAddres = plgApi.loadProperty( IDeployConst.PLUGIN_ID, "cambi.email.addres" );
 			mailer = new MailUtil( emailFrom, emailFromName, emailAddres );
 
 		} catch ( DotDataException e ) {
@@ -135,7 +125,7 @@ public class CambiServlet extends HttpServlet {
 	}
 
 	protected void internalProcess( HttpServletRequest request, HttpServletResponse response ) throws IOException {
-		// String user = request.getRemoteUser();
+		User usr = null;
 		Logger.info( CambiServlet.class, "internalProcess " );
 		localHostName = request.getServerName();
 		String address = request.getRemoteAddr();
@@ -148,35 +138,39 @@ public class CambiServlet extends HttpServlet {
 		response.setCharacterEncoding( "UTF-8" );
 		response.setContentType( "text/plain" );
 		response.setStatus( HttpServletResponse.SC_OK );// Fake ok for wget
-
 		if ( !UtilMethods.isSet( userIdParameter ) ) {
 			Logger.info( CambiServlet.class, USER_PARAMETER + " mancante" );
 			out.print( IMPORT_ERROR_MSG );
-			out.print( USER_PARAMETER + " mancante, " );
-			out.print( "impossibile procedere" );
-			return;
+			out.print( USER_PARAMETER + " mancante. " );
+			out.print( "Impossibile procedere!" );
+			return ;
+		}else {
+			PluginAPI plgApi =  APILocator.getPluginAPI();
+			try{
+				usr = APILocator.getUserAPI().loadUserById(userIdParameter);
+				String roleEnabled = System.getProperty(IDeployConst.USR_CAMBI_ROLE);
+				boolean isInRole= APILocator.getRoleAPI().doesUserHaveRole(usr, roleEnabled );				
+				if( !isInRole ){
+					Logger.error( CambiServlet.class, "Utente "+ USER_PARAMETER+" non ha il ruolo per inserire i cambi " );
+					out.print( IMPORT_ERROR_MSG );
+					out.print( USER_PARAMETER + "  "+ userIdParameter+ " non ha il ruolo per inserire i cambi" );
+					out.print( " Impossibile procedere!" );
+					return ;
+				}
+			}catch (Exception e) {
+				Logger.info( CambiServlet.class, "Utente "+ userIdParameter+ " non presente in DOTCMS " );
+				out.print( IMPORT_ERROR_MSG );
+				out.print( USER_PARAMETER + "  "+ userIdParameter+ " non presente nel sistema. " );
+				out.print( "Impossibile procedere!" );
+				return ;
+			}
 		}
-//		else {
-//			try{
-//				User usr = APILocator.getUserAPI().loadUserById(userIdParameter);
-//			}catch (Exception e) {
-//				 	Logger.info( CambiServlet.class, "Utente non presente in DOTCMS " );
-//					out.print( IMPORT_ERROR_MSG );
-//					out.print( USER_PARAMETER + "  "+ userIdParameter+ " non presente. " );
-//					out.print( "impossibile procedere" );
-//					return;
-//			}
-//			
-//			
-//		}
 		Logger.info( CambiServlet.class, "operationParameter value : " +  operationParameter );
-
 		if ( !UtilMethods.isSet( operationParameter ) || operationParameter.equalsIgnoreCase( Operation.getPublishingStatus.name() ) ) {
 			printStatus( out );
 		} else if ( operationParameter.equalsIgnoreCase( Operation.startPublish.name() ) ) {
 			try {
-
-				startImport( userIdParameter, out );
+				startImport( usr , userIdParameter, out );
 			} catch ( InterruptedException e ) {
 				out.print( IMPORT_ERROR_MSG );
 				out.print( e );
@@ -226,7 +220,7 @@ public class CambiServlet extends HttpServlet {
 		}
 	}
 
-	private void startImport( String username, PrintWriter out ) throws InterruptedException {
+	private void startImport(User usr, String username, PrintWriter out ) throws InterruptedException {
 		if ( action != null
 				&& action.isAlive()
 				&& ( action.getStatus().equals( CambiThread.Status.Started ) || action.getStatus().equals( CambiThread.Status.RemotePublishing ) || action.getStatus().equals(
@@ -235,8 +229,23 @@ public class CambiServlet extends HttpServlet {
 			return;
 		}
 		Logger.info( CambiServlet.class, "Comincia -> startImport "  );
-
-		action = new CambiThread( user, host, importDir, selettorePath, cambiPath, indicatoriPath, username, localHostName );
+		User utente =  null;
+		try{
+			String useUser = APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID,  IDeployConst.USE_USER_CAMBI );
+			Logger.info( CambiServlet.class, "VALORE Property useUser    " + IDeployConst.USE_USER_CAMBI  + " = "+ useUser  );
+			if( useUser!= null && Boolean.parseBoolean( useUser) ){
+				utente  = usr ;
+				Logger.info( CambiServlet.class, "UTILIZZO  " + user.getUserId()   );					
+			}else{
+				utente  =  	APILocator.getUserAPI().getSystemUser();
+				Logger.info( CambiServlet.class, "UTILIZZO SU    "   );
+				
+			}
+		}catch (Exception e) {
+			Logger.error(this.getClass(), e.getMessage() );
+		}
+	 	
+		action = new CambiThread( utente, host, importDir, selettorePath, cambiPath, indicatoriPath, username, localHostName );
 		action.setRemotePublishing( remotePublishing );
 		action.setUpdateMode( updateMode );
 		action.setMailer( mailer );
@@ -267,4 +276,7 @@ public class CambiServlet extends HttpServlet {
 			out.print( IMPORT_NO_STARTED );
 		}
 	}
+
+
+	
 }

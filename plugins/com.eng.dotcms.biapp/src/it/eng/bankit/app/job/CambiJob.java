@@ -22,12 +22,12 @@ public class CambiJob implements StatefulJob {
 	private void init() throws JobExecutionException {
 		try {
 			User user = userApi.getSystemUser();
-			String hostName = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "bankit.host_name" );
+			String hostName = APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID, "bankit.host_name" );
 			Host host = APILocator.getHostAPI().find( hostName, user, true );
-			String importDir = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "cambi.import_dir" );
-			String selettorePath = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "cambi.selettore.path" );
-			String cambiPath = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "cambi.path" );
-			String indicatoriPath 	 = APILocator.getPluginAPI().loadProperty( IDeployConst.pluginId, "indicatori.path" );
+			String importDir = APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID, "cambi.import_dir" );
+			String selettorePath = APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID, "cambi.selettore.path" );
+			String cambiPath = APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID, "cambi.path" );
+			String indicatoriPath 	 = APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID, "indicatori.path" );
 			
 			action = new CambiThread( user, host, importDir, selettorePath, cambiPath, indicatoriPath , null,null );
 		} catch ( Exception e ) {
