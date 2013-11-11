@@ -375,32 +375,28 @@
 				: (dojo.byId("wfPublishDateAux"))
 					? dojo.date.locale.format(dojo.byId("wfPublishDateAux").value,{datePattern: "yyyy-MM-dd", selector: "date"})
 							: "";
-		alert(publishDate);
+		
 		var publishTime = (dijit.byId("wfPublishTimeAux"))
 			? dojo.date.locale.format(dijit.byId("wfPublishTimeAux").getValue(),{timePattern: "H-m", selector: "time"})
 				: (dojo.byId("wfPublishTimeAux"))
 					? dojo.date.locale.format(dojo.byId("wfPublishTimeAux").value,{timePattern: "H-m", selector: "time"})
 							: "";
 
-		alert(publishTime);
 		var expireDate = (dijit.byId("wfExpireDateAux"))
 			? dijit.byId("wfExpireDateAux").getValue()!=null ? dojo.date.locale.format(dijit.byId("wfExpireDateAux").getValue(),{datePattern: "yyyy-MM-dd", selector: "date"}) : ""
 				: (dojo.byId("wfExpireDateAux"))
 					? dojo.byId("wfExpireDateAux").value!=null ? dojo.date.locale.format(dojo.byId("wfExpireDateAux").value,{datePattern: "yyyy-MM-dd", selector: "date"}) : ""
 							: "";
-		alert(expireDate);
 		var expireTime = (dijit.byId("wfExpireTimeAux"))
 			? dijit.byId("wfExpireTimeAux").getValue()!=null ? dojo.date.locale.format(dijit.byId("wfExpireTimeAux").getValue(),{timePattern: "H-m", selector: "time"}) : ""
 				: (dojo.byId("wfExpireTimeAux"))
 					? dojo.byId("wfExpireTimeAux").value!=null ? dojo.date.locale.format(dojo.byId("wfExpireTimeAux").value,{timePattern: "H-m", selector: "time"}) : ""
 							: "";
-		alert(expireTime);
 		var neverExpire = (dijit.byId("wfNeverExpire"))
 			? dijit.byId("wfNeverExpire").getValue()
 				: (dojo.byId("wfNeverExpire"))
 					? dojo.byId("wfNeverExpire").value
 							: "";
-		alert(neverExpire);
 		var whereToSend = (dijit.byId("whereToSend"))
 			? dijit.byId("whereToSend").getValue()
 				: (dojo.byId("whereToSend"))
