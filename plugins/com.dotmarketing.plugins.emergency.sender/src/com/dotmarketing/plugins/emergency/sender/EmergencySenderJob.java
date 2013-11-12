@@ -26,24 +26,21 @@ public class EmergencySenderJob implements StatefulJob {
 	
 	@Override
 	public void execute(JobExecutionContext ctx) throws JobExecutionException {
-		Logger.debug(this, "Start emergency sender status check");
-				
 		if(esAPI.isEnabledEmergencySender()) {
+			Logger.info(this, "Start emergency sender");
 			try {
 				String scriptName = pluginAPI.loadProperty(pluginId, "script.name");
 				String scriptFolder = pluginAPI.loadProperty(pluginId, "script.folder");
 				ProcessBuilder pb = new ProcessBuilder("/bin/bash", scriptFolder+scriptName);
-
+				Logger.info(this, "Script: " + scriptFolder+scriptName);
 				pb.start();
-				Logger.info(this, "Starting emergency sender script");
+				Logger.info(this, "End emergency sender script");
 			} catch (DotDataException e) {
 				Logger.error(this, e.getMessage());
 			} catch (IOException e) {
 				Logger.error(this, e.getMessage());
 			}
 		}
-		
-		Logger.debug(this, "End emergency sender status check");
 	}
 
 }

@@ -13,8 +13,6 @@ import java.util.concurrent.TimeoutException;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.StatefulJob;
-import org.springframework.util.Assert;
-
 import com.dotmarketing.beans.Host;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.business.UserAPI;
@@ -45,7 +43,7 @@ public class ConsulWebJob implements StatefulJob {
 	private MailUtil mailer;
 	private Date startTime;
 	private Date endTime;
-	private PluginAPI pAPI = APILocator.getPluginAPI();
+	//	private PluginAPI pAPI = APILocator.getPluginAPI();
 
 	private void initialize() throws JobExecutionException {
 		if (!initialized) {
@@ -53,32 +51,19 @@ public class ConsulWebJob implements StatefulJob {
 				hostApi = APILocator.getHostAPI();
 				userApi = APILocator.getUserAPI();
 				user = userApi.getSystemUser();
-				String hostName = pluginAPI.loadProperty(	IDeployConst.PLUGIN_ID, "bankit.host_name");
-				sourceFolder = pluginAPI.loadProperty(IDeployConst.PLUGIN_ID,				"consWeb.pullPath");
-				filenameIt = pluginAPI.loadProperty(IDeployConst.PLUGIN_ID,				"consWeb.files.it");
-				filenameEn = pluginAPI.loadProperty(IDeployConst.PLUGIN_ID,				"consWeb.files.en");
-//				Assert.hasText(filenameIt,				"Nessun filename impostato per la lingua italiana");
-//				Assert.hasText(filenameEn,
-//				"Nessun filename impostato per la lingua inglese");
+				String hostId = pluginAPI.loadProperty(	IDeployConst.PLUGIN_ID, "bankit.host");
+				sourceFolder = pluginAPI.loadProperty(IDeployConst.PLUGIN_ID, "consWeb.pullPath");
+				filenameIt = pluginAPI.loadProperty(IDeployConst.PLUGIN_ID,	"consWeb.files.it");
+				filenameEn = pluginAPI.loadProperty(IDeployConst.PLUGIN_ID,	"consWeb.files.en");
 
-				if (UtilMethods.isSet(hostName)) {
-					host = hostApi.find(hostName, user, true);
+				if (UtilMethods.isSet(hostId)) {
+					host = hostApi.find(hostId, user, true);
 				}
 				if (host == null) {
 					host = hostApi.findDefaultHost(user, true);
 				}
-				//				Assert
-				//						.notNull(host, "Errore nel recuperare l'host:"
-				//								+ hostName);
-				//				Assert.hasText(sourceFolder,
-				//						"Parametro cambi.import_dir non impostato");
-				Host host = APILocator.getHostAPI().find(hostName, user, true);
-//				Assert
-//				.notNull(host, "Errore nel recuperare l'host:"
-//						+ hostName);
 
-				String remotePublishingProp = APILocator.getPluginAPI()
-				.loadProperty(IDeployConst.PLUGIN_ID,						"consWeb.remotePubblishing");
+				String remotePublishingProp = APILocator.getPluginAPI().loadProperty(IDeployConst.PLUGIN_ID,"consWeb.remotePubblishing");
 				if (UtilMethods.isSet(remotePublishingProp)) {					
 					remotePublishing = Boolean.parseBoolean(remotePublishingProp);
 				}
@@ -104,35 +89,47 @@ public class ConsulWebJob implements StatefulJob {
 	public void execute(JobExecutionContext arg0) throws JobExecutionException {
 		initialize();
 		startTime = new Date();
-		Logger.info(this.getClass(),
-		"--------------- Running ConsulWebJob -------------------");
+		Logger.info(this.getClass(), "--------------- Running ConsulWebJob -------------------");
 		boolean toRollback = false;
 		try {
 			// HibernateUtil.startTransaction();
 			if (user != null && host != null && UtilMethods.isSet(sourceFolder)) {
 				File directory = new File(sourceFolder);
-				File f[] = directory.listFiles();
+				File listaFileDirs[] = directory.listFiles();
 				File fileConsulWebIta = null;
 				File fileConsulWebEng = null;
+				File fileConsulWebItaCSV = null;
+				File fileConsulWebEngCSV = null;
+				String[] arrFileIta = filenameIt.split(";");
+				String[] arrFileEng = filenameEn.split(";");
+
+				String filenameItCSV = arrFileIta[1];
+				String filenameEnCSV = arrFileEng[1];
+				String filenameItPDF = arrFileIta[0];
+				String filenameEnPDF = arrFileEng[0];
+
 				boolean checkDir = checkDirectory(directory);
 				if (checkDir) {
-					Logger.info(ConsulWebJob.class,		"Controllo i file della cartella : "
-							+ sourceFolder);
-					for (File file : f) {
+					Logger.info(ConsulWebJob.class,	"Controllo i file della cartella : " + sourceFolder);
+					for (File file : listaFileDirs) {
 						String fileName = file.getName();
-						if (fileName.equals(filenameEn)) {
+						if (fileName.equals(filenameEnPDF)) {
 							fileConsulWebEng = file;
-						} else if (fileName.equals(filenameIt)) {
+						} else if (fileName.equals(filenameItPDF)) {
 							fileConsulWebIta = file;
 						}
+						else if (fileName.equals(filenameItCSV)) {
+							fileConsulWebItaCSV = file;
+						}
+						else if (fileName.equals(filenameEnCSV)) {
+							fileConsulWebEngCSV = file;
+						}
 					}
-					String destinationPath = pluginAPI.loadProperty(
-							IDeployConst.PLUGIN_ID, "consWeb.path").trim();
+					String destinationPath = pluginAPI.loadProperty( IDeployConst.PLUGIN_ID, "consWeb.path").trim();
 
 					if (fileConsulWebIta != null && fileConsulWebEng != null
 							&& UtilMethods.isSet(destinationPath)) {
-						ConsulWebImport importTask = new ConsulWebImport(user,
-								host);
+						ConsulWebImport importTask = new ConsulWebImport(user,	host);
 						importTask.setRemotePublication(remotePublishing);
 						importTask.setUpdateMode(updateMode);
 						importTask.init(destinationPath);
@@ -140,7 +137,10 @@ public class ConsulWebJob implements StatefulJob {
 							importTask.backupOldContentlet();
 						}
 						try {
-							importTask.importFiles(fileConsulWebIta, 	fileConsulWebEng);
+							importTask.importFiles(fileConsulWebIta, fileConsulWebEng);
+							
+							importTask.importFiles(fileConsulWebItaCSV, fileConsulWebEngCSV);
+
 							if (!updateMode) {
 								importTask.removeOldContentlet();
 							}
@@ -208,7 +208,7 @@ public class ConsulWebJob implements StatefulJob {
 
 	private void sendErrorMail(Throwable th) {
 		try {
-			String poolingMax = pAPI.loadProperty(
+			String poolingMax = pluginAPI.loadProperty(
 					it.eng.bankit.deploy.IDeployConst.PLUGIN_ID,
 					it.eng.bankit.deploy.IDeployConst.CAMBI_POOLING_MAXTIME);
 			long poolingMaxLong = Long.parseLong(poolingMax);

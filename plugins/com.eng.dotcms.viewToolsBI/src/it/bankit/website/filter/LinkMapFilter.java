@@ -44,7 +44,7 @@ public class LinkMapFilter implements Filter {
 	private ContentletAPI conAPI;
 	private UserWebAPI wuserAPI;
 	private HostWebAPI whostAPI;
- 
+
 
 	public void destroy() {
 	}
@@ -55,7 +55,7 @@ public class LinkMapFilter implements Filter {
 		wuserAPI = WebAPILocator.getUserWebAPI();
 		whostAPI = WebAPILocator.getHostWebAPI();
 		StructureCache.clearURLMasterPattern();
- 		
+
 	}
 
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
@@ -64,12 +64,10 @@ public class LinkMapFilter implements Filter {
 		HttpServletResponse response = (HttpServletResponse) res;
 		String uri = request.getRequestURI();
 		uri = URLDecoder.decode(uri, "UTF-8");
-
 		if ( excludeURI(uri) ) {
 			chain.doFilter(req, res);
 			return;
 		}
-
 		Host host;
 		try {
 			host = whostAPI.getCurrentHost(request);
@@ -102,9 +100,8 @@ public class LinkMapFilter implements Filter {
 		}
 
 		Structure struct  = StructureCache.getStructureByVelocityVarName("Link");
-		if (uri != null && ( struct != null  && UtilMethods.isSet(  struct.getInode() ) ) ){
+		if (uri != null && ( struct != null  && UtilMethods.isSet(struct.getInode() ) ) ){
 			StringTokenizer st = new StringTokenizer(uri , "/", false);
-
 			int numTok = st.countTokens();
 			int count = 1;
 			String identifier = "";
@@ -123,12 +120,12 @@ public class LinkMapFilter implements Filter {
 			}
 			Folder folder = null;
 			try {
-				IdentifierAPI iApi = APILocator.getIdentifierAPI();
+				 // APILocator.getIdentifierAPI();
 				//	Identifier id =  iApi.loadFromCache(whostAPI.getCurrentHost(request)  , path );
 				folder = APILocator.getFolderAPI().findFolderByPath(path, whostAPI.getCurrentHost(request), wuserAPI.getLoggedInUser(request), true);
 
 				if ( UtilMethods.isSet(folder.getInode()) &&  (!"".equals(identifier) ) && !folder.getInode().contains("system_folder")) {
-					String query = getQueryLinkEsterno( request , identifier, path, folder , host );
+					String query = getQueryLinkEsterno(request, identifier, path, folder , host );
 					List<Contentlet> linkList = conAPI.search(query.toString(), 1, 0, "modDate desc", APILocator.getUserAPI().getSystemUser(), true);
 					if (linkList.size() > 0) {
 						if (linkList.get(0).getStringProperty("linkType").equals("E")) {
@@ -145,8 +142,8 @@ public class LinkMapFilter implements Filter {
 							return;
 						}
 					}else {
-						String queryIn = getQueryLinkInterno(  request , identifier, path, folder , host );
-						List<Contentlet> linkListInt = conAPI.search(queryIn.toString(), 1, 0, "modDate desc", APILocator.getUserAPI().getSystemUser(), true);
+						String queryIn = getQueryLinkInterno( request , identifier, uri, folder , host );
+						List<Contentlet> linkListInt = conAPI.search(queryIn.toString(), 1, 0, "Link.dataEmanazione desc", APILocator.getUserAPI().getSystemUser(), true);
 						if (linkListInt.size() > 0) {
 							Logger.debug(this.getClass().getName() , "trovato un link con idRemoto = true ");
 							Contentlet contentlet = linkListInt.get(0);
@@ -157,15 +154,12 @@ public class LinkMapFilter implements Filter {
 							}else {
 								//Logger.info(this.getClass().getName() , "Sono ELSE" + extPageURI);
 								FileAsset fa =APILocator.getFileAssetAPI().fromContentlet(contentlet);
-								fa.getFileName();
-								String inodeF = fa.getFolder();
-								Identifier idFolder   =  iApi.loadFromCache(inodeF );
-								if( UtilMethods.isSet(idFolder ) &&  UtilMethods.isSet( idFolder.getInode()) )	{
-									extPageURI =
-										idFolder.getPath()+fa.getFileName();
-									request.getRequestDispatcher(extPageURI).forward(request, response);
-									//Logger.info(this.getClass().getName() , "Trovato un link ALLEGATO -pagina a cui redirigere " + extPageURI);
-								}
+								String identifierFA = fa.getIdentifier();
+								System.out.println( "identifierFA " + identifierFA  );
+								
+								extPageURI = APILocator.getIdentifierAPI().find(identifierFA ).getURI();
+								System.out.println( "File da recuperare  " + identifierFA  );
+								request.getRequestDispatcher(extPageURI).forward(request, response);
 							}
 							return;
 
@@ -217,17 +211,17 @@ public class LinkMapFilter implements Filter {
 	}
 
 
-	private String getQueryLinkInterno(	HttpServletRequest request  ,  String identifier , String path , Folder folder , Host host ){
+	private String getQueryLinkInterno(	HttpServletRequest request  ,  String identifier , String uri , Folder folder , Host host ){
 
 		//Logger.info(this.getClass(), "[INIT]getQueryLinkInterno -  Verifico se è un link interno ( di tipo A o I )" + identifier  );
 		HttpSession session = request.getSession();
 		StringBuilder query = null;
 		query = new StringBuilder();
-		query.append("+structureName:Link  -Link.linkType:*E*  +Link.identificativo:" + identifier + " +Link.idRemoto:*True* +conFolder:" + folder.getInode() + " +deleted:false ");
+		query.append("+structureName:Link  +Link.linkType:*A*  +Link.identificativo:" + uri + " +Link.idRemoto:*True*  +deleted:false ");
 		String params = addDefaultParameterToQuery(session, host);
 		query.append(params);
 		//Logger.info(this.getClass(), "[END]getQueryLinkInterno query: " + query.toString()   );
-
+		Logger.info(this.getClass(), "[END]getQueryLinkInterno query: " + query.toString()   );
 		return query.toString();
 
 	}
@@ -253,5 +247,5 @@ public class LinkMapFilter implements Filter {
 		}
 		return queryParam.toString();
 	}
- 
+
 }

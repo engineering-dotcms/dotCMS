@@ -87,7 +87,6 @@ public class ConsulWebImport extends AbstractImport {
 		Contentlet allegato = null;
 		Contentlet link = null;
 		String title = ( language.getLanguageCode().equalsIgnoreCase( "it" ) ? "Elenco" : "List" );
-
 		if ( updateMode ) {
 			allegato = checkoutAllegato( folder, language );
 			if ( fileAsserWorkArround && allegato != null && !language.equals( languageApi.getDefaultLanguage() ) ) {

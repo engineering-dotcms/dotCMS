@@ -119,13 +119,7 @@ function setDates(){
 					<div class="fieldValue"><textarea name="taskCommentsAux" id="taskCommentsAux" cols=40 rows=8 style="min-height:100px;" dojoType="dijit.form.Textarea"></textarea></div>
 					<div class="clear"></div>
 				</div>	
-			<%}else{ %>
-				<div class="fieldWrapper">
-					<div class="fieldName" style="width: 120px"><%= LanguageUtil.get(pageContext, "Comments") %>: </div>
-					<div class="fieldValue"><%= LanguageUtil.get(pageContext, "None") %></div>
-					<div class="clear"></div>
-				</div>
-			<%} %>
+			<%}%>
 				<div class="fieldWrapper">
 					<div class="fieldName" style="width: 120px"><%= LanguageUtil.get(pageContext, "Assignee") %>: </div>
 					<div class="fieldValue">				

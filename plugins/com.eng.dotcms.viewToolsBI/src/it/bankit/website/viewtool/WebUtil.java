@@ -75,6 +75,14 @@ public class WebUtil implements ViewTool {
 		}
 	}
 
+	public String getSystemProperty(String key){
+		String value = "";
+		if(UtilMethods.isSet(key)){
+			value = System.getProperty(key);
+		}
+		return value;
+	}
+	
 	public Folder getFolderByRequestURI() {
 		Folder folder = null;
 		try {

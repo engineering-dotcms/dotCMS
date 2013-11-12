@@ -67,7 +67,7 @@ public class LanguageCookieFilter implements Filter {
 			languageIdCookie = UtilMethods.getCookieValue(request.getCookies(), com.dotmarketing.util.WebKeys.HTMLPAGE_LANGUAGE);
 			if (languageIdCookie != null && !languageIdCookie.equals("0")) {
 				try {
-					int cookieId = Integer.parseInt(languageIdCookie);
+					Integer.parseInt(languageIdCookie);
 					cookieLanguage = langAPI.getLanguage(languageIdCookie);
 				} catch (Exception e) {
 					cookieLanguage = langAPI.getDefaultLanguage();

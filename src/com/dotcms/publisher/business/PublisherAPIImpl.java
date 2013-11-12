@@ -509,9 +509,10 @@ public class PublisherAPIImpl extends PublisherAPI{
 	public List<Map<String, Object>> getQueueBundleIdsToProcess() throws DotPublisherException {
 		try{
 			DotConnect dc = new DotConnect();
-
-			dc.setSQL(SQLGETSINGLEBUNDLESTOPROCESS);
-
+			if(DbConnectionFactory.isOracle())
+				dc.setSQL(SQLGETSINGLEBUNDLESTOPROCESS);
+			else
+				dc.setSQL(SQLGETBUNDLESTOPROCESS);
 			dc.addParam(Status.BUNDLE_SENT_SUCCESSFULLY.getCode());
 			dc.addParam(Status.PUBLISHING_BUNDLE.getCode());
 			dc.addParam(Status.BUNDLE_REQUESTED.getCode());
