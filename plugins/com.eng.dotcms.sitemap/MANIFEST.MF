@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Plugin-Name: Sitemap builder plugin
+Plugin-Version: 1.0
+Author: Alberto Montichiara - Engineering s.p.a.

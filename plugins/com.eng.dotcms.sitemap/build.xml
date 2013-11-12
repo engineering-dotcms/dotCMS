@@ -1,0 +1,3 @@
+<project name="Sitemap plugin" default="build">	
+	<import file="../common.xml"/>
+</project>

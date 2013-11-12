@@ -1,0 +1,2 @@
+<!-- Use this file to add portlets and extend the portlet file -->
+<portlet id="EXT_SITEMAP" struts-path="ext/tool/sitemap/builder" narrow="true" />

@@ -1,0 +1,24 @@
+
+<!-- BEGIN: PORTLET MAP BUILDER -->	
+<portlet>
+	<portlet-name>EXT_SITEMAP</portlet-name>
+	<display-name>Sitemap builder</display-name>
+	<portlet-class>com.liferay.portlet.JSPPortlet</portlet-class>
+	<init-param>
+			<name>view-jsp</name>
+			<value>/plugins/com.eng.dotcms.sitemap/view_sitemap_builder.jsp</value>
+	</init-param>
+	<init-param>
+			<name>useWEBINFDIR</name>
+			<value>false</value>
+	</init-param>
+	<expiration-cache>0</expiration-cache>
+	<supports>
+		<mime-type>text/html</mime-type>
+	</supports>
+	<resource-bundle>com.liferay.portlet.StrutsResourceBundle</resource-bundle>
+	<security-role-ref>
+		<role-name>CMS Administrator</role-name>
+	</security-role-ref>
+</portlet>	
+<!-- END: PORTLET MAP BUILDER -->
