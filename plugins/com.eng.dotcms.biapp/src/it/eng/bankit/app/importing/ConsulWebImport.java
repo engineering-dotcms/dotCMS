@@ -8,6 +8,8 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.lucene.queryParser.ParseException;
 
 import junit.framework.Assert;
@@ -27,6 +29,7 @@ import com.dotmarketing.portlets.languagesmanager.model.Language;
 import com.dotmarketing.portlets.structure.factories.RelationshipFactory;
 import com.dotmarketing.portlets.structure.model.Relationship;
 import com.dotmarketing.portlets.structure.model.Structure;
+import com.dotmarketing.util.FileUtil;
 import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.UtilMethods;
 import com.dotmarketing.viewtools.content.util.ContentUtils;
@@ -88,14 +91,14 @@ public class ConsulWebImport extends AbstractImport {
 		Contentlet link = null;
 		String title = ( language.getLanguageCode().equalsIgnoreCase( "it" ) ? "Elenco" : "List" );
 		if ( updateMode ) {
-			allegato = checkoutAllegato( folder, language );
+			allegato = checkoutAllegato( folder, language , file );
 			if ( fileAsserWorkArround && allegato != null && !language.equals( languageApi.getDefaultLanguage() ) ) {
 				/*
 				 * Workarround per aggirare il problema di disponibilità
 				 * dell'url finale di un fileasset multilanguage con file
 				 * differenti
 				 */
-				Contentlet allegatoPezzotto = checkoutAllegatoPezzotto( folder );
+				Contentlet allegatoPezzotto = checkoutAllegatoPezzotto( folder , file );
 				if ( allegatoPezzotto != null ) {
 					updateFileAsset( allegatoPezzotto, title, file, folder );
 					allegatoPezzotto = persistContentlet( allegatoPezzotto, "consulWeb_FileAsset_" + language.getId() );
@@ -117,17 +120,14 @@ public class ConsulWebImport extends AbstractImport {
 				allegatoPezzotto = persistContentlet( allegatoPezzotto, "consulWeb_FileAsset_" + language.getId() );
 			}
 		}
-
 		updateFileAsset( allegato, title, file, folder );
 		allegato = persistContentlet( allegato, "consulWeb_FileAsset_" + language.getId() );
-
 		if ( updateMode ) {
 			link = checkoutLink( folder, language );
 		}
 		if ( link == null ) {
 			link = createContentlet( stLink, language );
 		}
-
 		updateLinkAllegato( link, allegato );
 		link = persistContentlet( link, "consulWeb_Link" );
 		Contentlet dettaglio = getContentlet( stDettaglio, language, folder );
@@ -160,22 +160,24 @@ public class ConsulWebImport extends AbstractImport {
 		contentletAllegato.setProperty( FileAssetAPI.HOST_FOLDER_FIELD, folder.getInode() );
 	}
 
-	private Contentlet checkoutAllegato( Folder folder, Language lang ) throws DotContentletStateException, DotDataException, DotSecurityException, ParseException {
+	private Contentlet checkoutAllegato( Folder folder, Language lang , File file) throws DotContentletStateException, DotDataException, DotSecurityException, ParseException {
 		StringBuilder query = new StringBuilder();
 		query.append( "+structureName:" );
 		query.append( allegatoStructureName );
 		query.append( " +languageId:" );
 		query.append( lang.getId() );
+	//	String extens = FilenameUtils.getExtension(file.getName() );
 		if ( lang.getId() == languageApi.getDefaultLanguage().getId() ) {
-			query.append( " -" + allegatoStructureName + ".fileName:*_en.pdf" );
+			query.append( " -" + allegatoStructureName + ".fileName:"+file.getName() );
 		} else {
-			query.append( " +" + allegatoStructureName + ".fileName:*_en.pdf" );
+			query.append( " +" + allegatoStructureName + ".fileName:"+file.getName() );
 		}
 		query.append( " +conFolder:" );
 		query.append( folder.getInode() );
 		query.append( " +conHost:" );
 		query.append( host.getIdentifier() );
 		query.append( " +deleted:false +working:true +live:true" );
+		System.out.println(  " QUERY CONSULWEB checkoutAllegato  " + query );
 		List<Contentlet> contents = contentletApi.checkoutWithQuery( query.toString(), user, true );
 		if ( !contents.isEmpty() ) {
 			return contents.get( 0 );
@@ -183,18 +185,22 @@ public class ConsulWebImport extends AbstractImport {
 		return null;
 	}
 
-	private Contentlet checkoutAllegatoPezzotto( Folder folder ) throws DotContentletStateException, DotDataException, DotSecurityException, ParseException {
+	private Contentlet checkoutAllegatoPezzotto( Folder folder , File file) throws DotContentletStateException, DotDataException, DotSecurityException, ParseException {
 		StringBuilder query = new StringBuilder();
 		query.append( "+structureName:" );
 		query.append( allegatoStructureName );
 		query.append( " +languageId:" );
 		query.append( languageApi.getDefaultLanguage().getId() );
-		query.append( " +" + allegatoStructureName + ".fileName:*_en.pdf" );
+//		query.append( " +" + allegatoStructureName + ".fileName:*_en.pdf" );
+		query.append( " +" + allegatoStructureName + ".fileName:"+file.getName()  );
+	//	+file.getName() 
 		query.append( " +conFolder:" );
 		query.append( folder.getInode() );
 		query.append( " +conHost:" );
 		query.append( host.getIdentifier() );
 		query.append( " +deleted:false +working:true +live:true" );
+		System.out.println(  " QUERY CONSULWEB checkoutAllegatoPezzotto " + query );
+		
 		List<Contentlet> contents = contentletApi.checkoutWithQuery( query.toString(), user, true );
 		if ( !contents.isEmpty() ) {
 			return contents.get( 0 );

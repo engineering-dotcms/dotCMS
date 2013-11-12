@@ -3,6 +3,7 @@ package it.bankit.website.filter;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.servlet.Filter;
@@ -28,7 +29,6 @@ import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.filters.CMSFilter;
 import com.dotmarketing.portlets.contentlet.business.ContentletAPI;
 import com.dotmarketing.portlets.contentlet.model.Contentlet;
-import com.dotmarketing.portlets.fileassets.business.FileAsset;
 import com.dotmarketing.portlets.folders.model.Folder;
 import com.dotmarketing.portlets.structure.model.Structure;
 import com.dotmarketing.util.Config;
@@ -43,7 +43,8 @@ public class LinkMapFilter implements Filter {
 	private UserWebAPI wuserAPI;
 	private HostWebAPI whostAPI;
 
-
+   private  Set<String> exList=null;
+	   
 	public void destroy() {
 	}
 
@@ -53,6 +54,7 @@ public class LinkMapFilter implements Filter {
 		wuserAPI = WebAPILocator.getUserWebAPI();
 		whostAPI = WebAPILocator.getHostWebAPI();
 		StructureCache.clearURLMasterPattern();
+	//	exList = buildExcludeList();
 
 	}
 
@@ -150,13 +152,16 @@ public class LinkMapFilter implements Filter {
 							if( lType.equalsIgnoreCase("I") ){
 								extPageURI = contentlet.getStringProperty("linkInterno");
 							}else {
+								String allegatoId = null;
 								//Logger.info(this.getClass().getName() , "Sono ELSE" + extPageURI);
-								FileAsset fa =APILocator.getFileAssetAPI().fromContentlet(contentlet);
-								String identifierFA = fa.getIdentifier();
-								System.out.println( "identifierFA " + identifierFA  );
-								
-								extPageURI = APILocator.getIdentifierAPI().find(identifierFA ).getURI();
-								System.out.println( "File da recuperare  " + identifierFA  );
+								if (UtilMethods.isSet(contentlet.getStringProperty("allegatoId"))) {
+									allegatoId = contentlet.getStringProperty("allegatoId");
+								} else if (UtilMethods.isSet(contentlet.getStringProperty("allegato"))) {
+									allegatoId = contentlet.getStringProperty("allegato");
+								}
+								System.out.println( "identifierFA " + allegatoId  );
+								extPageURI = APILocator.getIdentifierAPI().find(allegatoId ).getURI();
+								System.out.println( "File da recuperare  " + extPageURI  );
 								request.getRequestDispatcher(extPageURI).forward(request, response);
 							}
 							return;
@@ -189,7 +194,9 @@ public class LinkMapFilter implements Filter {
 	private  boolean excludeURI(String uri) {
 		boolean exclude = CMSFilter.excludeURI(uri);
 		if( !exclude ){
-			if (uri.trim().endsWith("/testLB.html" )  ){
+			String url = uri.trim();		
+			if (url.endsWith("/testLB.html" )  || 
+					url.endsWith(".ico" ) || url.endsWith(".js" ) ){
 				exclude = true ;
 			}
 		}
@@ -237,7 +244,7 @@ public class LinkMapFilter implements Filter {
 			try {
 				queryParam.append("+(conhost:" + host.getIdentifier() + ") " );
 			} catch (Exception e) {
-				Logger.error(LinkMapFilter.class, e.getMessage() + "getQueryLinkInterno  : Unable to build host in query : ", e);
+				Logger.error(LinkMapFilter.class, e.getMessage() + "addDefaultParameterToQuery  : Unable to build host in query : ", e);
 			}
 		}
 		if(UtilMethods.isSet(session.getAttribute("com.dotmarketing.htmlpage.language"))){
@@ -246,4 +253,6 @@ public class LinkMapFilter implements Filter {
 		return queryParam.toString();
 	}
 
+	
+	  
 }

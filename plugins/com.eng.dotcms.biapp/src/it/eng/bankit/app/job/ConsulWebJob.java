@@ -137,8 +137,9 @@ public class ConsulWebJob implements StatefulJob {
 						}
 						try {
 							importTask.importFiles(fileConsulWebIta, fileConsulWebEng);
-							
-							importTask.importFiles(fileConsulWebItaCSV, fileConsulWebEngCSV);
+							if( UtilMethods.isSet(fileConsulWebItaCSV ) && UtilMethods.isSet(fileConsulWebEngCSV )){
+								importTask.importFiles(fileConsulWebItaCSV, fileConsulWebEngCSV);
+							}
 
 							if (!updateMode) {
 								importTask.removeOldContentlet();
