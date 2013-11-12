@@ -1,5 +1,5 @@
 <%@page import="com.dotcms.enterprise.LicenseUtil"%>
-<%@ include file="/html/plugins/com.dotmarketing.plugins.emergency.sender/init.jsp" %>
+<%@ include file="/html/plugins/com.eng.dotcms.sitemap/init.jsp" %>
 <%@page import="com.liferay.portal.util.WebKeys"%>
 <%@page import="com.dotmarketing.business.Layout"%>
 <%@page import="com.dotmarketing.util.UtilMethods"%>
@@ -37,7 +37,7 @@
 	
 	function refreshTool(idTab, page, urlParams){
 
-		var url = "/html/plugins/it.eng.dotcms.sitemap/"+page+".jsp?"+ urlParams;		
+		var url = "/html/plugins/com.eng.dotcms.sitemap/"+page+".jsp?"+ urlParams;		
 		
 		var myCp = dijit.byId(idTab+"-content");	
 		
