@@ -187,29 +187,29 @@ public class PollsDeployer extends PluginDeployer {
 			CronScheduledTask cronScheduledTask = new CronScheduledTask(jobName, jobGroup, jobDescription, javaClassname, new Date(), null, CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW, new HashMap<String, Object>(), cronExpression);
 			QuartzUtils.scheduleTask(cronScheduledTask);
 		}
-		//scheduled put csv job (if enable)
-		String enablePutCSV = pluginAPI.loadProperty(PLUGIN_ID, PROP_ENABLE_PUT_CSV_JOB);
-		if(Boolean.parseBoolean(enablePutCSV)){
-			String jobPutName = pluginAPI.loadProperty(PLUGIN_ID, PROP_PUT_CSV_JOB_NAME);
-			String jobPutGroup = pluginAPI.loadProperty(PLUGIN_ID, PROP_POLLS_JOB_GROUP);
-			String jobPutDescription = pluginAPI.loadProperty(PLUGIN_ID, PROP_PUT_CSV_JOB_DESCRIPTION);
-			String javaPutClassname = pluginAPI.loadProperty(PLUGIN_ID, PROP_PUT_CSV_JOB_CLASS);
-			String cronPutExpression = pluginAPI.loadProperty(PLUGIN_ID, PROP_PUT_CSV_JOB_CRON_EXP);
-			CronScheduledTask cronPutScheduledTask = new CronScheduledTask(jobPutName, jobPutGroup, jobPutDescription, javaPutClassname, new Date(), null, CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW, new HashMap<String, Object>(), cronPutExpression);
-			QuartzUtils.scheduleTask(cronPutScheduledTask);			
-		}
-		
-		//scheduled get csv job (if enable)
-		String enableGetCSV = pluginAPI.loadProperty(PLUGIN_ID, PROP_ENABLE_GET_CSV_JOB);
-		if(Boolean.parseBoolean(enableGetCSV)){
-			String jobGetName = pluginAPI.loadProperty(PLUGIN_ID, PROP_GET_CSV_JOB_NAME);
-			String jobGetGroup = pluginAPI.loadProperty(PLUGIN_ID, PROP_POLLS_JOB_GROUP);
-			String jobGetDescription = pluginAPI.loadProperty(PLUGIN_ID, PROP_GET_CSV_JOB_DESCRIPTION);
-			String javaGetClassname = pluginAPI.loadProperty(PLUGIN_ID, PROP_GET_CSV_JOB_CLASS);
-			String cronGetExpression = pluginAPI.loadProperty(PLUGIN_ID, PROP_GET_CSV_JOB_CRON_EXP);
-			CronScheduledTask cronGetScheduledTask = new CronScheduledTask(jobGetName, jobGetGroup, jobGetDescription, javaGetClassname, new Date(), null, CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW, new HashMap<String, Object>(), cronGetExpression);
-			QuartzUtils.scheduleTask(cronGetScheduledTask);
-		}
+//		//scheduled put csv job (if enable)
+//		String enablePutCSV = pluginAPI.loadProperty(PLUGIN_ID, PROP_ENABLE_PUT_CSV_JOB);
+//		if(Boolean.parseBoolean(enablePutCSV)){
+//			String jobPutName = pluginAPI.loadProperty(PLUGIN_ID, PROP_PUT_CSV_JOB_NAME);
+//			String jobPutGroup = pluginAPI.loadProperty(PLUGIN_ID, PROP_POLLS_JOB_GROUP);
+//			String jobPutDescription = pluginAPI.loadProperty(PLUGIN_ID, PROP_PUT_CSV_JOB_DESCRIPTION);
+//			String javaPutClassname = pluginAPI.loadProperty(PLUGIN_ID, PROP_PUT_CSV_JOB_CLASS);
+//			String cronPutExpression = pluginAPI.loadProperty(PLUGIN_ID, PROP_PUT_CSV_JOB_CRON_EXP);
+//			CronScheduledTask cronPutScheduledTask = new CronScheduledTask(jobPutName, jobPutGroup, jobPutDescription, javaPutClassname, new Date(), null, CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW, new HashMap<String, Object>(), cronPutExpression);
+//			QuartzUtils.scheduleTask(cronPutScheduledTask);			
+//		}
+//		
+//		//scheduled get csv job (if enable)
+//		String enableGetCSV = pluginAPI.loadProperty(PLUGIN_ID, PROP_ENABLE_GET_CSV_JOB);
+//		if(Boolean.parseBoolean(enableGetCSV)){
+//			String jobGetName = pluginAPI.loadProperty(PLUGIN_ID, PROP_GET_CSV_JOB_NAME);
+//			String jobGetGroup = pluginAPI.loadProperty(PLUGIN_ID, PROP_POLLS_JOB_GROUP);
+//			String jobGetDescription = pluginAPI.loadProperty(PLUGIN_ID, PROP_GET_CSV_JOB_DESCRIPTION);
+//			String javaGetClassname = pluginAPI.loadProperty(PLUGIN_ID, PROP_GET_CSV_JOB_CLASS);
+//			String cronGetExpression = pluginAPI.loadProperty(PLUGIN_ID, PROP_GET_CSV_JOB_CRON_EXP);
+//			CronScheduledTask cronGetScheduledTask = new CronScheduledTask(jobGetName, jobGetGroup, jobGetDescription, javaGetClassname, new Date(), null, CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW, new HashMap<String, Object>(), cronGetExpression);
+//			QuartzUtils.scheduleTask(cronGetScheduledTask);
+//		}
 
 	}
 	

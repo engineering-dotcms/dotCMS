@@ -102,7 +102,6 @@ public class ConsulWebJob implements StatefulJob {
 				File fileConsulWebEngCSV = null;
 				String[] arrFileIta = filenameIt.split(";");
 				String[] arrFileEng = filenameEn.split(";");
-
 				String filenameItCSV = arrFileIta[1];
 				String filenameEnCSV = arrFileEng[1];
 				String filenameItPDF = arrFileIta[0];
@@ -197,8 +196,7 @@ public class ConsulWebJob implements StatefulJob {
 			esito.append(" e si è conclusa con successo ");
 			esito.append(DisplayUtil.printOreGiorno(endTime));
 			esito.append(" .");
-			mailer.sendMail("[SITIDOT " + localHostName
-					+ "] - Importazione ConsulWeb completata con successo",
+			mailer.sendMail("[SITIDOT " + localHostName	+ "] - Importazione ConsulWeb completata con successo",
 					DisplayUtil.printConsulWebMailBody(host.getHostname(),
 							startTime, esito.toString()));
 		} catch (Exception e) {
@@ -208,9 +206,7 @@ public class ConsulWebJob implements StatefulJob {
 
 	private void sendErrorMail(Throwable th) {
 		try {
-			String poolingMax = pluginAPI.loadProperty(
-					it.eng.bankit.deploy.IDeployConst.PLUGIN_ID,
-					it.eng.bankit.deploy.IDeployConst.CAMBI_POOLING_MAXTIME);
+			String poolingMax = pluginAPI.loadProperty(	IDeployConst.PLUGIN_ID, IDeployConst.CAMBI_POOLING_MAXTIME);
 			long poolingMaxLong = Long.parseLong(poolingMax);
 			StringBuilder esito = new StringBuilder();
 			if (th instanceof TimeoutException) {
