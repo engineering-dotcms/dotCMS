@@ -17,7 +17,7 @@
 <%@page import="java.util.Calendar"%>
 <%@page import="com.dotmarketing.util.UtilMethods"%>
 <%@ page import="com.liferay.portal.language.LanguageUtil"%>
-<%@ include file="/html/plugins/it.eng.dotcms.sitemap/init.jsp" %>
+<%@ include file="/html/plugins/com.eng.dotcms.sitemap/init.jsp" %>
 
 <%
 SitemapAPI sitemapAPI = SitemapAPI.getInstance();
