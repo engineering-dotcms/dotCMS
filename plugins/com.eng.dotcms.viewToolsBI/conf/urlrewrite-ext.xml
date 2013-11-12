@@ -44,15 +44,15 @@
 	<note>Rewrite del vecchio link di traduzione alla lingua Italiano
 	</note>
 	<condition type="query-string">LANGUAGE=it</condition>
-	<from>^(.*);internal&amp;action=_setlanguage\.action(.*)$</from>
-	<to type="redirect" last="true">$1?com.dotmarketing.htmlpage.language=1</to>
+	<from>^(.*/serv_pubblico/visite-virtuali/monetaitaliaunita)(.*);internal&amp;action=_setlanguage\.action(.*)$</from>
+	<to type="redirect" last="true">$1$2/index.html?lang=it</to>
 </rule>
 <rule>
 	<name>Traduzione Inglese path</name>
 	<note>Rewrite del vecchio link di traduzione alla lingua Inglese</note>
 	<condition type="query-string">LANGUAGE=en</condition>
-	<from>^(.*);internal&amp;action=_setlanguage\.action(.*)$</from>
-	<to type="redirect" last="true">$1?com.dotmarketing.htmlpage.language=103</to>
+	<from>^(.*/serv_pubblico/visite-virtuali/monetaitaliaunita)(.*);internal&amp;action=_setlanguage\.action(.*)$</from>
+	<to type="redirect" last="true">$1$2/index.html?lang=en</to>
 </rule>
 <rule>
 	<name>Traduzione Italiano hp</name>
@@ -76,10 +76,25 @@
 	<to type="forward" last="true">$1/homepage/rss.html?lang=$4</to>
 </rule>
 <rule>
-	<name>RSS Homepage data</name>
+	<name>RSS Homepage data- </name>
+	<note>RSS Homepage con data di partenza</note>
+	<from>^([^/]*)(/)?(rootcollection)?;internal&amp;action=rss1\.action&amp;lingua=(it|en)&amp;datada=(\d{14})$</from>
+	<to type="forward" last="true">$1/homepage/rss.html?lang=$4&amp;data=$5</to>
+</rule>
+
+<rule>
+	<name>RSS Homepage data- parametri invertiti</name>
 	<note>RSS Homepage con data di partenza</note>
 	<from>^([^/]*)(/)?(rootcollection)?;internal&amp;action=rss1\.action&amp;datada=(\d{14})&amp;lingua=(it|en)$</from>
-	<to type="forward" last="true">$1/homepage/rss.html?data=$4&amp;lang=$5</to>
+	<to type="forward" last="true">$1/homepage/rss.html?lang=$5&amp;data=$4</to>
+</rule>
+
+
+<rule>
+	<name>RSS Homepage data- senza lingua</name>
+	<note>RSS Homepage con data di partenza</note>
+	<from>^([^/]*)(/)?(rootcollection)?;internal&amp;action=rss1\.action&amp;datada=(\d{14})$</from>
+	<to type="forward" last="true">$1/homepage/rss.html?data=$4</to>
 </rule>
 <rule>
 	<name>RSS</name>
@@ -87,6 +102,15 @@
 	<from>^(.*)(/)?;internal&amp;action=rss1\.action&amp;lingua=(it|en)$</from>
 	<to type="forward" last="true">$1/rss.html?lang=$3</to>
 </rule>
+
+<rule>
+	<name>RSS data - parametri invertiti</name>
+	<note>RSS con data parametri invertiti</note>
+	<from>^(.*)(/)?;internal&amp;action=rss1\.action&amp;lingua=(it|en)&amp;datada=(\d{14})$</from>
+	<to type="forward" last="true">$1/rss.html?lang=$3&amp;data=$4</to>
+</rule>
+
+
 <rule>
 	<name>RSS data</name>
 	<note>RSS con data</note>
