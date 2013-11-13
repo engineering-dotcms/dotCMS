@@ -289,30 +289,26 @@ public class ContentletPreHook extends ContentletAPIPreHookAbstractImp {
 		return (contentlet != null && contentlet.getStructure().getVelocityVarName().equalsIgnoreCase(structureName));
 	}
 
-	// private boolean existFieldInStructure(Contentlet c, String
-	// fieldVelocityVarName) {
-	// Field f = c.getStructure().getFieldVar(fieldVelocityVarName);
-	// return (f != null && UtilMethods.isSet(f.getInode()));
-	//
-	// }
+	
 
 	private boolean getLinkRelated(Contentlet contentlet) {
-		String q = "";
-		q = "+structureName:Link +Link.allegatoId:" + contentlet.getIdentifier();
-		System.out.println("Query Lucene: " + q);
-		List<Contentlet> related;
-		try {
-			related = APILocator.getContentletAPI().search(q, -1, 0, null, APILocator.getUserAPI().getSystemUser(), false);
-			System.out.println("TROVATI LINK RELAZIONATI");
-			if (related.size() > 0) {
-				return true;
-			} else {
-				return false;
-			}
-		} catch (Exception e) {
-			LOG.error(e.getMessage());
-			return false;
-		}
+//		String q = "";
+//		q = "+structureName:Link +Link.allegatoId:" + contentlet.getIdentifier();
+//		System.out.println("Query Lucene: " + q);
+//		List<Contentlet> related;
+//		try {
+//			related = APILocator.getContentletAPI().search(q, -1, 0, null, APILocator.getUserAPI().getSystemUser(), false);
+//			System.out.println("TROVATI LINK RELAZIONATI");
+//			if (related.size() > 0) {
+//				return true;
+//			} else {
+//				return false;
+//			}
+//		} catch (Exception e) {
+//			LOG.error(e.getMessage());
+//			return false;
+//		}
+		return false;
 	}
 
 	@Override

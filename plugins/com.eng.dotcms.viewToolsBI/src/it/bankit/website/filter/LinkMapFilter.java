@@ -162,7 +162,9 @@ public class LinkMapFilter implements Filter {
 								System.out.println( "identifierFA " + allegatoId  );
 								extPageURI = APILocator.getIdentifierAPI().find(allegatoId ).getURI();
 								System.out.println( "File da recuperare  " + extPageURI  );
+								//response.sendRedirect(arg0)
 								request.getRequestDispatcher(extPageURI).forward(request, response);
+								return;
 							}
 							return;
 
@@ -196,7 +198,8 @@ public class LinkMapFilter implements Filter {
 		if( !exclude ){
 			String url = uri.trim();		
 			if (url.endsWith("/testLB.html" )  || 
-					url.endsWith(".ico" ) || url.endsWith(".js" ) ){
+					url.endsWith(".ico" ) || url.endsWith(".js" )  || url.endsWith(".css" ) 
+					|| url.endsWith(".gif" )  ){
 				exclude = true ;
 			}
 		}
