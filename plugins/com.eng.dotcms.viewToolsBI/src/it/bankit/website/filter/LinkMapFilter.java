@@ -162,8 +162,8 @@ public class LinkMapFilter implements Filter {
 								System.out.println( "identifierFA " + allegatoId  );
 								extPageURI = APILocator.getIdentifierAPI().find(allegatoId ).getURI();
 								System.out.println( "File da recuperare  " + extPageURI  );
-								//response.sendRedirect(arg0)
-								request.getRequestDispatcher(extPageURI).forward(request, response);
+								response.sendRedirect(extPageURI);
+//								request.getRequestDispatcher(extPageURI).forward(request, response);
 								return;
 							}
 							return;
