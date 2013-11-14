@@ -59,7 +59,7 @@ public class RemotePublisher {
 			poolingWarningLong = Long.parseLong( poolingWarning ) ;
 			poolingMaxLong = Long.parseLong( poolingMax ) ;
 		}catch (Exception e) {
-			e.printStackTrace();
+		//	e.printStackTrace();
 			poolingIntervalLong = 60000;
 		    poolingWarningLong = 300000;
 			poolingMaxLong = 1800000;

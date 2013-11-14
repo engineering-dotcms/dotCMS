@@ -153,17 +153,13 @@ public class LinkMapFilter implements Filter {
 								extPageURI = contentlet.getStringProperty("linkInterno");
 							}else {
 								String allegatoId = null;
-								//Logger.info(this.getClass().getName() , "Sono ELSE" + extPageURI);
 								if (UtilMethods.isSet(contentlet.getStringProperty("allegatoId"))) {
 									allegatoId = contentlet.getStringProperty("allegatoId");
 								} else if (UtilMethods.isSet(contentlet.getStringProperty("allegato"))) {
 									allegatoId = contentlet.getStringProperty("allegato");
 								}
-								System.out.println( "identifierFA " + allegatoId  );
 								extPageURI = APILocator.getIdentifierAPI().find(allegatoId ).getURI();
-								System.out.println( "File da recuperare  " + extPageURI  );
 								response.sendRedirect(extPageURI);
-//								request.getRequestDispatcher(extPageURI).forward(request, response);
 								return;
 							}
 							return;
@@ -199,7 +195,7 @@ public class LinkMapFilter implements Filter {
 			String url = uri.trim();		
 			if (url.endsWith("/testLB.html" )  || 
 					url.endsWith(".ico" ) || url.endsWith(".js" )  || url.endsWith(".css" ) 
-					|| url.endsWith(".gif" )  ){
+					|| url.endsWith(".gif" )  || url.endsWith(".jpg" ) || url.endsWith(".jpeg" )){
 				exclude = true ;
 			}
 		}
@@ -220,16 +216,12 @@ public class LinkMapFilter implements Filter {
 
 
 	private String getQueryLinkInterno(	HttpServletRequest request  ,  String identifier , String uri , Folder folder , Host host ){
-
-		//Logger.info(this.getClass(), "[INIT]getQueryLinkInterno -  Verifico se è un link interno ( di tipo A o I )" + identifier  );
 		HttpSession session = request.getSession();
 		StringBuilder query = null;
 		query = new StringBuilder();
 		query.append("+structureName:Link  +Link.linkType:*A*  +Link.identificativo:" + uri + " +Link.idRemoto:*True*  +deleted:false ");
 		String params = addDefaultParameterToQuery(session, host);
 		query.append(params);
-		//Logger.info(this.getClass(), "[END]getQueryLinkInterno query: " + query.toString()   );
-		Logger.info(this.getClass(), "[END]getQueryLinkInterno query: " + query.toString()   );
 		return query.toString();
 
 	}

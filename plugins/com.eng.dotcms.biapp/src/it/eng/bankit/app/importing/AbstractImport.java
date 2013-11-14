@@ -104,7 +104,6 @@ public abstract class AbstractImport {
 		contentlet.setHost( host.getIdentifier() );
 		contentlet.setLastReview( data );
 		contentlet.setDateProperty( "timeCreated", data );
-
 		return contentlet;
 	}
 
@@ -168,16 +167,16 @@ public abstract class AbstractImport {
 			contentletApi.unlock( returnContentlet, insertUser, true );
 		}
 
-		if ( returnContentlet.getStructure().getVelocityVarName().equalsIgnoreCase( "Link" ) && returnContentlet.getLanguageId() != languageApi.getDefaultLanguage().getId() ) {
-			try {// Pezzotto per gestire errore pubblicazione eventuale x
-				// linguagio non di default
-				contentletApi.publish( returnContentlet, insertUser, true );
-			} catch ( Exception e ) {
-				Logger.warn( this.getClass(), "Pubblicazione Link con errore gestito in language non di default ", e );
-			}
-		} else {			
+//		if ( returnContentlet.getStructure().getVelocityVarName().equalsIgnoreCase( "Link" ) && returnContentlet.getLanguageId() != languageApi.getDefaultLanguage().getId() ) {
+//			try {// Pezzotto per gestire errore pubblicazione eventuale x
+//				// linguagio non di default
+//				contentletApi.publish( returnContentlet, insertUser, true );
+//			} catch ( Exception e ) {
+//				Logger.warn( this.getClass(), "Pubblicazione Link con errore gestito in language non di default ", e );
+//			}
+//		} else {			
 			contentletApi.publish( returnContentlet, insertUser , true );
-		}
+//		}
 
 		String newIdentifier = returnContentlet.getIdentifier();
 		if ( !UtilMethods.isSet( identifier ) && UtilMethods.isSet( newIdentifier ) ) {

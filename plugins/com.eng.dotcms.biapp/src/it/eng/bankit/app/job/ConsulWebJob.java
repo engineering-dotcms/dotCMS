@@ -13,6 +13,9 @@ import java.util.concurrent.TimeoutException;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.StatefulJob;
+
+import bsh.util.Util;
+
 import com.dotmarketing.beans.Host;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.business.UserAPI;
@@ -102,10 +105,18 @@ public class ConsulWebJob implements StatefulJob {
 				File fileConsulWebEngCSV = null;
 				String[] arrFileIta = filenameIt.split(";");
 				String[] arrFileEng = filenameEn.split(";");
-				String filenameItCSV = arrFileIta[1];
-				String filenameEnCSV = arrFileEng[1];
 				String filenameItPDF = arrFileIta[0];
 				String filenameEnPDF = arrFileEng[0];
+				String filenameItCSV = "";
+				String filenameEnCSV = "";
+				System.out.println(ConsulWebJob.class + " filenameItPDF " + filenameItPDF );
+				System.out.println(ConsulWebJob.class + " filenameEnPDF " + filenameEnPDF );
+				if( arrFileIta != null && arrFileIta.length == 2 ){
+					filenameItCSV = arrFileIta[1];
+					filenameEnCSV = arrFileEng[1];
+					System.out.println(ConsulWebJob.class + " filenameItCSV " + filenameItCSV );
+					System.out.println(ConsulWebJob.class + " filenameEnCSV " + filenameEnCSV );
+				}
 
 				boolean checkDir = checkDirectory(directory);
 				if (checkDir) {
@@ -117,17 +128,16 @@ public class ConsulWebJob implements StatefulJob {
 						} else if (fileName.equals(filenameItPDF)) {
 							fileConsulWebIta = file;
 						}
-						else if (fileName.equals(filenameItCSV)) {
+						else if (UtilMethods.isSet(filenameItCSV)  &&  fileName.equals(filenameItCSV)) {
 							fileConsulWebItaCSV = file;
 						}
-						else if (fileName.equals(filenameEnCSV)) {
+						else if (UtilMethods.isSet(filenameEnCSV)  &&  fileName.equals(filenameEnCSV)) {
 							fileConsulWebEngCSV = file;
 						}
 					}
 					String destinationPath = pluginAPI.loadProperty( IDeployConst.PLUGIN_ID, "consWeb.path").trim();
 
-					if (fileConsulWebIta != null && fileConsulWebEng != null
-							&& UtilMethods.isSet(destinationPath)) {
+					if (fileConsulWebIta != null && fileConsulWebEng != null && UtilMethods.isSet(destinationPath)) {
 						ConsulWebImport importTask = new ConsulWebImport(user,	host);
 						importTask.setRemotePublication(remotePublishing);
 						importTask.setUpdateMode(updateMode);
@@ -136,16 +146,14 @@ public class ConsulWebJob implements StatefulJob {
 							importTask.backupOldContentlet();
 						}
 						try {
-							importTask.importFiles(fileConsulWebIta, fileConsulWebEng);
-							if( UtilMethods.isSet(fileConsulWebItaCSV ) && UtilMethods.isSet(fileConsulWebEngCSV )){
-								importTask.importFiles(fileConsulWebItaCSV, fileConsulWebEngCSV);
-							}
-
-							if (!updateMode) {
+							importTask.importFiles(fileConsulWebIta, fileConsulWebEng , fileConsulWebItaCSV, fileConsulWebEngCSV );
+ 							if (!updateMode) {
 								importTask.removeOldContentlet();
 							}
 							fileConsulWebIta.delete();
 							fileConsulWebEng.delete();
+							if(fileConsulWebItaCSV != null  )
+							  fileConsulWebItaCSV.delete(); 
 							endTime = new Date();
 							sendOkMail();
 							Logger.info(ConsulWebJob.class, "Job di importazione cambi terminato con successo");

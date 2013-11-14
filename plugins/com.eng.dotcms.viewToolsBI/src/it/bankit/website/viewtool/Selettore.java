@@ -192,10 +192,11 @@ public class Selettore {
 
 					} else {
 
-						if (link.getStringProperty("identificativo") != null && !"".equals(link.getStringProperty("identificativo"))) {
-							href = path + "/" + link.getStringProperty("identificativo");
+					//	if (link.getStringProperty("identificativo") != null && !"".equals(link.getStringProperty("identificativo"))) {
+						//	href = path + "/" + link.getStringProperty("identificativo");
+						   href =  link.getStringProperty("linkEsterno");
 							src = ESTERNO;
-						}
+					//	}
 					}
 
 					if (!"".equals(href)) {
@@ -400,6 +401,192 @@ public class Selettore {
 		boolean merge = nullList.addAll(orderedList);
 
 		return nullList;
+
+	}
+	
+	
+	
+	
+	public String getLinksByCategory(String path, String languageID, String hostId, String mode) throws Exception {
+
+		StringBuffer stringbuf = new StringBuffer("");		
+		try{
+			User user = APILocator.getUserAPI().getSystemUser();
+			Contentlet dettaglio;
+			String sortOrder = "Link.dataEmanazione desc , Link.sortOrder1 asc";
+			String folderTranslation = "";
+
+			if (UtilMethods.isSet(path) && !path.equals("/")) {
+				String cp = convertPath(path);
+				folderTranslation = BankitCache.getInstance().getStringKey(langAPI.getLanguage(languageID), cp);
+			}
+
+			String dettaglioQuery = "";
+			dettaglioQuery = "+StructureName:Dettaglio +languageId:" + languageID + " +parentPath:" + path + "/";
+			List<Contentlet> dettagli = APILocator.getContentletAPI().search(dettaglioQuery, -1, 0, "Dettaglio.dataEmanazione desc", user, false);
+
+			if (dettagli.size() > 0) {
+				dettaglio = (Contentlet) dettagli.get(0);
+				if (dettaglio.getStringProperty("orderType") != null && !"".equals(dettaglio.getStringProperty("orderType"))) {
+					sortOrder = su.generateLuceneSortOrder(dettaglio.getStringProperty("orderType"), "Link");
+				}
+			}
+
+
+			if (!folderTranslation.equals("")) {
+				String q = "";
+				q = "+StructureName:Link +languageId:" + languageID + " +" + mode + ":true +path:" + path + "/*";
+				List<Contentlet> linksList = APILocator.getContentletAPI().search(q, -1, 0, sortOrder, APILocator.getUserAPI().getSystemUser(), false);
+
+				String qLinkSemplice = "";
+				qLinkSemplice = "+StructureName:Linksemplice +languageId:" + languageID + " +live:true +parentPath:" + path + "/";
+
+				List<Contentlet> linksSempliceList = APILocator.getContentletAPI().search(qLinkSemplice, -1, 0, "modDate desc", user, false);
+
+				stringbuf.append("<div id=\"dt_" + folderTranslation + "\">");
+				stringbuf.append("<div class=\"titolo\"><h3>" + folderTranslation + "</h3></div>");
+				stringbuf.append("<ul>");
+				nullLast(linksList);
+
+				for (Contentlet link : linksList) {
+
+					String titolo;
+					String sommario = "";
+					String href = "";
+					String type = "";
+					String labelType = "";
+					String size = "";
+					String allegatoId = "";
+					String src = null;
+					String ms = "";
+
+					if (UtilMethods.isSet(link.getStringProperty("titoloLungo"))) {
+						titolo = link.getStringProperty("titoloLungo");
+					} else {
+						titolo = link.getStringProperty("titolo");
+					}
+					String mostraS =link.getStringProperty("mostraSommario");
+					if (UtilMethods.isSet( mostraS )) {
+						ms = mostraS;
+						if (link.getStringProperty("sommario") != null) {
+							sommario = link.getStringProperty("sommario");
+						}	
+					}
+
+					String linkType = link.getStringProperty("linkType");
+
+					if ("A".equals(linkType)) {
+						Contentlet allegatoDettaglio;
+
+						if (UtilMethods.isSet(link.getStringProperty("allegatoId"))) {
+							allegatoId = link.getStringProperty("allegatoId");
+						} else if (UtilMethods.isSet(link.getStringProperty("allegato"))) {
+							allegatoId = link.getStringProperty("allegato");
+						}
+
+						String queryForAllegatoDettaglio = "";
+
+						if (allegatoId != null && !"".equals(allegatoId)) {
+
+							queryForAllegatoDettaglio = "+identifier:" + allegatoId + " +languageId:" + languageID;
+							List<Contentlet> allegatoList = APILocator.getContentletAPI().search( queryForAllegatoDettaglio, -1, 0, null, user, false);
+
+							if (allegatoList.size() > 0) {
+								allegatoDettaglio = allegatoList.get(0);
+								File file = allegatoDettaglio.getBinary("fileAsset");
+								size = FileSizeUtil.getsize(file);
+								type = file.getName().substring(file.getName().lastIndexOf("."));
+								labelType = assignType(type);
+								String id = allegatoDettaglio.getIdentifier();
+								Identifier i = APILocator.getIdentifierAPI().loadFromCache(id);
+								if (i == null) {
+									i = APILocator.getIdentifierAPI().find(id);
+								}
+
+								src = assignIcon(type);
+								if (src.equals(WMV)) {
+									href = i.getPath() + "internal&action=video.action";
+								} else {
+									href = i.getPath();
+								}
+
+							}
+
+						}
+
+					} else if ("I".equals(linkType)) {
+						String li = link.getStringProperty("linkInterno");
+
+						if (li != null && !"".equals(li) && li.endsWith(".html")) {
+
+							HTMLPage linkedPage = pageAPI.loadPageByPath(li, hostId);
+							Template linkedPageTemplate = null;
+
+							if(UtilMethods.isSet(linkedPage) && linkedPage.isLive()){
+								linkedPageTemplate = templateApi.findLiveTemplate(linkedPage.getTemplateId(), user, true);
+
+								Folder folder = folderAPI.findFolderByPath(li.substring(0, li.lastIndexOf("/")), hostId, user, true);
+								href = li.substring(0, li.lastIndexOf("/") + 1);
+
+								if(UtilMethods.isSet(linkedPageTemplate) && linkedPageTemplate.getTitle().toLowerCase().contains("video")){							
+									src = WMVICON;
+								} else if (folderAPI.findMenuItems(folder, user, true).size() > 0) {
+									src = FOLDERICON;								
+								} else {
+									src = PAGEICON;
+								}
+							}
+						}
+
+					} else {
+
+					//	if (link.getStringProperty("identificativo") != null && !"".equals(link.getStringProperty("identificativo"))) {
+						//	href = path + "/" + link.getStringProperty("identificativo");
+						   href =  link.getStringProperty("linkEsterno");
+							src = ESTERNO;
+					//	}
+					}
+
+					if (!"".equals(href)) {
+						stringbuf.append("<li>");
+						stringbuf.append("<a href=\"" + href + "\"><img src=\"" + src + "\" class=\"ico\" width=\"14\" height=\"14\">" + titolo + "</a> " + buildSpan(link, size, labelType));
+						if (!"".equals(ms) && !"".equals(sommario)) {
+							stringbuf.append("<br/>" + sommario);
+						}
+						stringbuf.append("</li>");
+					}
+
+				}
+
+				Contentlet linkSemplice = null;
+				String linkSempliceType = "";
+				if (linksSempliceList.size() > 0){
+					linkSemplice = linksSempliceList.get(0);
+					linkSempliceType = linkSemplice.getStringProperty("linkType");
+				}
+
+				if (linkSemplice != null && (!"".equals(linkSempliceType) && "I".equals(linkSempliceType))) {
+
+					String linkSempHref = "";
+					if("I".equals(linkSempliceType)){
+						linkSempHref = linkSemplice.getStringProperty("linkInterno");
+					} else {
+						linkSempHref = path;
+					}
+
+					String titolo = linkSemplice.getStringProperty("titolo");
+					stringbuf.append("<li class=\"noborder\"><a href=\"" + linkSempHref + "\" class=\"altri\">" + titolo + "</a></li>");
+				}
+
+				stringbuf.append("</ul>");
+				stringbuf.append("</div>");
+
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return stringbuf.toString();
 
 	}
 

@@ -72,8 +72,7 @@ public class SiteSearchAction extends DispatchAction {
 	}
 
 	public ActionForward advanced(ActionMapping mapping, ActionForm lf, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		Logger.warn(SiteSearchAction.class, "[INIT ] method advanced "    );
-
+		Logger.warn(SiteSearchAction.class, "[INIT ] method advanced ");
 		int nPage;
 
 		if (UtilMethods.isSet(ParamUtil.get(request, "cerca", ""))) {
@@ -82,8 +81,7 @@ public class SiteSearchAction extends DispatchAction {
 			query = sanitizeAndDecode(query);
 			
 			String lingua = "";
-			lingua = request.getParameter("lingua");
-			 
+			lingua = request.getParameter("lingua");			 
 			String page = ParamUtil.get(request, "curpage", "").trim();
 			
 			if (Integer.parseInt(page) == 0 || Integer.parseInt(page) == 1) {
@@ -166,9 +164,8 @@ public class SiteSearchAction extends DispatchAction {
 		Logger.info(SiteSearchAction.class, "[INIT] method search " );		
  		String indexName = "";
 		int nPage;
-
-		if (UtilMethods.isSet(ParamUtil.get(request, "cerca", ""))) {
-			String query = ParamUtil.get(request, "cerca", "");
+		String query = ParamUtil.get(request, "cerca", "");		
+		if (UtilMethods.isSet( query )) {
 			String page = ParamUtil.get(request, "curpage", "").trim();
 			int pg = 0 ;
 			try{

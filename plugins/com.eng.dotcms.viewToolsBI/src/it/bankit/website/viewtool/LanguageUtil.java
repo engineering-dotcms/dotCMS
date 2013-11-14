@@ -45,10 +45,10 @@ public class LanguageUtil implements ViewTool {
 	
 	public String getPathTranslation(String path, String languageId ) {
 		if (UtilMethods.isSet(path) && !path.equals( "/" )) {
-			LOG.info( this.getClass() + ": getPathTranslation ->  path "+path+ " languageId  " +  languageId );
+//			LOG.info( this.getClass() + ": getPathTranslation ->  path "+path+ " languageId  " +  languageId );
 			String cp = convertPath(path);
 			Language lang = getLanguage(languageId );
-			LOG.info( this.getClass() + ": getPathTranslation ->  lang recuperato: "+lang.getLanguage() );
+//			LOG.info( this.getClass() + ": getPathTranslation ->  lang recuperato: "+lang.getLanguage() );
 			
 			return BankitCache.getInstance().getStringKey(lang, cp);
 		}
