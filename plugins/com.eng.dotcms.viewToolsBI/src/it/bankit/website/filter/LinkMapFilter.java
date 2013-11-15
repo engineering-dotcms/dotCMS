@@ -159,6 +159,7 @@ public class LinkMapFilter implements Filter {
 									allegatoId = contentlet.getStringProperty("allegato");
 								}
 								extPageURI = APILocator.getIdentifierAPI().find(allegatoId ).getURI();
+								Logger.info(this.getClass().getName() , "Trovato un link con ALIAS "+ identifier +"  -- redirigo a " + extPageURI);
 								response.sendRedirect(extPageURI);
 								return;
 							}

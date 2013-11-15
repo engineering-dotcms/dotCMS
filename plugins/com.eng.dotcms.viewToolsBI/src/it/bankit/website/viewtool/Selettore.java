@@ -411,12 +411,11 @@ public class Selettore {
 	
 	
 	public String getLinksByCategory(String path,String category,  String languageID, String hostId, String mode) throws Exception {
-        System.out.println( "getLinksByCategory  ");
-		StringBuffer stringbuf = new StringBuffer("");		
+       StringBuffer stringbuf = new StringBuffer("");		
 		try{
 			User user = APILocator.getUserAPI().getSystemUser();
 			Contentlet dettaglio;
-			String sortOrder = "Link.dataEmanazione desc , Link.sortOrder1 asc";
+			String sortOrder = "Link.dataEmanazione desc , Link.sortOrder1 asc, Link.titolo";
 			String folderTranslation = "";
 
 			if (UtilMethods.isSet(path) && !path.equals("/")) {
@@ -436,9 +435,6 @@ public class Selettore {
 			}else {
 			  sortOrder = su.generateLuceneSortOrder("-D#T", "Link");
 			}
-			System.out.println( "category  key " + category );
-			
-			System.out.println( "sortOrder " + sortOrder  );
 			
 			if (!folderTranslation.equals("")) {
 				List<Contentlet> linksList = null;
@@ -449,11 +445,8 @@ public class Selettore {
 					List<Category> cats = new ArrayList<Category>();
 					cats.add(cat);
 					
-					linksList = APILocator.getContentletAPI().find(cats, Long.parseLong(languageID), true,  "modDate desc", user, true);
-					List<Contentlet>  linksListfalse = APILocator.getContentletAPI().find(cats, Long.parseLong(languageID), true, "modDate desc", user, false);
-					System.out.println(  " Lista linksListfalse " + linksListfalse );
-					System.out.println(  " Lista link " + linksList );
-				}
+					linksList = APILocator.getContentletAPI().find(cats, Long.parseLong(languageID), true,  sortOrder , user, true);
+	 			}
 //				String q = "";
 //				q = "+StructureName:Link +languageId:" + languageID + " +" + mode + ":true +path:" + path + "/*";
 				//List<Contentlet> linksList = APILocator.getContentletAPI().search(q, -1, 0, sortOrder, APILocator.getUserAPI().getSystemUser(), false);

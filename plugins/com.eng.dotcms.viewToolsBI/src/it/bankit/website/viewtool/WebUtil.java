@@ -6,6 +6,7 @@ import it.bankit.website.util.AssetsComparator;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -410,5 +411,13 @@ public class WebUtil implements ViewTool {
 			return null;
 		}
 	}
-
+	
+	public String encode(String query, String encoding) {
+		try {
+			return URLEncoder.encode(query, encoding);
+		} catch (UnsupportedEncodingException e) {
+			Logger.warn(getClass(), "The encoding has failed: " + e.getMessage());
+			return query;
+		}
+	}
 }
