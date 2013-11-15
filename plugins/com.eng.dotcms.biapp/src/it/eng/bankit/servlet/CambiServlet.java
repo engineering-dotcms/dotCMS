@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.dotmarketing.beans.Host;
 import com.dotmarketing.business.APILocator;
+import com.dotmarketing.business.Role;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.plugin.business.PluginAPI;
@@ -149,7 +150,8 @@ public class CambiServlet extends HttpServlet {
 			try{
 				usr = APILocator.getUserAPI().loadUserById(userIdParameter);
 				String roleEnabled = System.getProperty(IDeployConst.USR_CAMBI_ROLE);
-				boolean isInRole= APILocator.getRoleAPI().doesUserHaveRole(usr, roleEnabled );				
+				Role roleOBC = APILocator.getRoleAPI().findRoleByName(roleEnabled , null );
+				boolean isInRole= APILocator.getRoleAPI().doesUserHaveRole(usr, roleOBC );				
 				if( !isInRole ){
 					Logger.error( CambiServlet.class, "Utente "+ USER_PARAMETER+" non ha il ruolo per inserire i cambi " );
 					out.print( IMPORT_ERROR_MSG );
