@@ -2,7 +2,7 @@
 <form-bean name="MoneteSearchForm" type="it.bankit.website.struts.MoneteSeachForm"></form-bean>
 
 <action path="/searchAction" type="it.bankit.website.struts.SiteSearchAction" name="SearchForm" scope="request" input="/homepage/search/simplesearch.html" validate="true" parameter="dispatch">
-     <forward name="normalSearchPage" path="/homepage/search/simplesearch.html" />
+     <forward name="normalSearchPage" path="/homepage/search/simplesearch.html" redirect="true" />
 </action>
 <action path="/monetaSearchAction" type="it.bankit.website.struts.MoneteSiteSearchAction" name="MoneteSearchForm" scope="request" input="/serv_pubblico/visite-virtuali/monetaitaliaunita/search/monetesimplesearch.html" validate="true" parameter="dispatch">
      <forward name="normalSearchPage" path="/serv_pubblico/visite-virtuali/monetaitaliaunita/search/monetesimplesearch.html" />
