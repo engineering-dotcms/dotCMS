@@ -10,8 +10,11 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import bsh.util.Util;
+
 import com.dotmarketing.beans.Identifier;
 import com.dotmarketing.business.APILocator;
+import com.dotmarketing.portlets.categories.model.Category;
 import com.dotmarketing.portlets.contentlet.model.Contentlet;
 import com.dotmarketing.portlets.folders.model.Folder;
 import com.dotmarketing.portlets.htmlpages.business.HTMLPageAPI;
@@ -407,8 +410,8 @@ public class Selettore {
 	
 	
 	
-	public String getLinksByCategory(String path, String languageID, String hostId, String mode) throws Exception {
-
+	public String getLinksByCategory(String path,String category,  String languageID, String hostId, String mode) throws Exception {
+        System.out.println( "getLinksByCategory  ");
 		StringBuffer stringbuf = new StringBuffer("");		
 		try{
 			User user = APILocator.getUserAPI().getSystemUser();
@@ -423,20 +426,37 @@ public class Selettore {
 
 			String dettaglioQuery = "";
 			dettaglioQuery = "+StructureName:Dettaglio +languageId:" + languageID + " +parentPath:" + path + "/";
-			List<Contentlet> dettagli = APILocator.getContentletAPI().search(dettaglioQuery, -1, 0, "Dettaglio.dataEmanazione desc", user, false);
+			List<Contentlet> dettagli = APILocator.getContentletAPI().search(dettaglioQuery, -1, 0, "Dettaglio.dataEmanazione desc ", user, false);
 
 			if (dettagli.size() > 0) {
 				dettaglio = (Contentlet) dettagli.get(0);
 				if (dettaglio.getStringProperty("orderType") != null && !"".equals(dettaglio.getStringProperty("orderType"))) {
-					sortOrder = su.generateLuceneSortOrder(dettaglio.getStringProperty("orderType"), "Link");
+					sortOrder = su.generateLuceneSortOrder("-D#T", "Link");
 				}
+			}else {
+			  sortOrder = su.generateLuceneSortOrder("-D#T", "Link");
 			}
-
-
+			System.out.println( "category  key " + category );
+			
+			System.out.println( "sortOrder " + sortOrder  );
+			
 			if (!folderTranslation.equals("")) {
-				String q = "";
-				q = "+StructureName:Link +languageId:" + languageID + " +" + mode + ":true +path:" + path + "/*";
-				List<Contentlet> linksList = APILocator.getContentletAPI().search(q, -1, 0, sortOrder, APILocator.getUserAPI().getSystemUser(), false);
+				List<Contentlet> linksList = null;
+				Category cat = APILocator.getCategoryAPI().findByKey(category, APILocator.getUserAPI().getSystemUser(), true);
+				System.out.println(  " Categoria trovata " + cat );
+			 	
+				if( cat!= null && UtilMethods.isSet(cat.getInode() ) ){
+					List<Category> cats = new ArrayList<Category>();
+					cats.add(cat);
+					
+					linksList = APILocator.getContentletAPI().find(cats, Long.parseLong(languageID), true,  "modDate desc", user, true);
+					List<Contentlet>  linksListfalse = APILocator.getContentletAPI().find(cats, Long.parseLong(languageID), true, "modDate desc", user, false);
+					System.out.println(  " Lista linksListfalse " + linksListfalse );
+					System.out.println(  " Lista link " + linksList );
+				}
+//				String q = "";
+//				q = "+StructureName:Link +languageId:" + languageID + " +" + mode + ":true +path:" + path + "/*";
+				//List<Contentlet> linksList = APILocator.getContentletAPI().search(q, -1, 0, sortOrder, APILocator.getUserAPI().getSystemUser(), false);
 
 				String qLinkSemplice = "";
 				qLinkSemplice = "+StructureName:Linksemplice +languageId:" + languageID + " +live:true +parentPath:" + path + "/";
@@ -447,9 +467,10 @@ public class Selettore {
 				stringbuf.append("<div class=\"titolo\"><h3>" + folderTranslation + "</h3></div>");
 				stringbuf.append("<ul>");
 				nullLast(linksList);
+				
 
 				for (Contentlet link : linksList) {
-
+					System.out.println(  " link  " + link );
 					String titolo;
 					String sommario = "";
 					String href = "";
