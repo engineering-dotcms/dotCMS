@@ -42,6 +42,8 @@ public interface SiteSearchAPI {
 	void putToIndex(String idx, List<SiteSearchResult> res);
 
 	void deleteFromIndex(String idx, String docId);
+	
+	void deleteFromIndex(String idx, SiteSearchResult res);
 
 	SiteSearchResults search(String query, int start, int rows);
 	
