@@ -165,6 +165,7 @@ public class SiteSearchAction extends DispatchAction {
  		String indexName = "";
 		int nPage;
 		String query = ParamUtil.get(request, "cerca", "");		
+		
 		if (UtilMethods.isSet( query )) {
 			String page = ParamUtil.get(request, "curpage", "").trim();
 			int pg = 0 ;
