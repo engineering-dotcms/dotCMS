@@ -2884,6 +2884,7 @@ public class ESContentletAPIImpl implements ContentletAPI {
 
     public List<Contentlet> find(Category category, long languageId,boolean live,String orderBy,User user, boolean respectFrontendRoles) throws DotDataException,DotContentletStateException, DotSecurityException {
         List<Category> cats  = new ArrayList<Category>();
+        cats.add(category);
         return find(cats,languageId, live, orderBy, user, respectFrontendRoles);
     }
 
@@ -2898,8 +2899,14 @@ public class ESContentletAPIImpl implements ContentletAPI {
             buffy.append(" +working:true");
         if(languageId > 0)
             buffy.append(" +languageId:" + languageId);
-        for (Category category : categories) {
-            buffy.append(" +c" + category.getInode() + "c:on");
+        if(categories.size()>1){
+        	buffy.append(" +(");
+	        for (Category category : categories)
+	            buffy.append("categories: " + category.getCategoryVelocityVarName() + " ");
+	        buffy.append(")");
+        }else{
+        	Category cat = categories.get(0);
+        	buffy.append(" +categories: " + cat.getCategoryVelocityVarName());
         }
         try {
             return search(buffy.toString(), 0, -1, orderBy, user, respectFrontendRoles);
