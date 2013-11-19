@@ -1,4 +1,4 @@
-package com.eng.dotcms.additions.deleteFolder.ajax;
+package com.eng.dotcms.additions.ajax;
 
 import java.io.IOException;
 import java.util.ArrayList;
