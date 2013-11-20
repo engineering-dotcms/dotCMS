@@ -41,10 +41,11 @@ public class RssUtil implements ViewTool {
 	public void init( Object initData ) {
 		identifierAPI = APILocator.getIdentifierAPI();
 		this.req = ( (ViewContext) initData ).getRequest();
-		basePath = "http://" + req.getServerName();
-		if ( req.getServerPort() != 80 ) {
-			basePath += ":" + req.getServerPort();
-		}
+		//	basePath = "http://" + req.getServerName();
+		basePath = "http://" + System.getProperty("RSS_SERVER_NAME");
+		//		if ( req.getServerPort() != 80 ) {
+		//			basePath += ":" + req.getServerPort();
+		//		}
 	}
 
 	public List<Map<String, Object>> convert( @SuppressWarnings( "rawtypes" ) List contentlets ) {
@@ -82,18 +83,15 @@ public class RssUtil implements ViewTool {
 		}
 		//if ( content.get( "mostraSommario" ) != null ) {
 		String sommario = (String) findValue( content, "sommarioEmail", "sommario", "description", "descrizione", "descrizioneBreve" );
-		
+
 		if( UtilMethods.isSet(sommario )  && sommario.length() >= 4000 ){
 			sommario = sommario.substring(0 , 3996) + "...";
 		}
 		curMap.put( "description", sommario  );
-		//}
 		curMap.put( "pubdate", findValue( content, "dataPubblicazione", "modDate" ) );
-		
-		
+
 		curMap.put( "dataEmanazione", findValue( content, "dataEmanazione", "dataCambio" ) );
-		
-		
+
 		String autore = (String) findValue( content, "autoreallegato", "autore", "autori" );
 		if ( UtilMethods.isSet( autore ) ) {
 			curMap.put( "author", autore );
@@ -132,14 +130,11 @@ public class RssUtil implements ViewTool {
 
 					}else if(  lType.equalsIgnoreCase("A")   ){
 						try{					
-						
-							System.out.println( "Verifico se è un allegato ");
 							FileAssetMap fileAssetMap = (FileAssetMap) content.get( "allegato" );
-								System.out.println( "fileAssetMap.getUri()  " + fileAssetMap.getUri() );
+							Logger.info( RssUtil.class, "fileAssetMap.getUri()  " + fileAssetMap.getUri() );
 							link = basePath + fileAssetMap.getUri();
 						}catch (Exception e) {
 							e.printStackTrace();
-							System.out.println( "RSSUTIL Errore FileAssetMap " + content.get( "allegato" )  );
 						}	
 					}else if ( lType.equalsIgnoreCase("E")  ){
 						String lEsterno = (String) content.get("linkEsterno");
@@ -152,15 +147,11 @@ public class RssUtil implements ViewTool {
 				}
 
 			}else if ( structure.getName().equalsIgnoreCase( "Cambio" ) ) {
-
 				String rifCambio = (String) content.get( "mesegiorno" );
-
 				Date dataCambio = (Date) content.get( "dataCambio" );
 				Calendar calCambio = Calendar.getInstance();
 				calCambio.setTime(dataCambio);
-				
 				int mese = calCambio.get( Calendar.MONTH ) + 1;
-
 				String meseString = String.valueOf( mese);
 				if ( mese < 10 ) {
 					meseString = "0" + mese;
@@ -172,8 +163,6 @@ public class RssUtil implements ViewTool {
 				}
 
 				int anno = calCambio.get( Calendar.YEAR );
-
-
 				String pathCambi = "/banca_centrale/cambi/rif/"+anno+"/"+meseString+"/";
 				if ( !language.getLanguageCode().equalsIgnoreCase( "it" ) ) {
 					rifCambio += "_" + language.getLanguageCode();
@@ -184,11 +173,8 @@ public class RssUtil implements ViewTool {
 				 * +"="+language.getLanguageCode(),"UTF-8");
 				 */
 				rifCambio = giornoString +meseString;
-				System.out.println(  " rifCambio " + rifCambio );
 				String query = UriUtils.encodeQuery( ";" + languageKeyHiperWave + "=" + language.getLanguageCode(), "UTF-8" );
-				
-				System.out.println(" PATH CAMBI  " + basePath + pathCambi + "cambi_rif_" + rifCambio + ".html" + query );
-				
+				Logger.info( RssUtil.class, " PATH CAMBI  " + basePath + pathCambi + "cambi_rif_" + rifCambio + ".html" + query );
 				link = basePath + pathCambi + "cambi_rif_" + rifCambio + ".html" + query;
 			} else {
 				/*

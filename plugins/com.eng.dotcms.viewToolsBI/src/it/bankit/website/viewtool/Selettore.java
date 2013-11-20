@@ -10,8 +10,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import bsh.util.Util;
-
 import com.dotmarketing.beans.Identifier;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.portlets.categories.model.Category;
@@ -20,6 +18,7 @@ import com.dotmarketing.portlets.folders.model.Folder;
 import com.dotmarketing.portlets.htmlpages.business.HTMLPageAPI;
 import com.dotmarketing.portlets.htmlpages.model.HTMLPage;
 import com.dotmarketing.portlets.languagesmanager.business.LanguageAPI;
+import com.dotmarketing.portlets.structure.model.Structure;
 import com.dotmarketing.portlets.templates.business.TemplateAPI;
 import com.dotmarketing.portlets.templates.model.Template;
 import com.dotmarketing.util.DateUtil;
@@ -195,11 +194,11 @@ public class Selettore {
 
 					} else {
 
-					//	if (link.getStringProperty("identificativo") != null && !"".equals(link.getStringProperty("identificativo"))) {
+						//	if (link.getStringProperty("identificativo") != null && !"".equals(link.getStringProperty("identificativo"))) {
 						//	href = path + "/" + link.getStringProperty("identificativo");
-						   href =  link.getStringProperty("linkEsterno");
-							src = ESTERNO;
-					//	}
+						href =  link.getStringProperty("linkEsterno");
+						src = ESTERNO;
+						//	}
 					}
 
 					if (!"".equals(href)) {
@@ -381,37 +380,35 @@ public class Selettore {
 	}
 
 	public List<Contentlet> nullLast(List<Contentlet> listOfElements) {
-
 		List<Contentlet> orderedList = new ArrayList<Contentlet>();
 		List<Contentlet> nullList = new ArrayList<Contentlet>();
+		if( listOfElements != null && listOfElements.size() > 0  ) {
+			for (Object object : listOfElements) {
 
-		for (Object object : listOfElements) {
+				if (object instanceof Contentlet) {
 
-			if (object instanceof Contentlet) {
+					Date dataEmanazioneField = ((Contentlet) object).getDateProperty("dataEmanazione");
 
-				Date dataEmanazioneField = ((Contentlet) object).getDateProperty("dataEmanazione");
+					if (dataEmanazioneField != null && UtilMethods.isSet(((Contentlet) object).getIdentifier())) {
+						nullList.add((Contentlet) object);
+					} else {
+						orderedList.add((Contentlet) object);
+					}
 
-				if (dataEmanazioneField != null && UtilMethods.isSet(((Contentlet) object).getIdentifier())) {
-					nullList.add((Contentlet) object);
-				} else {
-					orderedList.add((Contentlet) object);
 				}
 
 			}
 
+			boolean merge = nullList.addAll(orderedList);
 		}
-
-		boolean merge = nullList.addAll(orderedList);
-
 		return nullList;
-
 	}
-	
-	
-	
-	
+
+
+
+
 	public String getLinksByCategory(String path,String category,  String languageID, String hostId, String mode) throws Exception {
-       StringBuffer stringbuf = new StringBuffer("");		
+		StringBuffer stringbuf = new StringBuffer("");		
 		try{
 			User user = APILocator.getUserAPI().getSystemUser();
 			Contentlet dettaglio;
@@ -433,24 +430,19 @@ public class Selettore {
 					sortOrder = su.generateLuceneSortOrder("-D#T", "Link");
 				}
 			}else {
-			  sortOrder = su.generateLuceneSortOrder("-D#T", "Link");
+				sortOrder = su.generateLuceneSortOrder("-D#T", "Link");
 			}
-			
+
 			if (!folderTranslation.equals("")) {
 				List<Contentlet> linksList = null;
 				Category cat = APILocator.getCategoryAPI().findByKey(category, APILocator.getUserAPI().getSystemUser(), true);
 				System.out.println(  " Categoria trovata " + cat );
-			 	
+
 				if( cat!= null && UtilMethods.isSet(cat.getInode() ) ){
 					List<Category> cats = new ArrayList<Category>();
 					cats.add(cat);
-					
 					linksList = APILocator.getContentletAPI().find(cats, Long.parseLong(languageID), true,  sortOrder , user, true);
-	 			}
-//				String q = "";
-//				q = "+StructureName:Link +languageId:" + languageID + " +" + mode + ":true +path:" + path + "/*";
-				//List<Contentlet> linksList = APILocator.getContentletAPI().search(q, -1, 0, sortOrder, APILocator.getUserAPI().getSystemUser(), false);
-
+				}
 				String qLinkSemplice = "";
 				qLinkSemplice = "+StructureName:Linksemplice +languageId:" + languageID + " +live:true +parentPath:" + path + "/";
 
@@ -460,116 +452,142 @@ public class Selettore {
 				stringbuf.append("<div class=\"titolo\"><h3>" + folderTranslation + "</h3></div>");
 				stringbuf.append("<ul>");
 				nullLast(linksList);
-				
+				if(linksList != null  )
+				{				 
+					System.out.println(  " Nuemro contentlet trovate   " + linksList.size() );
 
-				for (Contentlet link : linksList) {
-					System.out.println(  " link  " + link );
-					String titolo;
-					String sommario = "";
-					String href = "";
-					String type = "";
-					String labelType = "";
-					String size = "";
-					String allegatoId = "";
-					String src = null;
-					String ms = "";
+					for (Contentlet link : linksList) {
+						String titolo = "";
+						String sommario = "";
+						String href = "";
+						String type = "";
+						String labelType = "";
+						String size = "";
+						String allegatoId = "";
+						String src = null;
+						String ms = "";
 
-					if (UtilMethods.isSet(link.getStringProperty("titoloLungo"))) {
-						titolo = link.getStringProperty("titoloLungo");
-					} else {
-						titolo = link.getStringProperty("titolo");
-					}
-					String mostraS =link.getStringProperty("mostraSommario");
-					if (UtilMethods.isSet( mostraS )) {
-						ms = mostraS;
-						if (link.getStringProperty("sommario") != null) {
-							sommario = link.getStringProperty("sommario");
-						}	
-					}
-
-					String linkType = link.getStringProperty("linkType");
-
-					if ("A".equals(linkType)) {
-						Contentlet allegatoDettaglio;
-
-						if (UtilMethods.isSet(link.getStringProperty("allegatoId"))) {
-							allegatoId = link.getStringProperty("allegatoId");
-						} else if (UtilMethods.isSet(link.getStringProperty("allegato"))) {
-							allegatoId = link.getStringProperty("allegato");
+						Structure st = link.getStructure();
+						if (UtilMethods.isSet(link.getStringProperty("titoloLungo"))) {
+							titolo = link.getStringProperty("titoloLungo");
+						} else {
+							titolo = link.getStringProperty("titolo");
 						}
+						String mostraS =link.getStringProperty("mostraSommario");
+						if (UtilMethods.isSet( mostraS )) {
+							ms = mostraS;
+							if (link.getStringProperty("sommario") != null) {
+								sommario = link.getStringProperty("sommario");
+							}	
+						}
+						System.out.println(  " Struttture contentlet  " + st.getVelocityVarName() );
 
-						String queryForAllegatoDettaglio = "";
+						if( st.getVelocityVarName().equalsIgnoreCase("Link") ) {
+							String linkType = link.getStringProperty("linkType");
 
-						if (allegatoId != null && !"".equals(allegatoId)) {
+							if ("A".equals(linkType)) {
+								Contentlet allegatoDettaglio;
 
-							queryForAllegatoDettaglio = "+identifier:" + allegatoId + " +languageId:" + languageID;
-							List<Contentlet> allegatoList = APILocator.getContentletAPI().search( queryForAllegatoDettaglio, -1, 0, null, user, false);
-
-							if (allegatoList.size() > 0) {
-								allegatoDettaglio = allegatoList.get(0);
-								File file = allegatoDettaglio.getBinary("fileAsset");
-								size = FileSizeUtil.getsize(file);
-								type = file.getName().substring(file.getName().lastIndexOf("."));
-								labelType = assignType(type);
-								String id = allegatoDettaglio.getIdentifier();
-								Identifier i = APILocator.getIdentifierAPI().loadFromCache(id);
-								if (i == null) {
-									i = APILocator.getIdentifierAPI().find(id);
+								if (UtilMethods.isSet(link.getStringProperty("allegatoId"))) {
+									allegatoId = link.getStringProperty("allegatoId");
+								} else if (UtilMethods.isSet(link.getStringProperty("allegato"))) {
+									allegatoId = link.getStringProperty("allegato");
 								}
 
-								src = assignIcon(type);
-								if (src.equals(WMV)) {
-									href = i.getPath() + "internal&action=video.action";
-								} else {
-									href = i.getPath();
+								String queryForAllegatoDettaglio = "";
+
+								if (allegatoId != null && !"".equals(allegatoId)) {
+
+									queryForAllegatoDettaglio = "+identifier:" + allegatoId + " +languageId:" + languageID;
+									List<Contentlet> allegatoList = APILocator.getContentletAPI().search( queryForAllegatoDettaglio, -1, 0, null, user, false);
+
+									if (allegatoList.size() > 0) {
+										allegatoDettaglio = allegatoList.get(0);
+										File file = allegatoDettaglio.getBinary("fileAsset");
+										size = FileSizeUtil.getsize(file);
+										type = file.getName().substring(file.getName().lastIndexOf("."));
+										labelType = assignType(type);
+										String id = allegatoDettaglio.getIdentifier();
+										Identifier i = APILocator.getIdentifierAPI().loadFromCache(id);
+										if (i == null) {
+											i = APILocator.getIdentifierAPI().find(id);
+										}
+
+										src = assignIcon(type);
+										if (src.equals(WMV)) {
+											href = i.getPath() + "internal&action=video.action";
+										} else {
+											href = i.getPath();
+										}
+
+									}
+
 								}
 
+							} else if ("I".equals(linkType)) {
+								String li = link.getStringProperty("linkInterno");
+
+								if (li != null && !"".equals(li) && li.endsWith(".html")) {
+
+									HTMLPage linkedPage = pageAPI.loadPageByPath(li, hostId);
+									Template linkedPageTemplate = null;
+
+									if(UtilMethods.isSet(linkedPage) && linkedPage.isLive()){
+										linkedPageTemplate = templateApi.findLiveTemplate(linkedPage.getTemplateId(), user, true);
+
+										Folder folder = folderAPI.findFolderByPath(li.substring(0, li.lastIndexOf("/")), hostId, user, true);
+										href = li.substring(0, li.lastIndexOf("/") + 1);
+
+										if(UtilMethods.isSet(linkedPageTemplate) && linkedPageTemplate.getTitle().toLowerCase().contains("video")){							
+											src = WMVICON;
+										} else if (folderAPI.findMenuItems(folder, user, true).size() > 0) {
+											src = FOLDERICON;								
+										} else {
+											src = PAGEICON;
+										}
+									}
+								}
+
+							} else {
+
+								//	if (link.getStringProperty("identificativo") != null && !"".equals(link.getStringProperty("identificativo"))) {
+								//	href = path + "/" + link.getStringProperty("identificativo");
+								href =  link.getStringProperty("linkEsterno");
+								src = ESTERNO;
+								//	}
 							}
+						}else if( st.getVelocityVarName().equalsIgnoreCase("Dettaglio") ) {		
+							String fold = link.getFolder() ;
+							System.out.println(  " link.getFolder()   " +fold );
 
-						}
+							Identifier id = APILocator.getIdentifierAPI().loadFromCache(link.getFolder());
+							System.out.println(  "UtilMethods.isSet(id)    " +UtilMethods.isSet(id) );
+							src = PAGEICON;
+							if( UtilMethods.isSet(id) && UtilMethods.isSet(id.getId() )){
+								href = id.getPath();
+								System.out.println(  "href  " +href );
 
-					} else if ("I".equals(linkType)) {
-						String li = link.getStringProperty("linkInterno");
-
-						if (li != null && !"".equals(li) && li.endsWith(".html")) {
-
-							HTMLPage linkedPage = pageAPI.loadPageByPath(li, hostId);
-							Template linkedPageTemplate = null;
-
-							if(UtilMethods.isSet(linkedPage) && linkedPage.isLive()){
-								linkedPageTemplate = templateApi.findLiveTemplate(linkedPage.getTemplateId(), user, true);
-
-								Folder folder = folderAPI.findFolderByPath(li.substring(0, li.lastIndexOf("/")), hostId, user, true);
-								href = li.substring(0, li.lastIndexOf("/") + 1);
-
-								if(UtilMethods.isSet(linkedPageTemplate) && linkedPageTemplate.getTitle().toLowerCase().contains("video")){							
-									src = WMVICON;
-								} else if (folderAPI.findMenuItems(folder, user, true).size() > 0) {
-									src = FOLDERICON;								
-								} else {
-									src = PAGEICON;
+							}else{
+								Folder f = APILocator.getFolderAPI().find(fold, user, true );
+								Identifier ide = APILocator.getIdentifierAPI().loadFromCache(f.getIdentifier() );
+								System.out.println(  "UtilMethods.isSet(ide)    " +UtilMethods.isSet(ide) );
+								if( UtilMethods.isSet(ide) && UtilMethods.isSet(ide.getId() )){
+									href = ide.getPath();
+									System.out.println(  "href  " +href );
 								}
 							}
 						}
 
-					} else {
-
-					//	if (link.getStringProperty("identificativo") != null && !"".equals(link.getStringProperty("identificativo"))) {
-						//	href = path + "/" + link.getStringProperty("identificativo");
-						   href =  link.getStringProperty("linkEsterno");
-							src = ESTERNO;
-					//	}
-					}
-
-					if (!"".equals(href)) {
-						stringbuf.append("<li>");
-						stringbuf.append("<a href=\"" + href + "\"><img src=\"" + src + "\" class=\"ico\" width=\"14\" height=\"14\">" + titolo + "</a> " + buildSpan(link, size, labelType));
-						if (!"".equals(ms) && !"".equals(sommario)) {
-							stringbuf.append("<br/>" + sommario);
+						if (!"".equals(href)) {
+							stringbuf.append("<li>");
+							stringbuf.append("<a href=\"" + href + "\"><img src=\"" + src + "\" class=\"ico\" width=\"14\" height=\"14\">" + titolo + "</a> " + buildSpan(link, size, labelType));
+							if (!"".equals(ms) && !"".equals(sommario)) {
+								stringbuf.append("<br/>" + sommario);
+							}
+							stringbuf.append("</li>");
 						}
-						stringbuf.append("</li>");
-					}
 
+					}
 				}
 
 				Contentlet linkSemplice = null;
