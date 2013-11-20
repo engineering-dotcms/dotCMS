@@ -530,10 +530,7 @@ public class HTMLPageFactory {
     	}catch(DotSecurityException e){
     		Logger.error(HTMLPageFactory.class, "Error load HTMLPage from container: " + e.getMessage());
     		return null;
-    	}finally{
-    		DbConnectionFactory.closeConnection();
     	}
-		
     }
     
     public static List<HTMLPage> getHTMLPageFromContentlet(Contentlet contentlet) {
@@ -560,9 +557,6 @@ public class HTMLPageFactory {
     	}catch(DotSecurityException e){
     		Logger.error(HTMLPageFactory.class, "Error load HTMLPage from contentlet: " + e.getMessage());
     		return null;
-    	}finally{
-    		DbConnectionFactory.closeConnection();
-    	}
-		
+    	}		
     }
 }

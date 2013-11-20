@@ -78,7 +78,7 @@
 		var body = document.getElementsByTagName("body")[0];
 		body.setAttribute("style","cursor: wait !important");
 		var xhrArgs = {
-			url:'/DotAjaxDirector/com.eng.dotcms.additions.deleteFolder.ajax.DeleteFolderAjaxAction/cmd/deleteFolder/folderInode/'+folderInode,
+			url:'/DotAjaxDirector/com.eng.dotcms.additions.ajax.DeleteFolderAjaxAction/cmd/deleteFolder/folderInode/'+folderInode,
 			handleAs: 'text',
 			load: function(data){
 				if(data.indexOf("FAILURE") > -1){
