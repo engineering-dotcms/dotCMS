@@ -11,7 +11,7 @@
 
 <%
 	Inode asset = (Inode) request.getAttribute(com.dotmarketing.util.WebKeys.PERMISSIONABLE_EDIT);
-
+	if(null!=asset){
 	List<PushedAsset> pushedAssets = APILocator.getPushedAssetsAPI().getPushedAssets(asset.getIdentifier());
 
 %>
@@ -90,4 +90,4 @@ function deletePushHistory() {
 <% } %>
 
 </table>
-
+<%} %>
