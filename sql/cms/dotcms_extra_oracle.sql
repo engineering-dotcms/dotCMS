@@ -907,3 +907,174 @@ CREATE INDEX idx_pushed_assets_1 ON publishing_pushed_assets (bundle_id);
 CREATE INDEX idx_pushed_assets_2 ON publishing_pushed_assets (environment_id);
 
 alter table publishing_bundle add force_push number(1,0) ;
+
+/*************************************************************************/
+/* BANKIT ADDS */
+
+  CREATE TABLE CONSULWEB_OLD_INODES 
+   (	"INODE" VARCHAR2(36 BYTE)
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "DOTCMS201" ;
+REM INSERTING into DOTCMS201.CONSULWEB_OLD_INODES
+SET DEFINE OFF;
+--------------------------------------------------------
+--  Constraints for Table CONSULWEB_OLD_INODES
+--------------------------------------------------------
+
+  ALTER TABLE CONSULWEB_OLD_INODES MODIFY ("INODE" NOT NULL ENABLE);
+
+  CREATE TABLE HOST_OLD_INODES
+   (	"INODE" VARCHAR2(36 BYTE)
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "DOTCMS201" ;
+REM INSERTING into DOTCMS201.HOST_OLD_INODES
+SET DEFINE OFF;
+--------------------------------------------------------
+--  Constraints for Table HOST_OLD_INODES
+--------------------------------------------------------
+
+  ALTER TABLE HOST_OLD_INODES MODIFY ("INODE" NOT NULL ENABLE);
+  
+  CREATE OR REPLACE PROCEDURE CONSULWEBVERSION AS 
+  
+  /* Recupero gli identifier dei contenuti (pdf e link) */
+  CURSOR pdf_identifiers
+    IS 
+      select distinct i.id 
+      from identifier i, structure s, contentlet c
+      where i.id = c.identifier
+      and c.structure_inode = s.inode
+      and i.parent_path = '/bancaditalia/trasparenza/consulenti/' 
+      and s.velocity_var_name in ('AllegatoDettaglio', 'Link');
+      
+  CURSOR version_infos (id VARCHAR2)
+    IS
+      select live_inode, working_inode, lang
+      from contentlet_version_info
+      where identifier = id;    
+
+  pdf_live_inode        inode.inode%TYPE;
+  pdf_working_inode     inode.inode%TYPE;
+  pdf_lang              contentlet_version_info.lang%TYPE;
+  pdf_identifier        identifier.id%TYPE;
+
+BEGIN
+  /* lock sulle tabelle interessate */
+  --lock table contentlet in exclusive mode;
+  --lock table inode in exclusive mode;
+  
+  OPEN pdf_identifiers;  
+  LOOP  
+    FETCH pdf_identifiers INTO pdf_identifier;
+    EXIT WHEN pdf_identifiers%NOTFOUND;
+    DBMS_OUTPUT.put_line ('Processo identificativo: ' || pdf_identifier || '...');
+    /* Recupero gli inode correntemente in uso per l'identifier */
+    OPEN version_infos (pdf_identifier);
+    LOOP
+        FETCH version_infos INTO pdf_live_inode, pdf_working_inode, pdf_lang;
+        EXIT WHEN version_infos%NOTFOUND;
+        DBMS_OUTPUT.put_line ('Live inode: ' || pdf_live_inode || ';');
+        DBMS_OUTPUT.put_line ('Working inode: ' || pdf_working_inode || ';');
+        DBMS_OUTPUT.put_line ('Lang: ' || pdf_lang || ';');
+        
+        /* elimino i records nella tabella d'appoggio */
+        delete from consulweb_old_inodes;
+      
+        /* inserisco nella tabella gli inodes del pdf attualmente in esame, tranne i due correntemente in uso */
+        insert into consulweb_old_inodes (inode) 
+        select i.inode 
+        from inode i, contentlet c 
+        where c.inode = i.inode
+        and c.identifier = pdf_identifier
+        and i.inode not in (pdf_live_inode, pdf_working_inode)
+        and c.language_id = pdf_lang;  
+        
+        /* elimino le versioni in più */
+        delete from contentlet 
+        where identifier = pdf_identifier
+        and inode not in (pdf_live_inode, pdf_working_inode) 
+        and language_id = pdf_lang;
+        
+        /* ripulisco anche gli inodes */
+        delete from inode where inode in (
+          select inode
+          from consulweb_old_inodes    
+        );         
+    END LOOP;      
+    CLOSE version_infos;
+  END LOOP; 
+  CLOSE pdf_identifiers;
+  commit;  
+END CONSULWEBVERSION;
+
+  CREATE OR REPLACE PROCEDURE DELETEOLDHOSTVERSION AS 
+  host_working_inode inode.inode%TYPE;
+  host_live_inode inode.inode%TYPE;
+  
+BEGIN
+  
+  /* lock sulle tabelle interessate */
+  /* lock table contentlet in exclusive mode; */
+  /* lock table inode in exclusive mode; */
+
+  /* seleziono gli inode attualmente utilizzati per l'host BANCA.IT */
+  select live_inode, working_inode
+  into host_live_inode, host_working_inode 
+  from contentlet_version_info
+  where identifier = '5966314a-fb1e-4e09-91c9-bdcc95a0d1a0';
+  
+  /* memorizzo in una tabella d'appoggio gli inodes da eliminare successivamente */  
+  delete from host_old_inodes;
+  
+  insert into host_old_inodes (inode) 
+  select i.inode 
+  from inode i, contentlet c 
+  where c.inode = i.inode
+  and c.identifier = '5966314a-fb1e-4e09-91c9-bdcc95a0d1a0'
+  and i.inode not in (host_live_inode, host_working_inode);
+ 
+  /* cancello tutte le versioni attualmente memorizzate per l'host BANCA.IT tranne le due appena recuperate */
+  delete from contentlet
+  where identifier = '5966314a-fb1e-4e09-91c9-bdcc95a0d1a0'
+  and inode not in (host_live_inode, host_working_inode);
+  
+  /* cancello gli inodes */
+  delete from inode
+  where inode in (
+    select inode from host_old_inodes
+  );
+  
+  commit;
+END DELETEOLDHOSTVERSION;
+
+
+  CREATE OR REPLACE TRIGGER CHECK_OWNER
+BEFORE INSERT OR UPDATE OF OWNER ON INODE 
+REFERENCING OLD AS old NEW AS new 
+FOR EACH ROW 
+BEGIN
+  CASE
+    WHEN INSERTING THEN
+        IF :new.owner IS NULL
+        THEN :new.owner := 'dotcms.org.2808';
+        END IF;
+    WHEN UPDATING THEN 
+        IF :new.owner IS NULL
+        THEN :new.owner := 'dotcms.org.2808';
+        END IF;        
+  END CASE;
+END;
+/
+ALTER TRIGGER CHECK_OWNER ENABLE;
+
+

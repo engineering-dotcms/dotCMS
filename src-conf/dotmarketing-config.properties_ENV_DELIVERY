@@ -75,10 +75,10 @@ DIST_INDEXATION_SLEEP=500
 DIST_INDEXATION_SERVER_ID=1
 
 ## COLLAUDO (ST/DEL) + PRODUZIONE (ST)
-DIST_INDEXATION_SERVERS_IDS=1,2
+## DIST_INDEXATION_SERVERS_IDS=1,2
 
 ## PRODUZIONE (DEL)
-## DIST_INDEXATION_SERVERS_IDS=1,2,3,4
+DIST_INDEXATION_SERVERS_IDS=1,2,3,4
 
 
 ##	CLUSTERED CACHE SETTINGS
@@ -93,7 +93,7 @@ CACHE_PROTOCOL=udp
 CACHE_BINDPORT=7800
 
 ## COLLAUDO (ST)
-CACHE_BINDADDRESS=10.120.23.24
+##CACHE_BINDADDRESS=10.120.23.24
 ##CACHE_BINDADDRESS=10.120.23.25
 
 ## COLLAUDO (DEL)
@@ -105,7 +105,7 @@ CACHE_BINDADDRESS=10.120.23.24
 ##CACHE_BINDADDRESS=10.120.22.27
 
 ## PRODUZIONE (DEL)
-##CACHE_BINDADDRESS=172.20.194.105
+CACHE_BINDADDRESS=172.20.194.105
 ##CACHE_BINDADDRESS=172.20.194.106
 ##CACHE_BINDADDRESS=172.20.194.107
 ##CACHE_BINDADDRESS=172.20.194.108
@@ -113,7 +113,7 @@ CACHE_BINDADDRESS=10.120.23.24
 CACHE_MULTICAST_PORT=9301
 
 ## COLLAUDO (ST)
-CACHE_MULTICAST_ADDRESS=239.192.0.16
+##CACHE_MULTICAST_ADDRESS=239.192.0.16
 
 ## COLLAUDO (DEL)
 ##CACHE_MULTICAST_ADDRESS=239.192.0.15
@@ -122,7 +122,7 @@ CACHE_MULTICAST_ADDRESS=239.192.0.16
 ##CACHE_MULTICAST_ADDRESS=239.192.0.17
 
 ## PRODUZIONE (DEL)
-##CACHE_MULTICAST_ADDRESS=239.194.0.10
+CACHE_MULTICAST_ADDRESS=239.194.0.10
 
 ##	TCP Config
 ##	The INITIAL_HOSTS is a comma separated list of hosts and port that are in the cluster. You must include the local server also.
@@ -574,15 +574,32 @@ ES_URL_ENDPOINT=http://localhost:9200/
 
 
 ## Default Caching Settings
-cache.default.size=1000
-cache.default.disk=false
-cache.default.ttl=5
-cache.livecache.size=1000
-cache.workingcache.size=1000
+cache.default.size=100000
+cache.default.disk=true
+cache.default.ttl=86400
+cache.livecache.size=100000
+cache.workingcache.size=100000
 cache.concurrencylevel=32
 
 
 ## Region Specific Memory Settings
+## OVERRIDE:com.eng.dotcms.bankitplugin
+#cache.bankit-languagecache.size=10000
+cache.bankit-languagecache.disk=false
+## OVERRIDE:com.eng.dotcms.bankitplugin
+#cache.bankit-subfoldercache.size=10000
+## OVERRIDE:com.eng.dotcms.bankitplugin
+#cache.logmappercache.size=1000
+## OVERRIDE:com.eng.dotcms.bankitplugin
+#cache.navcache.size=1000
+## OVERRIDE:com.eng.dotcms.bankitplugin
+#cache.plugincache.size=1000
+## OVERRIDE:com.eng.dotcms.bankitplugin
+#cache.propertycache.size=1000
+## OVERRIDE:com.eng.dotcms.bankitplugin
+#cache.relationshipcachebyinode.size=1000
+## OVERRIDE:com.eng.dotcms.bankitplugin
+#cache.relationshipcachebyname.size=1000
 cache.adminconfigpool.size=100
 cache.blockdirectivecache.size=1000
 cache.blockdirectivehtmlpagecache.size=1000
@@ -591,62 +608,91 @@ cache.categorycache.size=1000
 cache.categorychildrencache.size=1000
 cache.categoryparentscache.size=1000
 cache.companypool.size=10
-cache.contentletcache.size=5000
-cache.fileassetmetadatacache.size=200
+cache.contentletcache.size=100000
+cache.fileassetmetadatacache.size=100000
 cache.dotcmslayoutcache.size=1000
 cache.dotcmsrolecache.size=1000
 cache.dotcmsrolekeycache.size=1000
 cache.dotcmsuserrolecache.size=1000
+cache.dotcmsuserrolecache.disk=false
 cache.fieldscache.size=1000
 cache.filecache.size=1000
-cache.foldercache.size=1000
+cache.foldercache.size=100000
 cache.hostaliascache.size=1000
 cache.hostcache.size=1000
 cache.hostvariablescache.size=1000
-cache.htmlpagecache.size=1000
-cache.identifiercache.size=50000
+cache.htmlpagecache.size=100000
+cache.identifiercache.size=100000
 cache.languagecacheimpl.size=1000
-cache.navcache.size=1000
 cache.parentpermissionablecache.size=10000
-cache.permissioncache.size=50000
-cache.plugincache.size=1000
-cache.portletpool.size=100
-cache.structurecache.size=500
-cache.templatecache.size=500
+cache.permissioncache.size=100000
+## OVERRIDE:com.eng.dotcms.bankitplugin
+#cache.plugincache.size=1000
+## OVERRIDE:com.eng.dotcms.bankitplugin
+#cache.portletpool.size=1000
+cache.publishingendpointcache.size=100
+## OVERRIDE:com.eng.dotcms.bankitplugin
+#cache.relationshipcachebyinode.size=10000
+## OVERRIDE:com.eng.dotcms.bankitplugin
+#cache.relationshipcachebyname.size=10000
+## OVERRIDE:com.eng.dotcms.bankitplugin
+#cache.templatecache.size=1000
 cache.userdotcmscache.size=1000
 cache.useremaildotcmscache.size=1000
 cache.userproxycache.size=1000
-cache.velocitycache.size=1000
+cache.velocitycache.size=5000
 cache.velocitymenucache.size=1000
 cache.velocitymisscache.size=1000
-cache.versioncache.size=50000
 cache.versioninfocache.size=50000
-cache.virtuallinkscache.size=1000
+cache.virtuallinkscache.size=10000
+## OVERRIDE:com.eng.dotcms.bankitplugin
+#cache.versioncache.size=100000
+## OVERRIDE:com.eng.dotcms.bankitplugin
+cache.workflowstepcache.size=100000
 cache.workflowcache.size=1000
 cache.workflowstepcache.size=1000
 cache.workflowtaskcache.size=1000
 cache.indiciescache.size=8
-cache.publishingendpointcache.size=100
-cache.workflowactioncache.size=10000
-cache.logmappercache.size=10
-cache.translatedquerycache.size=5000
+cache.plugincache.size=1000
+cache.structurecache.size=1000
+cache.plugincache.size=1000
+cache.portletpool.size=1000
+cache.bankit.ttl=86400
+cache.bankit-languagecache.size=10000
+cache.bankit-subfoldercache.size=100
+cache.logmappercache.size=1000
+cache.navcache.size=10000
+cache.propertycache.size=1000
+cache.relationshipcachebyinode.size=1000
+cache.relationshipcachebyname.size=1000
+cache.versioncache.size=50000
+cache.versioncache.size=50000
+cache.workflowactioncache.size=1000
+cache.livecache.size=10000
+cache.fieldsvarcache.size=1000
+cache.imagepool.size=1000
+cache.templatecache.size=10000
+cache.templatequerycache.size=10000
+cache.dotcmsrootrolescache.size=10000
 
 
 
 ##  Cache to disk Settings
 cache.contentletcache.disk=true
+cache.velocitymenucache.disk=true
 cache.velocitycache.disk=true
-
+cache.foldercache.disk=true
+cache.identifiercache.disk=true
+cache.velocitymenucache.disk=true
+cache.blockdirectivecache.disk=true
+cache.bankit-subfoldercache.disk=true
+cache.livecache.disk=true
 
 ##	Disk cache settings (local java db)
 ##  defaults if not set CACHE_DB_MAX_CONN=600, CACHE_DB_MAX_IDLE=100, CACHE_DB_MIN_IDLE=50
 #CACHE_DB_MAX_CONN=600
 #CACHE_DB_MAX_IDLE=100
 #CACHE_DB_MIN_IDLE=50
-
-
-
-
 
 
 ##################### ElasticSearch Configuration #####################
@@ -662,13 +708,13 @@ ELASTICSEARCH_USE_FILTERS_FOR_SEARCHING=true
 ##  should have a unique name (all servers in a cluster share the same name)
 
 ## COLLAUDO
-es.cluster.name=dotCMSContentIndexColl
+##es.cluster.name=dotCMSContentIndexColl
 
 ## PRODUZIONE
-##es.cluster.name=dotCMSContentIndexProd
+es.cluster.name=dotCMSContentIndexProd
 
 ## COLLAUDO (ST)
-es.network.host=10.120.23.24
+##es.network.host=10.120.23.24
 ##es.network.host=10.120.23.25
 
 ## COLLAUDO (DEL)
@@ -680,7 +726,7 @@ es.network.host=10.120.23.24
 ##es.network.host=10.120.22.27
 
 ## PRODUZIONE (DEL)
-##es.network.host=172.20.194.105
+es.network.host=172.20.194.105
 ##es.network.host=172.20.194.106
 ##es.network.host=172.20.194.107
 ##es.network.host=172.20.194.108
@@ -698,9 +744,10 @@ es.gateway.type=local
 #es.gateway.expected_nodes=1
 
 ##  Elasticsearch cluster config
-es.discovery.zen.ping.multicast.enabled=false
-es.discovery.zen.ping.timeout=5s
-es.discovery.zen.minimum_master_nodes=1
+es.transport.tcp.compress=true
+es.discovery.zen.ping.multicast.enabled=true
+es.discovery.zen.ping.timeout=20s
+es.discovery.zen.minimum_master_nodes=3
 
 ## COLLAUDO (ST)
 ##es.discovery.zen.ping.multicast.group=239.192.0.16
@@ -712,14 +759,14 @@ es.discovery.zen.minimum_master_nodes=1
 ##es.discovery.zen.ping.multicast.group=239.192.0.17
 
 ## PRODUZIONE (DEL)
-##es.discovery.zen.ping.multicast.group=239.194.0.10
+es.discovery.zen.ping.multicast.group=239.194.0.10
 
 
-#es.discovery.zen.ping.multicast.address=XXX.XXX.XXX.XXX
-#es.discovery.zen.ping.multicast.port=45589
+es.discovery.zen.ping.multicast.address=172.20.194.105
+es.discovery.zen.ping.multicast.port=45589
 
 ## COLLAUDO (STAGING)
-es.discovery.zen.ping.unicast.hosts=10.120.23.24:9301,10.120.23.25:9301
+## es.discovery.zen.ping.unicast.hosts=10.120.23.24:9301,10.120.23.25:9301
 
 ## COLLAUDO (DELIVERY)
 ## es.discovery.zen.ping.unicast.hosts=10.110.236.141:9301,10.110.236.142:9301
@@ -728,7 +775,7 @@ es.discovery.zen.ping.unicast.hosts=10.120.23.24:9301,10.120.23.25:9301
 ## es.discovery.zen.ping.unicast.hosts=10.120.22.26:9301,10.120.22.27:9301
 
 ## PRODUZIONE (DELIVERY)
-## es.discovery.zen.ping.unicast.hosts=172.20.194.105:9301,172.20.194.106:9301,172.20.194.107:9301,172.20.194.108:9301
+#es.discovery.zen.ping.unicast.hosts=172.20.194.105:9301,172.20.194.106:9301,172.20.194.107:9301,172.20.194.108:9301
 
 
 ##  Elasticsearch index config rule of thumb:
@@ -742,12 +789,12 @@ es.discovery.zen.ping.unicast.hosts=10.120.23.24:9301,10.120.23.25:9301
 ##    (the number of servers in your dotCMS cluster / 2) + 1
 
 ## COLLAUDO (ST/DEL) + PRODUZIONE (ST)
-es.index.number_of_shards=1
-es.index.number_of_replicas=1
+##es.index.number_of_shards=1
+##es.index.number_of_replicas=1
 
 ## PRODUZIONE (DEL)
-##es.index.number_of_shards=1
-##es.index.number_of_replicas=3
+es.index.number_of_shards=1
+es.index.number_of_replicas=3
 
 
 ##  Defaults to 1024, but that is to small for very large portfolio pages
@@ -889,24 +936,6 @@ FILE_ASSET_THREAD_POOL_KEEP_ALIVE_TIME=20
 ##
 ## TrustStore (Includes the Remote Server SSL Key)
 
-## COLLAUDO (ST)
-TRUSTSTORE_PATH=/opt/jboss_fs/jboss-eap-5.1.2/jboss-as/server/JBossWCMStagingColl/conf/ssl/truststore.jks
-TRUSTSTORE_PWD=qaz,wsx
-KEYSTORE_PATH=/opt/jboss_fs/jboss-eap-5.1.2/jboss-as/server/JBossWCMStagingColl/conf/ssl/keystore.jks
-KEYSTORE_PWD=qaz,wsx
-
-## COLLAUDO (DEL)
-TRUSTSTORE_PATH=/opt/jboss_fs/jboss-eap-5.1.2/jboss-as/server/JBossWCMDeliveryColl/conf/ssl/51truststore.jks
-TRUSTSTORE_PWD=qaz,wsx
-KEYSTORE_PATH=/opt/jboss_fs/jboss-eap-5.1.2/jboss-as/server/JBossWCMDeliveryColl/conf/ssl/51keystore.jks
-KEYSTORE_PWD=qaz,wsx
-
-## PRODUZIONE (ST)
-TRUSTSTORE_PATH=/opt/jboss_fs/jboss-eap-5.1.2/jboss-as/server/JBossWCMStagingProd/conf/ssl/mytruststore.jks
-TRUSTSTORE_PWD=qaz,wsx
-KEYSTORE_PATH=/opt/jboss_fs/jboss-eap-5.1.2/jboss-as/server/JBossWCMStagingProd/conf/ssl/mykeystore.jks
-KEYSTORE_PWD=qaz,wsx
-
 ## PRODUZIONE (DEL)
 TRUSTSTORE_PATH=/opt/jboss_fs/jboss-eap-5.1.2/jboss-as/server/JBossWCMDeliveryProd/conf/ssl/mytruststore.jks
 TRUSTSTORE_PWD=qaz,wsx
@@ -927,7 +956,7 @@ ASSETS_SEARCH_AND_REPLACE_MAX_NUMBER_OF_ASSET_TO_SEARCH=100
 ##Alowed File assets
 ASSETS_SEARCH_AND_REPLACE_ALLOWED_FILE_TYPES=vtl,css,js,txt,html,htm,xml,php
 ## run link checker every 2 hours
-linkchecker.enablejob=true
+linkchecker.enablejob=false
 linkchecker.enable_email_notification=false
 linkchecker.cronexp=0 0 0/2 * * ?
 
@@ -935,7 +964,7 @@ linkchecker.cronexp=0 0 0/2 * * ?
 CONTENT_VERSION_HARD_LINK=true
 
 ## Default cache for pages
-DEFAULT_PAGE_CACHE_SECONDS=15
+DEFAULT_PAGE_CACHE_SECONDS=0
 
 ## do permission check on menu items for every request
 ENABLE_NAV_PERMISSION_CHECK=false
