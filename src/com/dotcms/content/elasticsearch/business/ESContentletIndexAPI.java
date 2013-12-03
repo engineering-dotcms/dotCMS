@@ -381,7 +381,7 @@ public class ESContentletIndexAPI implements ContentletIndexAPI{
 	    removeContentFromIndex(content, false);
 	}
 
-	private void removeContentFromIndex(final Contentlet content, final boolean onlyLive, final List<Relationship> relationships) throws DotHibernateException {
+	private void removeContentFromIndex(final Contentlet content, final boolean onlyLive, final List<Relationship> relationships, boolean fromWorkflow) throws DotHibernateException {
 		 Runnable indexRunner = new Runnable() {
 	            public void run() {
 	        	    try {
@@ -426,7 +426,21 @@ public class ESContentletIndexAPI implements ContentletIndexAPI{
 	        	    }
 	            }
 	        };
-	        HibernateUtil.addCommitListener(content.getIdentifier(),indexRunner);
+	        if(fromWorkflow)
+	        	indexRunner.run();
+	        else
+	        	HibernateUtil.addCommitListener(content.getIdentifier(),indexRunner);
+	}
+	
+	public void removeContentFromIndex(final Contentlet content, final boolean onlyLive, boolean fromWorkflow) throws DotHibernateException {
+
+	    if(content==null || !UtilMethods.isSet(content.getIdentifier())) return;
+
+	    List<Relationship> relationships = RelationshipFactory.getAllRelationshipsByStructure(content.getStructure());
+	    // add a commit listener to index the contentlet if the entire
+        // transaction finish clean
+        removeContentFromIndex(content, onlyLive, relationships, fromWorkflow);
+       
 	}
 	
 	public void removeContentFromIndex(final Contentlet content, final boolean onlyLive) throws DotHibernateException {
@@ -436,7 +450,7 @@ public class ESContentletIndexAPI implements ContentletIndexAPI{
 	    List<Relationship> relationships = RelationshipFactory.getAllRelationshipsByStructure(content.getStructure());
 	    // add a commit listener to index the contentlet if the entire
         // transaction finish clean
-        removeContentFromIndex(content, onlyLive, relationships);
+        removeContentFromIndex(content, onlyLive, relationships, false);
        
 	}
 

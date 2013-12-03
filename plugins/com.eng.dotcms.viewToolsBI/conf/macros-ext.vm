@@ -52,7 +52,10 @@
 
 	#if($size==0 && $transSize>0)
                 <h2></h2>
+       #if( $request.getHeader("User-Agent") == "DOTCMS-SITESEARCH")
+       #else
 		<p>$messagesTool.get("warning.message.no.traslation")</p>  
+	   #end	
 	#end
 #end  ##macro-checkTranslation
 

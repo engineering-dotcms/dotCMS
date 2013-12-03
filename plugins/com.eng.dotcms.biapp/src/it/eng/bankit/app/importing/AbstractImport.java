@@ -162,10 +162,10 @@ public abstract class AbstractImport {
 		} else {
 			returnContentlet = contentletApi.checkin( contentlet, permissionList, insertUser, true );
 		}
-
-		if ( returnContentlet.isLocked() ) {
-			contentletApi.unlock( returnContentlet, insertUser, true );
-		}
+		contentletApi.unlock( returnContentlet, insertUser, true );
+//		if ( returnContentlet.isLocked() ) {
+//			contentletApi.unlock( returnContentlet, insertUser, true );
+//		}
 
 //		if ( returnContentlet.getStructure().getVelocityVarName().equalsIgnoreCase( "Link" ) && returnContentlet.getLanguageId() != languageApi.getDefaultLanguage().getId() ) {
 //			try {// Pezzotto per gestire errore pubblicazione eventuale x

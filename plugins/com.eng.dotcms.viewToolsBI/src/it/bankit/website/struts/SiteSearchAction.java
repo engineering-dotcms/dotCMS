@@ -65,7 +65,7 @@ public class SiteSearchAction extends DispatchAction {
 		//indexIT = pAPI.loadProperty(IDeployConst.PLUGIN_ID, "siteSearch.indexName.it");
 		//indexEN = pAPI.loadProperty(IDeployConst.PLUGIN_ID, "siteSearch.indexName.en");
 		indexALL = pAPI.loadProperty(IDeployConst.PLUGIN_ID, "siteSearch.indexName.all");
-		policy = Policy.getInstance(this.getClass().getClassLoader().getResourceAsStream(POLICY_FILENAME));
+		policy = Policy.getInstance(Thread.currentThread().getContextClassLoader().getResourceAsStream(POLICY_FILENAME));
 		antiSamy = new AntiSamy(policy);
 		currentUser = APILocator.getUserAPI().getSystemUser();
 		return super.dispatchMethod(mapping, form, request, response, name);
@@ -312,6 +312,9 @@ public class SiteSearchAction extends DispatchAction {
 		} else {
 			encodedString = query;
 		}
+		
+		int numError = antiSamy.scan(encodedString, AntiSamy.DOM).getNumberOfErrors();
+		
 		
 		encodedString = antiSamy.scan(encodedString, AntiSamy.DOM).getCleanHTML();
 		encodedString = HtmlUtils.htmlUnescape(encodedString);

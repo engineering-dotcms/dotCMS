@@ -66,6 +66,8 @@ public interface ContentletIndexAPI {
 
 	public void removeContentFromIndex(final Contentlet content, final boolean onlyLive) throws DotHibernateException;
 
+	public void removeContentFromIndex(final Contentlet content, final boolean onlyLive, boolean fromWorkflow) throws DotHibernateException;
+
 	public void removeContentFromLiveIndex(final Contentlet content) throws DotHibernateException;
 
 	public void removeContentFromIndexByStructureInode(String structureInode) throws DotDataException;

@@ -8,11 +8,9 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.lucene.queryParser.ParseException;
-
 import junit.framework.Assert;
+
+import org.apache.lucene.queryParser.ParseException;
 
 import com.dotmarketing.beans.Host;
 import com.dotmarketing.beans.Permission;
@@ -21,7 +19,6 @@ import com.dotmarketing.business.DotStateException;
 import com.dotmarketing.cache.StructureCache;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotSecurityException;
-import com.dotmarketing.portlets.categories.model.Category;
 import com.dotmarketing.portlets.contentlet.business.DotContentletStateException;
 import com.dotmarketing.portlets.contentlet.business.DotContentletValidationException;
 import com.dotmarketing.portlets.contentlet.model.Contentlet;
@@ -31,7 +28,6 @@ import com.dotmarketing.portlets.languagesmanager.model.Language;
 import com.dotmarketing.portlets.structure.factories.RelationshipFactory;
 import com.dotmarketing.portlets.structure.model.Relationship;
 import com.dotmarketing.portlets.structure.model.Structure;
-import com.dotmarketing.util.FileUtil;
 import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.UtilMethods;
 import com.dotmarketing.viewtools.content.util.ContentUtils;
@@ -53,7 +49,6 @@ public class ConsulWebImport extends AbstractImport {
 	private boolean remotePublication = false;
 	private boolean backup = false;
 	private boolean published = false;
-	private boolean fileAsserWorkArround = false;
 
 	public ConsulWebImport( User user, Host host ) {
 		super( user, host );
@@ -69,7 +64,7 @@ public class ConsulWebImport extends AbstractImport {
 			stLink = StructureCache.getStructureByVelocityVarName( linkStructureName );
 			relationName = pluginAPI.loadProperty( IDeployConst.PLUGIN_ID, "consWeb.link.relazione" );
 			relationNameAllegatoLink = "Parent_Link-Child_AllegatoDettaglio";
-			fileAsserWorkArround = readBooleanProperty( "dotCms.fileAssetWorkArround" );
+		//	fileAsserWorkArround = readBooleanProperty( "dotCms.fileAssetWorkArround" );
 			if ( !updateMode ) {
 				checkBackupDir();
 			}
@@ -78,61 +73,45 @@ public class ConsulWebImport extends AbstractImport {
 	}
 
 	public void importFiles( File fileIt, File fileEn , File fileCSVIt, File fileCSVEn  ) throws Exception {
-		try{
-			Logger.info( ConsulWebJob.class, "Importo il file pdf : " + fileIt.getName() );
-			Contentlet consulPDFIta = saveContentletsFile( fileIt, consulwebFolder, langIt );	
-			Logger.info( ConsulWebJob.class, "Importo il file pdf INGLESE NON DEVE ESSERE LA TRADUZIONE : " + fileEn.getName() );
-			Contentlet consulPDFEng = saveContentletsFile( fileEn, consulwebFolder, langEn );
-			Logger.info( ConsulWebJob.class, "I pdf sono stati salvati --- ");
+		Logger.info( ConsulWebJob.class, "Importo il file pdf : " + fileIt.getName() );
+		Contentlet consulPDFIta = saveContentletsFile( fileIt, consulwebFolder, langIt );	
+		Logger.info( ConsulWebJob.class, "Importo il file pdf INGLESE NON DEVE ESSERE LA TRADUZIONE : " + fileEn.getName() );
+		Contentlet consulPDFEng = saveContentletsFile( fileEn, consulwebFolder, langEn );
+		Logger.info( ConsulWebJob.class, "I pdf sono stati salvati --- ");
 
-			Contentlet consulCSVITA = null; 
-			Contentlet consulCSVENG = null;
-			if( fileCSVIt != null ){
-				Logger.info( ConsulWebJob.class, "Importo il file cvs : " + fileCSVIt.getName() );
-				consulCSVITA = saveContentletsFile( fileCSVIt, consulwebFolder, langIt );
-				Logger.info( ConsulWebJob.class, " ***** SALVATO CSV  ITALIANO"  );
-			}
-			if(fileCSVEn == null && UtilMethods.isSet( fileCSVIt) ){
-				fileCSVEn = fileCSVIt ;		
-				Logger.info( ConsulWebJob.class, "Importo il file: INGLESE (UGUALE ITALIANO) " + fileCSVEn.getName() );
-				consulCSVENG = saveContentletsFile( fileCSVEn, consulwebFolder, langEn  , consulCSVITA );
-			}else if(  fileCSVEn != null  ){
-				Logger.info( ConsulWebJob.class, "Importo il file: INGLESE (DIVERSO ITALIANO) " + fileCSVEn.getName() );
-				consulCSVENG = saveContentletsFile( fileCSVEn, consulwebFolder, langEn);
-			}
-
-			Logger.info( ConsulWebJob.class, "CREO / RECUPERO LINK ITLIANO   "  );
-			Contentlet link = creoLink(consulwebFolder, langIt , consulPDFIta );
-			Logger.info( ConsulWebJob.class, "CREO / RECUPERO LINK INGLESE (DEVE ESSERE TRADUZIONE   "  );
-			creoLink(consulwebFolder, langEn , consulPDFEng );
-			Logger.info( ConsulWebJob.class, "CREATO / RECUPERATO IL LINK DEVO CREARE LE RELAZIONI CON ALLEGATODETTAGLIO   "  );
-
-			APILocator.getRelationshipAPI().addRelationship( link.getIdentifier(), consulPDFIta.getIdentifier(), relationNameAllegatoLink );
-			APILocator.getRelationshipAPI().addRelationship( link.getIdentifier(), consulPDFEng.getIdentifier(), relationNameAllegatoLink );
-			if( consulCSVITA != null ){
-				APILocator.getRelationshipAPI().addRelationship( link.getIdentifier(), consulCSVITA.getIdentifier(), relationNameAllegatoLink );
-			}
-			Logger.info( ConsulWebJob.class, "FINE RELAZIONI  "  );
-		}catch (Exception e) {
-			e.printStackTrace();
+		Contentlet consulCSVITA = null; 
+		Contentlet consulCSVENG = null;
+		if( fileCSVIt != null ){
+			Logger.info( ConsulWebJob.class, "Importo il file cvs : " + fileCSVIt.getName() );
+			consulCSVITA = saveContentletsFile( fileCSVIt, consulwebFolder, langIt );
+			Logger.info( ConsulWebJob.class, " ***** SALVATO CSV  ITALIANO"  );
 		}
+		if(fileCSVEn == null && UtilMethods.isSet( fileCSVIt) ){
+			fileCSVEn = fileCSVIt ;		
+			Logger.info( ConsulWebJob.class, "Importo il file CSV : INGLESE (UGUALE ITALIANO) " + fileCSVEn.getName() );
+			consulCSVENG = saveContentletsFile( fileCSVEn, consulwebFolder, langEn  , consulCSVITA );
+		}else if(  fileCSVEn != null  ){
+			Logger.info( ConsulWebJob.class, "Importo il file CV: INGLESE (DIVERSO ITALIANO) " + fileCSVEn.getName() );
+			consulCSVENG = saveContentletsFile( fileCSVEn, consulwebFolder, langEn);
+		}
+		Logger.info( ConsulWebJob.class, "CREO / RECUPERO LINK ITLIANO (PDF )  "  );
+		Contentlet link = creoLink(consulwebFolder, langIt , consulPDFIta );
+		Logger.info( ConsulWebJob.class, "CREO / RECUPERO LINK INGLESE (DEVE ESSERE TRADUZIONE   "  );
+		creoLink(consulwebFolder, langEn , consulPDFEng );
+		Logger.info( ConsulWebJob.class, "CREATO / RECUPERATO IL LINK DEVO CREARE LE RELAZIONI CON ALLEGATODETTAGLIO   "  );
 
-		//		List<Contentlet> checkLinks = ContentUtils.pullRelated( relationNameAllegatoLink, link.getIdentifier(), false, 1, "modDate desc", user, null );
-		//		if ( !checkLinks.isEmpty() ) {
-		//			boolean needRelated =checkLinks.get( 0 ).getIdentifier().equals( link.getIdentifier() ) ;
-		//			if ( needRelated ) {
-		//				APILocator.getRelationshipAPI().addRelationship( link.getIdentifier(), consulPDFIta.getIdentifier(), relationNameAllegatoLink );
-		//				APILocator.getRelationshipAPI().addRelationship( link.getIdentifier(), consulPDFEng.getIdentifier(), relationNameAllegatoLink );
-		//				APILocator.getRelationshipAPI().addRelationship( link.getIdentifier(), consulCSVITA.getIdentifier(), relationNameAllegatoLink );
-		//			}
-		//		}
-		//	creaLinkERelazioni(consulPDFIta, consulCSVITA, consulwebFolder, langIt )	;
-		Logger.info( ConsulWebJob.class, "DEVO MANDARE IN PUBBLICAZIONE REMOTA  "  );
+		APILocator.getRelationshipAPI().addRelationship( link.getIdentifier(), consulPDFIta.getIdentifier(), relationNameAllegatoLink );
+		APILocator.getRelationshipAPI().addRelationship( link.getIdentifier(), consulPDFEng.getIdentifier(), relationNameAllegatoLink );
+		if( consulCSVITA != null ){
+			APILocator.getRelationshipAPI().addRelationship( link.getIdentifier(), consulCSVITA.getIdentifier(), relationNameAllegatoLink );
+		}
+		Logger.info( ConsulWebJob.class, "FINE CREAZIONE ALLEGATO DETTAGLIO / LINK  "  );
 
-		//creaLinkERelazioni(consulPDFEng, consulCSVENG, consulwebFolder, langIt )	;
-		//		if ( remotePublication ) {
-		//			remotePublish( true );
-		//		}
+		if ( remotePublication ) {
+			Logger.info( ConsulWebJob.class, "DEVO MANDARE IN PUBBLICAZIONE REMOTA  "  );
+			remotePublish( true );
+			Logger.info( ConsulWebJob.class, "DATI CONSULWEB INVIATI IN PUBBLICAZIONE REMOTA "  );
+		}
 		published = true;
 	}
 
@@ -142,33 +121,8 @@ public class ConsulWebImport extends AbstractImport {
 			link = createContentlet( stLink, language );
 			updateLinkAllegato( link, allegato );
 			link = persistContentlet( link, "consulWeb_Link" );			
-			//			if ( link != null ) {
-			//				boolean needNewRelationLink = true;
-			//				if ( updateMode ) {
-			//					List<Contentlet> checkLinks = ContentUtils.pullRelated( relationName, link.getIdentifier(), false, 1, "modDate desc", user, null );
-			//					if ( !checkLinks.isEmpty() ) {
-			//						if ( checkLinks.get( 0 ).getIdentifier().equals( link.getIdentifier() ) ) {
-			//							needNewRelationLink = false;
-			//						} else {
-			//							//removeRelatedLink( link, checkLinks.get( 0 ) );
-			//						}
-			//					}
-			//				}
-			////				if ( needNewRelationLink ) {
-			////					APILocator.getRelationshipAPI().addRelationship( link.getIdentifier(), allegato1.getIdentifier(), relationNameAllegatoLink );
-			////					APILocator.getRelationshipAPI().addRelationship( link.getIdentifier(), allegato2.getIdentifier(), relationNameAllegatoLink );
-			////				}
-			//			}	
-
-			//		}else{		 
-			//			Logger.info( ConsulWebJob.class, "creaLinkERelazioni --> " + link.getIdentifier()  + "  "  + allegato1.getIdentifier()  );
-			//
-			//			APILocator.getRelationshipAPI().addRelationship( link.getIdentifier(), allegato1.getIdentifier(), relationNameAllegatoLink );
-			//			APILocator.getRelationshipAPI().addRelationship( link.getIdentifier(), allegato2.getIdentifier(), relationNameAllegatoLink );
-			//		}
 		}
 		return link ;
-
 	}
 
 	protected void creaLinkERelazioni( Contentlet allegato1 , Contentlet allegato2 ,  Folder folder, Language language ) throws Exception{		
@@ -203,34 +157,10 @@ public class ConsulWebImport extends AbstractImport {
 		Contentlet allegato = null;
 		String title = ( language.getLanguageCode().equalsIgnoreCase( "it" ) ? "Elenco" : "List" );
 		if ( updateMode ) {
-			allegato = checkoutAllegato( folder, language , file );
-			if ( fileAsserWorkArround && allegato != null && !language.equals( languageApi.getDefaultLanguage() ) ) {
-				/*
-				 * Workarround per aggirare il problema di disponibilità
-				 * dell'url finale di un fileasset multilanguage con file
-				 * differenti
-
-				Contentlet allegatoPezzotto = checkoutAllegatoPezzotto( folder , file );
-				if ( allegatoPezzotto != null ) {
-					updateFileAsset( allegatoPezzotto, title, file, folder );
-					allegatoPezzotto = persistContentlet( allegatoPezzotto, "consulWeb_FileAsset_" + language.getId() );
-				} else {
-					Logger.warn( ConsulWebImport.class, "nessun allegato in default language trovato, update parziale" );
-				} */
-			}
+			allegato = checkoutAllegato( folder, language , file );			 
 		}
 		if ( allegato == null ) {
-			allegato = createContentlet( stAllegato, language );
-			if ( fileAsserWorkArround && !language.equals( languageApi.getDefaultLanguage() ) ) {
-				/*
-				 * Workarround per aggirare il problema di disponibilità
-				 * dell'url finale di un fileasset multilanguage con file
-				 * differenti
-
-				Contentlet allegatoPezzotto = createContentlet( stAllegato, languageApi.getDefaultLanguage() );
-				updateFileAsset( allegatoPezzotto, title, file, folder );
-				allegatoPezzotto = persistContentlet( allegatoPezzotto, "consulWeb_FileAsset_" + language.getId() ); */
-			}
+			allegato = createContentlet( stAllegato, language );			 
 		}
 		updateFileAsset( allegato, title, file, folder );
 		allegato = persistContentletAllegato( allegato,  "consulWeb_FileAsset_" +  file.getName() );
@@ -254,29 +184,11 @@ public class ConsulWebImport extends AbstractImport {
 		}
 		List<Permission> permissionList = permissionApi.getPermissions( getStructure( getStructureName() ));
 		Logger.info( this.getClass(), " permissionList  " +  permissionList  );
-		//		if ( category != null ) {
-		//			List<Category> categories = Collections.singletonList( category );
-		//			Logger.info( this.getClass(), " category getKey  " +  category.getKey()   );				
-		//			returnContentlet = contentletApi.checkin( contentlet, categories, permissionList, insertUser, true );
-		//		} else {
 		returnContentlet = contentletApi.checkin( contentlet, permissionList, insertUser, true );
-		//		}
-
 		if ( returnContentlet.isLocked() ) {
 			contentletApi.unlock( returnContentlet, insertUser, true );
 		}
-
-		//		if ( returnContentlet.getStructure().getVelocityVarName().equalsIgnoreCase( "Link" ) && returnContentlet.getLanguageId() != languageApi.getDefaultLanguage().getId() ) {
-		//			try {// Pezzotto per gestire errore pubblicazione eventuale x
-		//				// linguagio non di default
-		//				contentletApi.publish( returnContentlet, insertUser, true );
-		//			} catch ( Exception e ) {
-		//				Logger.warn( this.getClass(), "Pubblicazione Link con errore gestito in language non di default ", e );
-		//			}
-		//		} else {			
 		contentletApi.publish( returnContentlet, insertUser , true );
-		//		}
-
 		String newIdentifier = returnContentlet.getIdentifier();
 		if ( !UtilMethods.isSet( identifier ) && UtilMethods.isSet( newIdentifier ) ) {
 			idMap.put( contextIdentifier, newIdentifier );
@@ -314,41 +226,17 @@ public class ConsulWebImport extends AbstractImport {
 			query.append( " +conHost:" );
 			query.append( host.getIdentifier() );
 			query.append( " +deleted:false +working:true +live:true" );
-			System.out.println(  " QUERY CONSULWEB checkoutAllegato  " + query );
+			Logger.info( this.getClass(), " QUERY CONSULWEB checkoutAllegato  " + query );
 			List<Contentlet> contents = contentletApi.checkoutWithQuery( query.toString(), user, true );
 			if ( !contents.isEmpty() ) {
-				System.out.println(  " Esiste allegato con filename " + file.getName() );
+				Logger.info( this.getClass(), " Esiste allegato con filename " + file.getName() );
 				return contents.get( 0 );			
-			}else
-			{
-				System.out.println(  " NON ESISTE  " + file.getName() );
+			}else {
+				Logger.info( this.getClass(),  " NON ESISTE  " + file.getName() );
 			}
 		}
 		return null;
 	}
-
-	//	private Contentlet checkoutAllegatoPezzotto( Folder folder , File file) throws DotContentletStateException, DotDataException, DotSecurityException, ParseException {
-	//		StringBuilder query = new StringBuilder();
-	//		query.append( "+structureName:" );
-	//		query.append( allegatoStructureName );
-	//		query.append( " +languageId:" );
-	//		query.append( languageApi.getDefaultLanguage().getId() );
-	//		//		query.append( " +" + allegatoStructureName + ".fileName:*_en.pdf" );
-	//		query.append( " +" + allegatoStructureName + ".fileName:"+file.getName()  );
-	//		//	+file.getName() 
-	//		query.append( " +conFolder:" );
-	//		query.append( folder.getInode() );
-	//		query.append( " +conHost:" );
-	//		query.append( host.getIdentifier() );
-	//		query.append( " +deleted:false +working:true +live:true" );
-	//		System.out.println(  " QUERY CONSULWEB checkoutAllegatoPezzotto " + query );
-	//
-	//		List<Contentlet> contents = contentletApi.checkoutWithQuery( query.toString(), user, true );
-	//		if ( !contents.isEmpty() ) {
-	//			return contents.get( 0 );
-	//		}
-	//		return null;
-	//	}
 
 	private void updateLinkAllegato( Contentlet link, Contentlet allegato ) {
 		link.setProperty( "titolo", allegato.getStringProperty( "title" ) );

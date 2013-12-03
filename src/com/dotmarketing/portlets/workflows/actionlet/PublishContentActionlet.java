@@ -2,7 +2,7 @@ package com.dotmarketing.portlets.workflows.actionlet;
 
 import java.util.List;
 import java.util.Map;
-
+import com.dotcms.content.elasticsearch.business.ESContentletIndexAPI;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.portlets.contentlet.model.Contentlet;
 import com.dotmarketing.portlets.workflows.model.WorkflowActionClassParameter;
@@ -15,8 +15,8 @@ import com.dotmarketing.util.UtilMethods;
 
 public class PublishContentActionlet extends ContentActionlet {
 
-
-
+	private ESContentletIndexAPI indexAPI = new ESContentletIndexAPI();
+	
 	/**
 	 * 
 	 */
@@ -41,8 +41,14 @@ public class PublishContentActionlet extends ContentActionlet {
 			}
 			
 			for(Contentlet c : contentletsToProcess){
-				if(!UtilMethods.isSet(APILocator.getIdentifierAPI().find(c.getIdentifier()).getSysPublishDate()))
-					APILocator.getContentletAPI().publish(c, processor.getUser(), false);
+				if(!UtilMethods.isSet(APILocator.getIdentifierAPI().find(c.getIdentifier()).getSysPublishDate())){
+					Logger.debug(getClass(), "STO PUBBLICANDO IL CONTENUTO: " + c.getTitle());
+					APILocator.getContentletAPI().publish(c, processor.getUser(), true);
+					Logger.debug(getClass(), "PUBBLICATO IL CONTENUTO: " + c.getTitle());
+					APILocator.getContentletAPI().unlock(c, processor.getUser(), true);
+					indexAPI.addContentToIndex(c,false,true,false,null);
+					Logger.debug(getClass(), "AGGIUNTO IL CONTENUTO: " + c.getTitle());
+				}
 			}
 
 		} catch (Exception e) {

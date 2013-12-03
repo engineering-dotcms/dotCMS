@@ -95,7 +95,7 @@ public class MostResearchedTermsFilter implements Filter{
 		langAPI = APILocator.getLanguageAPI();
 		hostWebAPI = WebAPILocator.getHostWebAPI();
 		try {
-			policy = Policy.getInstance(this.getClass().getClassLoader().getResourceAsStream(POLICY_FILENAME));
+			policy = Policy.getInstance(Thread.currentThread().getContextClassLoader().getResourceAsStream(POLICY_FILENAME));
 			antiSamy = new AntiSamy(policy);
 		} catch (PolicyException e) {
 			Logger.error(this, e.getMessage(), e);

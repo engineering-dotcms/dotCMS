@@ -59,6 +59,7 @@ import com.dotmarketing.util.Config;
 import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.UtilMethods;
 import com.dotmarketing.util.WebKeys;
+import com.eng.dotcms.additions.workflow.actionlets.AddHTMLPagePathActionlet;
 import com.liferay.portal.language.LanguageException;
 import com.liferay.portal.language.LanguageUtil;
 import com.liferay.portal.model.User;
@@ -95,7 +96,8 @@ public class WorkflowAPIImpl implements WorkflowAPI, WorkflowAPIOsgiService {
 			MultipleApproverActionlet.class,
 			TwitterActionlet.class,
 			PushPublishActionlet.class,
-			CheckURLAccessibilityActionlet.class
+			CheckURLAccessibilityActionlet.class,
+			AddHTMLPagePathActionlet.class
 		}));
 
 		refreshWorkFlowActionletMap();
