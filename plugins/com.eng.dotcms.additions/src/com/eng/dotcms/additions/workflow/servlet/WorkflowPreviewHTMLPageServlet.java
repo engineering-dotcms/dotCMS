@@ -43,13 +43,12 @@ public class WorkflowPreviewHTMLPageServlet extends HttpServlet {
 		req.getSession().setAttribute(com.dotmarketing.util.WebKeys.ADMIN_MODE_SESSION, "true");
 		
 		User user;
-//		try {
+		try {
 //			user = UserLocalManagerUtil.getUserById(userId);
 //			req.setAttribute(WebKeys.USER, user);
 			req.getRequestDispatcher(path).forward(req, resp);
-//		} catch (PortalException e) {
-//			e.printStackTrace();
-//		} catch (SystemException e) {
+		} catch (Exception e) {} 
+//		catch (SystemException e) {
 //			e.printStackTrace();
 //		}
 		
