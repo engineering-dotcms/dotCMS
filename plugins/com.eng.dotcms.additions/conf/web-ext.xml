@@ -1,0 +1,8 @@
+<servlet>
+	<servlet-name>WorkflowPreviewHTMLPageServlet</servlet-name>
+	<servlet-class>com.eng.dotcms.additions.workflow.servlet.WorkflowPreviewHTMLPageServlet</servlet-class>
+</servlet>
+<servlet-mapping>
+	<servlet-name>WorkflowPreviewHTMLPageServlet</servlet-name>
+	<url-pattern>/servlets/workflowRedirect</url-pattern>
+</servlet-mapping>

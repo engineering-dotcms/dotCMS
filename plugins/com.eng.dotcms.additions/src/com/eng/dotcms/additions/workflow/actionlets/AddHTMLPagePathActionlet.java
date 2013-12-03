@@ -7,6 +7,7 @@ import java.util.Map;
 import com.dotmarketing.beans.Host;
 import com.dotmarketing.beans.Identifier;
 import com.dotmarketing.business.APILocator;
+import com.dotmarketing.common.db.DotConnect;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.portlets.contentlet.model.Contentlet;
@@ -16,6 +17,7 @@ import com.dotmarketing.portlets.workflows.model.WorkflowActionFailureException;
 import com.dotmarketing.portlets.workflows.model.WorkflowActionletParameter;
 import com.dotmarketing.portlets.workflows.model.WorkflowComment;
 import com.dotmarketing.portlets.workflows.model.WorkflowProcessor;
+import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.UtilMethods;
 
 public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
@@ -24,7 +26,9 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
+	
+	private static String PRE_SERVLET = "/servlets/workflowRedirect?p=";
+	
 	@Override
 	public List<WorkflowActionletParameter> getParameters() {
 		// TODO Auto-generated method stub
@@ -44,13 +48,22 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 	@Override
 	public void executeAction(WorkflowProcessor processor, Map<String, WorkflowActionClassParameter> params) throws WorkflowActionFailureException {
 		try{
+			Host currentHost = APILocator.getHostAPI().find(processor.getContentlet().getHost(), APILocator.getUserAPI().getSystemUser(), true);
+			Logger.info(getClass(), "Start add path to comments");
 			WorkflowComment lastCommentWithPaths = new WorkflowComment();
 			// retrieve the last comment on this task
-			WorkflowComment lastComment = APILocator.getWorkflowAPI().findWorkFlowComments(processor.getTask()).get(0);
-			List<String> paths = getHTMLPagePaths(processor.getContentlet());
+			List<WorkflowComment> comments = APILocator.getWorkflowAPI().findWorkFlowComments(processor.getTask());
+			WorkflowComment lastComment = null;
+			if(comments.size()>0)
+				lastComment = comments.get(0);
+			String _lastCommentId = (lastComment!=null)?lastComment.getId():"NULLO";
+			Logger.info(getClass(), "Last comment on this task: " + _lastCommentId);
+			List<String> paths = getHTMLPagePaths(processor.getContentlet(), currentHost);
+			Logger.info(getClass(), "Number of pages into the contentlet path: " + paths.size());
 			lastCommentWithPaths.setPostedBy(processor.getContentlet().getModUser());			
 			StringBuilder commentText = new StringBuilder();
 			if(null!=lastComment && UtilMethods.isSet(lastComment.getComment())){
+				Logger.info(getClass(), "There is previous comment...");
 				commentText.append(lastComment.getComment());
 				commentText.append("<br /><br />");
 			}
@@ -58,17 +71,27 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 			commentText.append("<br />");
 			commentText.append("<ul>");
 			for(String page:paths){
-				commentText.append("<li><a href=");
-				commentText.append(page);
-				commentText.append(">");
-				commentText.append(page);
+				String[] splitted = page.split("[|]");
+				commentText.append("<li><a href=\"");
+				commentText.append("https://");
+				commentText.append(currentHost.getHostname());
+				commentText.append(PRE_SERVLET);
+				commentText.append(splitted[1]);
+				commentText.append("\">");
+				commentText.append(splitted[0]);
 				commentText.append("</a>");
 				commentText.append("</li>");
 			}
 			commentText.append("</ul>");
 			lastCommentWithPaths.setComment(commentText.toString());
 			lastCommentWithPaths.setWorkflowtaskId(processor.getTask().getId());
+			Logger.info(getClass(), "Save the comment...");
+			if(null!=lastComment)
+				APILocator.getWorkflowAPI().deleteComment(lastComment);
 			APILocator.getWorkflowAPI().saveComment(lastCommentWithPaths);
+			processor.setWorkflowMessage(lastCommentWithPaths.getComment());
+			processor.getContentlet().setStringProperty(Contentlet.WORKFLOW_COMMENTS_KEY, lastCommentWithPaths.getComment());
+			Logger.info(getClass(), "Comment saved.");
 		}catch(DotDataException e){
 			e.printStackTrace();
 		}catch (DotSecurityException e) {
@@ -76,21 +99,59 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 		}
 	}
 	
-	private List<String> getHTMLPagePaths(Contentlet contentlet) throws DotDataException, DotSecurityException {
-		Host currentHost = APILocator.getHostAPI().find(contentlet.getHost(), APILocator.getUserAPI().getSystemUser(), true);
+	private List<String> getHTMLPagePaths(Contentlet contentlet, Host currentHost) throws DotDataException, DotSecurityException {
+		Logger.info(getClass(), "Current host: " + currentHost.getHostname());
 		List<String> paths = new ArrayList<String>();
 		
 		Identifier id = APILocator.getIdentifierAPI().find(contentlet.getIdentifier());
-		List<Identifier> ids = APILocator.getIdentifierAPI().findByURIPattern("htmlpage", id.getParentPath(), 
-				true, false, true, currentHost);
+		List<Identifier> ids = findByParentPath(id.getParentPath(),currentHost.getIdentifier());
+		Logger.info(getClass(), "Number of ids of htmlpage into the path: " + id.getParentPath() + " = " + ids.size());
 		for(Identifier identifier:ids){
 			StringBuilder page = new StringBuilder();
-			page.append("http://");
+			page.append("https://");
 			page.append(currentHost.getHostname());
 			page.append(identifier.getParentPath());
 			page.append(identifier.getAssetName());
+			page.append("|");
+			page.append(identifier.getParentPath());
+			page.append(identifier.getAssetName());
+			Logger.info(getClass(), "URL to append: " + page.toString());
+			
 			paths.add(page.toString());
 		}
 		return paths;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private List<Identifier> findByParentPath(String parentPath, String host) throws DotDataException {
+		DotConnect dc = new DotConnect();
+		StringBuilder bob = new StringBuilder("select distinct i.* from identifier i ");
+		bob.append("where i.asset_type = ? ");
+		bob.append("and i.parent_path = ? ");
+		bob.append("and i.host_inode = ? ");
+
+		dc.setSQL(bob.toString());
+		dc.addParam("htmlpage");
+		dc.addParam(parentPath);
+		dc.addParam(host);
+		return convertDotConnectMapToPOJO(dc.loadResults());
+	}
+	
+	private List<Identifier> convertDotConnectMapToPOJO(List<Map<String,String>> results){
+		List<Identifier> ret = new ArrayList<Identifier>();
+		if(results == null || results.size()==0){
+			return ret;
+		}
+		
+		for (Map<String, String> map : results) {
+			Identifier i = new Identifier();
+			i.setAssetName(map.get("asset_name"));
+			i.setAssetType(map.get("asset_type"));
+			i.setHostId(map.get("host_inode"));
+			i.setId(map.get("id"));
+			i.setParentPath(map.get("parent_path"));
+			ret.add(i);
+		}
+		return ret;
 	}
 }
