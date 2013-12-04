@@ -685,7 +685,7 @@ ELASTICSEARCH_USE_FILTERS_FOR_SEARCHING=true
 ##es.cluster.name=dotCMSContentIndexColl
 
 ## PRODUZIONE
-es.cluster.name=dotCMSContentIndex
+es.cluster.name=dotCMSContentIndexPSMStaging
 
 ## PSM (ST)
 es.network.host=161.27.206.130
