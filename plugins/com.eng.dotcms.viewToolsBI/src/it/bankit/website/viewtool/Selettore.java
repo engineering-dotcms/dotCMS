@@ -69,7 +69,7 @@ public class Selettore {
 		try{
 			User user = APILocator.getUserAPI().getSystemUser();
 			Contentlet dettaglio;
-			String sortOrder = "Link.dataEmanazione desc , Link.sortOrder1 asc";
+			String sortOrder = "Link.dataEmanazione desc , Link.sortOrder1 asc , Link.titolo asc";
 			String folderTranslation = "";
 
 			if (UtilMethods.isSet(path) && !path.equals("/")) {
@@ -78,7 +78,7 @@ public class Selettore {
 			}
 
 			String dettaglioQuery = "";
-			dettaglioQuery = "+StructureName:Dettaglio +languageId:" + languageID + " +parentPath:" + path + "/";
+			dettaglioQuery = "+StructureName:Dettaglio  +deleted:false  +languageId:" + languageID + " +parentPath:" + path + "/";
 			List<Contentlet> dettagli = APILocator.getContentletAPI().search(dettaglioQuery, -1, 0, "Dettaglio.dataEmanazione desc", user, false);
 
 			if (dettagli.size() > 0) {
@@ -89,7 +89,7 @@ public class Selettore {
 			}
 			if (!folderTranslation.equals("")) {
 				String q = "";
-				q = "+StructureName:Link +languageId:" + languageID + " +" + mode + ":true +path:" + path + "/*";
+				q = "+StructureName:Link  +deleted:false  +languageId:" + languageID + " +" + mode + ":true +path:" + path + "/*";
 				List<Contentlet> linksList = APILocator.getContentletAPI().search(q, -1, 0, sortOrder, APILocator.getUserAPI().getSystemUser(), false);
 
 				String qLinkSemplice = "";
@@ -125,12 +125,10 @@ public class Selettore {
 							sommario = link.getStringProperty("sommario");
 						}	
 					}
-
 					String linkType = link.getStringProperty("linkType");
 
 					if ("A".equals(linkType)) {
 						Contentlet allegatoDettaglio;
-
 						if (UtilMethods.isSet(link.getStringProperty("allegatoId"))) {
 							allegatoId = link.getStringProperty("allegatoId");
 						} else if (UtilMethods.isSet(link.getStringProperty("allegato"))) {
@@ -140,10 +138,8 @@ public class Selettore {
 						String queryForAllegatoDettaglio = "";
 
 						if (allegatoId != null && !"".equals(allegatoId)) {
-
-							queryForAllegatoDettaglio = "+identifier:" + allegatoId + " +languageId:" + languageID;
+							queryForAllegatoDettaglio = "+identifier:" + allegatoId + " +languageId:" + languageID  +" deleted:false";
 							List<Contentlet> allegatoList = APILocator.getContentletAPI().search( queryForAllegatoDettaglio, -1, 0, null, user, false);
-
 							if (allegatoList.size() > 0) {
 								allegatoDettaglio = allegatoList.get(0);
 								File file = allegatoDettaglio.getBinary("fileAsset");
@@ -155,7 +151,6 @@ public class Selettore {
 								if (i == null) {
 									i = APILocator.getIdentifierAPI().find(id);
 								}
-
 								src = assignIcon(type);
 								if (src.equals(WMV)) {
 									href = i.getPath() + "internal&action=video.action";
@@ -264,8 +259,12 @@ public class Selettore {
 			return ZIPICON;
 		} else if (type.contains(".xls")) {
 			return XLSICON;
-		} else if (type.contains(".doc")) {
+		} else if (type.contains(".xlsx")) {
+			return XLSICON;
+		}else if (type.contains(".doc")) {
 			return DOCICON;
+		} else if (type.contains(".docx")) {
+			return XLSICON;
 		} else if (type.contains(".epub")) {
 			return EPUBICON;
 		} else if (type.contains(".wmv")) {
@@ -298,6 +297,8 @@ public class Selettore {
 			return EPUB;
 		} else if (type.contains(".cert")) {
 			return CERT;
+		} else if (type.contains(".der")) {
+			return PKCS;
 		} else if (type.contains(".zip.p7m")) {
 			return PKCS;
 		} else {
@@ -357,28 +358,28 @@ public class Selettore {
 
 	}
 
-	private String sizeRenderer(int size) {
-
-		int divider = 0;
-		String unit = "";
-
-		if (size < 1000) {
-			divider = 1;
-			unit = "B";
-		} else if (size < 1048576) {
-			divider = 1024;
-			unit = "kB";
-		} else if (size < 1073741824) {
-			divider = 1048576;
-			unit = "MB";
-		} else {
-			divider = 1073741824;
-			unit = "GB";
-		}
-
-		return Double.toString(Math.round(size / divider)) + " " + unit;
-
-	}
+//	private String sizeRenderer(int size) {
+//
+//		int divider = 0;
+//		String unit = "";
+//
+//		if (size < 1000) {
+//			divider = 1;
+//			unit = "B";
+//		} else if (size < 1048576) {
+//			divider = 1024;
+//			unit = "kB";
+//		} else if (size < 1073741824) {
+//			divider = 1048576;
+//			unit = "MB";
+//		} else {
+//			divider = 1073741824;
+//			unit = "GB";
+//		}
+//
+//		return Double.toString(Math.round(size / divider)) + " " + unit;
+//
+//	}
 
 	public List<Contentlet> nullLast(List<Contentlet> listOfElements) {
 		List<Contentlet> orderedList = new ArrayList<Contentlet>();
