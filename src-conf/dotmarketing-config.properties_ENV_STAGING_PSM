@@ -94,7 +94,7 @@ CACHE_BINDADDRESS=161.27.206.130
 
 ##	TCP Config
 ##	The INITIAL_HOSTS is a comma separated list of hosts and port that are in the cluster. You must include the local server also.
-CACHE_TCP_INITIAL_HOSTS=161.27.206.130[7800],161.27.206.130[7800]
+CACHE_TCP_INITIAL_HOSTS=161.27.206.130[7800],161.27.206.131[7800]
 
 ##	Some systems are not set up for UDP Multicast over IPv6 properly.
 CACHE_FORCE_IPV4=true
