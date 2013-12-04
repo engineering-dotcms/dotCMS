@@ -43,7 +43,7 @@ REPORT_PATH=/reports
 ##	shared folder in unix/linux enviroments we encourage you to use symbolic links
 ##	If this variable is commented the system will work as usual using
 ##	the ASSET_PATH variable as the assets directory inside liferay web root
-ASSET_REAL_PATH = /mnt/oradbfs/dotcms201/dotAssets
+ASSET_REAL_PATH = /mnt/oradbfs/staging_area/assets
 
 ##	This variable should be used if the dynamic content is to be placed outside of the web application.  By the default, the location
 ##	is in dotCMS/dotsecure.  If running as war inside an application server, it is important to move this data to a location
