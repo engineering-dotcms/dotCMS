@@ -98,6 +98,7 @@ import com.dotmarketing.portlets.structure.model.Structure;
 import com.dotmarketing.portlets.workflows.business.DotWorkflowException;
 import com.dotmarketing.portlets.workflows.business.WorkflowAPI;
 import com.dotmarketing.portlets.workflows.model.WorkflowProcessor;
+import com.dotmarketing.portlets.workflows.model.WorkflowScheme;
 import com.dotmarketing.services.ContentletMapServices;
 import com.dotmarketing.services.ContentletServices;
 import com.dotmarketing.services.PageServices;
@@ -384,7 +385,9 @@ public class ESContentletAPIImpl implements ContentletAPI {
                     Identifier id = APILocator.getIdentifierAPI().find(value);
                     if (InodeUtils.isSet(id.getInode()) && id.getAssetType().equals("contentlet")) {
                     	Contentlet fileAssetCont = findBinaryAssociatedContent(id,contentlet.getLanguageId());
-                        publish(fileAssetCont, APILocator.getUserAPI().getSystemUser(), false);
+                    	WorkflowScheme wfSchema = APILocator.getWorkflowAPI().findSchemeForStruct(fileAssetCont.getStructure());
+                    	if(null==wfSchema || !wfSchema.isMandatory())
+                    		publish(fileAssetCont, APILocator.getUserAPI().getSystemUser(), false);                    	
                     }else if(InodeUtils.isSet(id.getInode())){
                         File file  = (File) APILocator.getVersionableAPI().findWorkingVersion(id, APILocator.getUserAPI().getSystemUser(), false);
                         PublishFactory.publishAsset(file, user, false, isNewVersion);

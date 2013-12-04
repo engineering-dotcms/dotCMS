@@ -1,6 +1,7 @@
 package com.eng.dotcms.additions.workflow.actionlets;
 
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ import com.dotmarketing.common.db.DotConnect;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.portlets.contentlet.model.Contentlet;
+import com.dotmarketing.portlets.structure.model.Structure;
 import com.dotmarketing.portlets.workflows.actionlet.WorkFlowActionlet;
 import com.dotmarketing.portlets.workflows.model.WorkflowActionClassParameter;
 import com.dotmarketing.portlets.workflows.model.WorkflowActionFailureException;
@@ -56,42 +58,48 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 			WorkflowComment lastComment = null;
 			if(comments.size()>0)
 				lastComment = comments.get(0);
-			String _lastCommentId = (lastComment!=null)?lastComment.getId():"NULLO";
-			Logger.info(getClass(), "Last comment on this task: " + _lastCommentId);
-			List<String> paths = getHTMLPagePaths(processor.getContentlet(), currentHost);
-			Logger.info(getClass(), "Number of pages into the contentlet path: " + paths.size());
-			lastCommentWithPaths.setPostedBy(processor.getContentlet().getModUser());			
-			StringBuilder commentText = new StringBuilder();
-			if(null!=lastComment && UtilMethods.isSet(lastComment.getComment())){
-				Logger.info(getClass(), "There is previous comment...");
-				commentText.append(lastComment.getComment());
-				commentText.append("<br /><br />");
+			String _lastCommentId = (lastComment!=null)?lastComment.getId():"NULL";
+			Logger.debug(getClass(), "Last comment on this task: " + _lastCommentId);
+			List<String> paths = new ArrayList<String>();
+			if(processor.getContentlet().getStructure().getStructureType()!=Structure.STRUCTURE_TYPE_FILEASSET)
+				paths = getHTMLPagePaths(processor.getContentlet(), currentHost);
+			else
+				paths = getFileAssetPath(processor.getContentlet(), currentHost);
+			Logger.debug(getClass(), "Number of pages into the contentlet path: " + paths.size());
+			if(paths.size()>0){
+				lastCommentWithPaths.setPostedBy(processor.getContentlet().getModUser());			
+				StringBuilder commentText = new StringBuilder();
+				if(null!=lastComment && UtilMethods.isSet(lastComment.getComment())){
+					Logger.info(getClass(), "There is previous comment...");
+					commentText.append(lastComment.getComment());
+					commentText.append("<br /><br />");
+				}
+				commentText.append("Il contenuto è consultabile al/ai seguente/i percorso/i:");
+				commentText.append("<br />");
+				commentText.append("<ul>");
+				for(String page:paths){
+					String[] splitted = page.split("[|]");
+					commentText.append("<li><a href=\"");
+					commentText.append("https://");
+					commentText.append(currentHost.getHostname());
+					commentText.append(PRE_SERVLET);
+					commentText.append(splitted[1]);
+					commentText.append("\">");
+					commentText.append(splitted[0]);
+					commentText.append("</a>");
+					commentText.append("</li>");
+				}
+				commentText.append("</ul>");
+				lastCommentWithPaths.setComment(commentText.toString());
+				lastCommentWithPaths.setWorkflowtaskId(processor.getTask().getId());
+				Logger.info(getClass(), "Save the comment...");
+				if(null!=lastComment)
+					APILocator.getWorkflowAPI().deleteComment(lastComment);
+				APILocator.getWorkflowAPI().saveComment(lastCommentWithPaths);
+				processor.setWorkflowMessage(lastCommentWithPaths.getComment());
+				processor.getContentlet().setStringProperty(Contentlet.WORKFLOW_COMMENTS_KEY, lastCommentWithPaths.getComment());
+				Logger.info(getClass(), "Comment saved.");
 			}
-			commentText.append("Queste sono le pagine in cui il contenuto potrebbe essere visualizzato:");
-			commentText.append("<br />");
-			commentText.append("<ul>");
-			for(String page:paths){
-				String[] splitted = page.split("[|]");
-				commentText.append("<li><a href=\"");
-				commentText.append("https://");
-				commentText.append(currentHost.getHostname());
-				commentText.append(PRE_SERVLET);
-				commentText.append(splitted[1]);
-				commentText.append("\">");
-				commentText.append(splitted[0]);
-				commentText.append("</a>");
-				commentText.append("</li>");
-			}
-			commentText.append("</ul>");
-			lastCommentWithPaths.setComment(commentText.toString());
-			lastCommentWithPaths.setWorkflowtaskId(processor.getTask().getId());
-			Logger.info(getClass(), "Save the comment...");
-			if(null!=lastComment)
-				APILocator.getWorkflowAPI().deleteComment(lastComment);
-			APILocator.getWorkflowAPI().saveComment(lastCommentWithPaths);
-			processor.setWorkflowMessage(lastCommentWithPaths.getComment());
-			processor.getContentlet().setStringProperty(Contentlet.WORKFLOW_COMMENTS_KEY, lastCommentWithPaths.getComment());
-			Logger.info(getClass(), "Comment saved.");
 		}catch(DotDataException e){
 			e.printStackTrace();
 		}catch (DotSecurityException e) {
@@ -100,7 +108,7 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 	}
 	
 	private List<String> getHTMLPagePaths(Contentlet contentlet, Host currentHost) throws DotDataException, DotSecurityException {
-		Logger.info(getClass(), "Current host: " + currentHost.getHostname());
+		Logger.debug(getClass(), "Current host: " + currentHost.getHostname());
 		List<String> paths = new ArrayList<String>();
 		
 		Identifier id = APILocator.getIdentifierAPI().find(contentlet.getIdentifier());
@@ -115,10 +123,34 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 			page.append("|");
 			page.append(identifier.getParentPath());
 			page.append(identifier.getAssetName());
-			Logger.info(getClass(), "URL to append: " + page.toString());
+			Logger.debug(getClass(), "URL to append: " + page.toString());
 			
 			paths.add(page.toString());
 		}
+		return paths;
+	}
+	
+	private List<String> getFileAssetPath(Contentlet fileAsset, Host currentHost) throws DotDataException {
+		Logger.debug(getClass(), "Current host: " + currentHost.getHostname());
+		List<String> paths = new ArrayList<String>();
+		Identifier identifier = APILocator.getIdentifierAPI().find(fileAsset.getIdentifier());
+		String[] split_point = identifier.getAssetName().split("[.]");
+		StringBuilder page = new StringBuilder();
+		page.append("https://");
+		page.append(currentHost.getHostname());
+		page.append(identifier.getParentPath());
+		page.append(identifier.getAssetName());
+		page.append("|");
+		page.append("/dotAsset/");
+		page.append(identifier.getId());
+		page.append(".");
+		if(split_point.length>0)
+			page.append(split_point[split_point.length-1]);
+		page.append("&amp;random=");
+		page.append(new GregorianCalendar().getTimeInMillis());
+		Logger.debug(getClass(), "URL to append: " + page.toString());
+		
+		paths.add(page.toString());
 		return paths;
 	}
 	

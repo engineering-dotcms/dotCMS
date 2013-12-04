@@ -155,7 +155,10 @@ public class WfTaskAjax extends WfBaseAction {
 				if(con == null || ! UtilMethods.isSet(con.getInode())){
 					List<Language> langs = APILocator.getLanguageAPI().getLanguages();
 					for(Language lang : langs){
-						con = (Contentlet) APILocator.getContentletAPI().findContentletByIdentifier(id.getId(), false, lang.getId(), getUser(), false);
+						try{
+							con = (Contentlet) APILocator.getContentletAPI().findContentletByIdentifier(id.getId(), false, lang.getId(), getUser(), false);
+						}catch (Exception e) {
+						}
 						if(con != null && UtilMethods.isSet(con.getInode())){
 							break;
 						}

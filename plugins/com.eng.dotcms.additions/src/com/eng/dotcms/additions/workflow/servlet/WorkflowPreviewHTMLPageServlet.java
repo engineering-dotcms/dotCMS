@@ -47,7 +47,8 @@ public class WorkflowPreviewHTMLPageServlet extends HttpServlet {
 //			user = UserLocalManagerUtil.getUserById(userId);
 //			req.setAttribute(WebKeys.USER, user);
 			req.getRequestDispatcher(path).forward(req, resp);
-		} catch (Exception e) {} 
+		} catch (Exception e) {
+		} 
 //		catch (SystemException e) {
 //			e.printStackTrace();
 //		}
