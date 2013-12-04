@@ -82,7 +82,7 @@ CACHE_CLUSTER_THROUGH_DB=false
 
 ##	Assuming CACHE_CLUSTER_THROUGH_DB is false the cluster will try to use the network to communicate what needs to be invalidated with other nodes
 ##	Currently you can use TCP or UDP to configure this communication. set to tcp or udp for the protocol
-CACHE_PROTOCOL=udp
+CACHE_PROTOCOL=tcp
 
 ##	The BINDPORT is the port to locally bind to.  The BINDADDRESS is the local address to bind to.  These are not always necessary.
 ##	For TCP the bind address and port are usually required. If you are having issues with UDP try to set the bindaddress.
