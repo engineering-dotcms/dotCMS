@@ -1,8 +1,10 @@
 package com.eng.dotcms.additions.workflow.actionlets;
 
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
+
 import com.dotmarketing.beans.Host;
 import com.dotmarketing.beans.Identifier;
 import com.dotmarketing.business.APILocator;
@@ -72,7 +74,7 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 					commentText.append(lastComment.getComment());
 					commentText.append("<br /><br />");
 				}
-				commentText.append("Queste sono le pagine in cui il contenuto potrebbe essere visualizzato:");
+				commentText.append("Il contenuto è consultabile al/ai seguente/i percorso/i:");
 				commentText.append("<br />");
 				commentText.append("<ul>");
 				for(String page:paths){
@@ -106,7 +108,7 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 	}
 	
 	private List<String> getHTMLPagePaths(Contentlet contentlet, Host currentHost) throws DotDataException, DotSecurityException {
-		Logger.info(getClass(), "Current host: " + currentHost.getHostname());
+		Logger.debug(getClass(), "Current host: " + currentHost.getHostname());
 		List<String> paths = new ArrayList<String>();
 		
 		Identifier id = APILocator.getIdentifierAPI().find(contentlet.getIdentifier());
@@ -121,7 +123,7 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 			page.append("|");
 			page.append(identifier.getParentPath());
 			page.append(identifier.getAssetName());
-			Logger.info(getClass(), "URL to append: " + page.toString());
+			Logger.debug(getClass(), "URL to append: " + page.toString());
 			
 			paths.add(page.toString());
 		}
@@ -129,18 +131,24 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 	}
 	
 	private List<String> getFileAssetPath(Contentlet fileAsset, Host currentHost) throws DotDataException {
-		Logger.info(getClass(), "Current host: " + currentHost.getHostname());
+		Logger.debug(getClass(), "Current host: " + currentHost.getHostname());
 		List<String> paths = new ArrayList<String>();
 		Identifier identifier = APILocator.getIdentifierAPI().find(fileAsset.getIdentifier());
+		String[] split_point = identifier.getAssetName().split("[.]");
 		StringBuilder page = new StringBuilder();
 		page.append("https://");
 		page.append(currentHost.getHostname());
 		page.append(identifier.getParentPath());
 		page.append(identifier.getAssetName());
 		page.append("|");
-		page.append(identifier.getParentPath());
-		page.append(identifier.getAssetName());
-		Logger.info(getClass(), "URL to append: " + page.toString());
+		page.append("/dotAsset/");
+		page.append(identifier.getId());
+		page.append(".");
+		if(split_point.length>0)
+			page.append(split_point[split_point.length-1]);
+		page.append("&amp;random=");
+		page.append(new GregorianCalendar().getTimeInMillis());
+		Logger.debug(getClass(), "URL to append: " + page.toString());
 		
 		paths.add(page.toString());
 		return paths;
