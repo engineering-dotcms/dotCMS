@@ -19,6 +19,7 @@ import com.dotmarketing.portlets.workflows.model.WorkflowActionFailureException;
 import com.dotmarketing.portlets.workflows.model.WorkflowActionletParameter;
 import com.dotmarketing.portlets.workflows.model.WorkflowComment;
 import com.dotmarketing.portlets.workflows.model.WorkflowProcessor;
+import com.dotmarketing.util.Config;
 import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.UtilMethods;
 
@@ -30,6 +31,9 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 	private static final long serialVersionUID = 1L;
 	
 	private static String PRE_SERVLET = "/servlets/workflowRedirect?p=";
+	
+	private static String SERVER_PORT = Config.CONTEXT.getAttribute("WEB_SERVER_HTTP_PORT").toString();			
+	private static String SERVER_SCHEMA = Config.CONTEXT.getAttribute("WEB_SERVER_SCHEME").toString();
 	
 	@Override
 	public List<WorkflowActionletParameter> getParameters() {
@@ -80,8 +84,13 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 				for(String page:paths){
 					String[] splitted = page.split("[|]");
 					commentText.append("<li><a href=\"");
-					commentText.append("https://");
+					commentText.append(SERVER_SCHEMA);
+					commentText.append("://");
 					commentText.append(currentHost.getHostname());
+					if(!SERVER_PORT.equals("80")){
+						commentText.append(":");
+						commentText.append(SERVER_PORT);
+					}
 					commentText.append(PRE_SERVLET);
 					commentText.append(splitted[1]);
 					commentText.append("\">");

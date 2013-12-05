@@ -90,6 +90,7 @@ public class WorkflowEmailUtil {
 					new Class[] { DotResponseProxy.class }, dotInvocationHandler);
 
 			org.apache.velocity.context.Context ctx = VelocityUtil.getWebContext(requestProxy, responseProxy);
+			ctx.put("serverScheme", serverScheme);
 			ctx.put("host", host);
 			ctx.put("host_id", host.getIdentifier());
 			ctx.put("user", processor.getUser());
