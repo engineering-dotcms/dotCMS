@@ -31,10 +31,7 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 	private static final long serialVersionUID = 1L;
 	
 	private static String PRE_SERVLET = "/servlets/workflowRedirect?p=";
-	
-	private static String SERVER_PORT = Config.CONTEXT.getAttribute("WEB_SERVER_HTTP_PORT").toString();			
-	private static String SERVER_SCHEMA = Config.CONTEXT.getAttribute("WEB_SERVER_SCHEME").toString();
-	
+		
 	@Override
 	public List<WorkflowActionletParameter> getParameters() {
 		// TODO Auto-generated method stub
@@ -54,6 +51,8 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 	@Override
 	public void executeAction(WorkflowProcessor processor, Map<String, WorkflowActionClassParameter> params) throws WorkflowActionFailureException {
 		try{
+			String SERVER_PORT = Config.CONTEXT.getAttribute("WEB_SERVER_HTTP_PORT").toString();			
+			String SERVER_SCHEMA = Config.CONTEXT.getAttribute("WEB_SERVER_SCHEME").toString();			
 			Host currentHost = APILocator.getHostAPI().find(processor.getContentlet().getHost(), APILocator.getUserAPI().getSystemUser(), true);
 			Logger.info(getClass(), "Start add path to comments");
 			WorkflowComment lastCommentWithPaths = new WorkflowComment();
