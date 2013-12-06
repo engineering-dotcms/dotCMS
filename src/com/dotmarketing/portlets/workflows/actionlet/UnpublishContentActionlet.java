@@ -39,7 +39,7 @@ public class UnpublishContentActionlet extends ContentActionlet {
 			for(Contentlet c : contentletsToProcess) {
 				APILocator.getContentletAPI().unpublish(c, processor.getUser(), true);
 				APILocator.getContentletAPI().unlock(c, processor.getUser(), true);
-				indexAPI.removeContentFromIndex(c,false,true);
+				indexAPI.removeContentFromIndex(c,true,true);
 				CacheLocator.getIdentifierCache().removeFromCacheByVersionable(c);
 			}
 

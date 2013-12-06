@@ -888,7 +888,7 @@ public class HTMLPageAPIImpl extends BaseWebAssetAPI implements HTMLPageAPI {
         sb.append(WebKeys.HTMLPAGE_LANGUAGE);
         sb.append("=");
         sb.append(langId);
-        Logger.info(getClass(), "URL da contattare: " + sb.toString());
+        Logger.debug(getClass(), "URL da contattare: " + sb.toString());
 		Connection conn = Jsoup.connect(sb.toString()).timeout(Config.getIntProperty("STATIC_HTML_THREAD_POOL_KEEP_ALIVE_TIME")*1000);
 		conn.userAgent(userAgent);
 		String html = conn.get().html();
@@ -927,7 +927,7 @@ public class HTMLPageAPIImpl extends BaseWebAssetAPI implements HTMLPageAPI {
         sb.append(WebKeys.HTMLPAGE_LANGUAGE);
         sb.append("=");
         sb.append(langId);
-        Logger.info(getClass(), "URL da contattare: " + sb.toString());
+        Logger.debug(getClass(), "URL da contattare: " + sb.toString());
 		Connection conn = Jsoup.connect(sb.toString()).timeout(Config.getIntProperty("STATIC_HTML_THREAD_POOL_KEEP_ALIVE_TIME")*1000);
 		conn.userAgent(userAgent);
 		String html = conn.get().html();
