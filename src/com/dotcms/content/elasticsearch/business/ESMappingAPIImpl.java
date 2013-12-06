@@ -281,7 +281,8 @@ public class ESMappingAPIImpl implements ContentMappingAPI {
             m.put("structureType", st.getStructureType() + "");
             m.put("inode", con.getInode());
             m.put("type", "content");
-            m.put("modDate", datetimeFormat.format(con.getModDate()));
+            if(UtilMethods.isSet(con.getModDate()))
+            	m.put("modDate", datetimeFormat.format(con.getModDate()));
             m.put("owner", con.getOwner()==null ? "0" : con.getOwner());
             m.put("modUser", con.getModUser());
             m.put("live", Boolean.toString(con.isLive()));
