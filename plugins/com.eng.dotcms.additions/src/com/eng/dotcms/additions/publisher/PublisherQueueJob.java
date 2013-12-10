@@ -36,6 +36,7 @@ import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotHibernateException;
 import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.portlets.contentlet.model.Contentlet;
+import com.dotmarketing.portlets.workflows.model.WorkflowScheme;
 import com.dotmarketing.util.Config;
 import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.PushPublishLogger;
@@ -317,7 +318,9 @@ public class PublisherQueueJob implements StatefulJob {
 	            
 	            try{
 	                Contentlet c = APILocator.getContentletAPI().find( (String)mm.get("working_inode"), systemU, false);
-	                APILocator.getContentletAPI().publish(c, APILocator.getUserAPI().loadUserById(c.getModUser(), systemU, false), false);
+	                WorkflowScheme wfscheme = APILocator.getWorkflowAPI().findSchemeForStruct(c.getStructure());
+	                if(null!=wfscheme && !wfscheme.isMandatory())
+	                	APILocator.getContentletAPI().publish(c, APILocator.getUserAPI().loadUserById(c.getModUser(), systemU, false), false);
 	            }
 	            catch(Exception e){
 	                Logger.debug(this, "content failed to publish: " +  e.getMessage());
