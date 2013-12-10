@@ -6,6 +6,7 @@ import it.eng.bankit.deploy.IDeployConst;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -28,9 +29,13 @@ import com.dotmarketing.portlets.languagesmanager.model.Language;
 import com.dotmarketing.portlets.structure.factories.RelationshipFactory;
 import com.dotmarketing.portlets.structure.model.Relationship;
 import com.dotmarketing.portlets.structure.model.Structure;
+import com.dotmarketing.portlets.workflows.business.DotWorkflowException;
+import com.dotmarketing.portlets.workflows.model.WorkflowAction;
+import com.dotmarketing.portlets.workflows.model.WorkflowScheme;
 import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.UtilMethods;
 import com.dotmarketing.viewtools.content.util.ContentUtils;
+import com.ibm.icu.text.SimpleDateFormat;
 import com.liferay.portal.model.User;
 
 public class ConsulWebImport extends AbstractImport {
@@ -39,6 +44,7 @@ public class ConsulWebImport extends AbstractImport {
 	private static String allegatoStructureName = "AllegatoDettaglio";
 	private static String linkStructureName = "Link";
 	private static String backupBasePath = "/backup";
+	private static SimpleDateFormat SDF = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 	private Folder consulwebFolder;
 	private Folder backupFolder;
 	private String relationName;
@@ -183,12 +189,32 @@ public class ConsulWebImport extends AbstractImport {
 			Logger.info( this.getClass(), "Inserisco la traduzione della contentlet.  " +  contextIdentifier +" Struttura  " +  contentlet.getStructure().getVelocityVarName() );
 		}
 		List<Permission> permissionList = permissionApi.getPermissions( getStructure( getStructureName() ));
-		Logger.info( this.getClass(), " permissionList  " +  permissionList  );
-		returnContentlet = contentletApi.checkin( contentlet, permissionList, insertUser, true );
+		
+		/**
+		 * BEGIN Fix per aggiunta workflow obbligatorio su Allegato Dettaglio
+		 */
+		WorkflowScheme wfscheme = APILocator.getWorkflowAPI().findSchemeForStruct(stAllegato);
+		if(null!=wfscheme && wfscheme.isMandatory()){
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+			// Recupero la Entry Action dal workflow e salvo il contenuto.
+			WorkflowAction entryAction = APILocator.getWorkflowAPI().findAction(wfscheme.getEntryActionId(), 
+					APILocator.getUserAPI().getSystemUser());
+			contentlet.setStringProperty("wfActionId", entryAction.getId());
+			contentlet.setStringProperty("wfActionComments", "ConsulWeb: Importazione automatica files del " + SDF.format(new GregorianCalendar().getTime()));
+			contentlet.setStringProperty("wfActionAssign", insertUser.getUserId());
+		}
+		
+		try{
+			returnContentlet = contentletApi.checkin( contentlet, permissionList, insertUser, true );
+		}catch(DotWorkflowException e){}
+		/**
+		 * END Fix per aggiunta workflow obbligatorio su Allegato Dettaglio
+		 */
+		
 		if ( returnContentlet.isLocked() ) {
 			contentletApi.unlock( returnContentlet, insertUser, true );
 		}
-		contentletApi.publish( returnContentlet, insertUser , true );
+		contentletApi.publish( returnContentlet, insertUser , false );
 		String newIdentifier = returnContentlet.getIdentifier();
 		if ( !UtilMethods.isSet( identifier ) && UtilMethods.isSet( newIdentifier ) ) {
 			idMap.put( contextIdentifier, newIdentifier );

@@ -4,7 +4,7 @@ public interface IDeployConst {
 	
 	public static String PLUGIN_ID 				= "com.eng.dotcms.biapp";
 	public static String USR_CAMBI_ROLE 		= "usr.cambi.role"; 
-	public static String HOST_NAME 				= "bankit.host_name";
+	public static String HOST_NAME 				= "bankit.host";
 	public static String USE_USER_CAMBI 		= "use.user.cambi"; 
 	public static String CAMBI_UPDATE_MODE		= "cambi.updateMode";
 	public static String CAMBI_REMOTE_PUBLISH	= "cambi.remotePubblishing";

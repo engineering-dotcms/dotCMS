@@ -14,8 +14,6 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.StatefulJob;
 
-import bsh.util.Util;
-
 import com.dotmarketing.beans.Host;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.business.UserAPI;
@@ -46,7 +44,6 @@ public class ConsulWebJob implements StatefulJob {
 	private MailUtil mailer;
 	private Date startTime;
 	private Date endTime;
-	//	private PluginAPI pAPI = APILocator.getPluginAPI();
 
 	private void initialize() throws JobExecutionException {
 		if (!initialized) {
@@ -109,13 +106,13 @@ public class ConsulWebJob implements StatefulJob {
 				String filenameEnPDF = arrFileEng[0];
 				String filenameItCSV = "";
 				String filenameEnCSV = "";
-				System.out.println(ConsulWebJob.class + " filenameItPDF " + filenameItPDF );
-				System.out.println(ConsulWebJob.class + " filenameEnPDF " + filenameEnPDF );
+				Logger.info(ConsulWebJob.class, "filenameItPDF " + filenameItPDF );
+				Logger.info(ConsulWebJob.class, "filenameEnPDF " + filenameEnPDF );
 				if( arrFileIta != null && arrFileIta.length == 2 ){
 					filenameItCSV = arrFileIta[1];
 					filenameEnCSV = arrFileEng[1];
-					System.out.println(ConsulWebJob.class + " filenameItCSV " + filenameItCSV );
-					System.out.println(ConsulWebJob.class + " filenameEnCSV " + filenameEnCSV );
+					Logger.info(ConsulWebJob.class, "filenameItCSV " + filenameItCSV );
+					Logger.info(ConsulWebJob.class, "filenameEnCSV " + filenameEnCSV );
 				}
 
 				boolean checkDir = checkDirectory(directory);

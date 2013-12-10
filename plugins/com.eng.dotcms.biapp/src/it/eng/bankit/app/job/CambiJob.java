@@ -22,8 +22,8 @@ public class CambiJob implements StatefulJob {
 	private void init() throws JobExecutionException {
 		try {
 			User user = userApi.getSystemUser();
-			String hostName = APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID, "bankit.host_name" );
-			Host host = APILocator.getHostAPI().find( hostName, user, true );
+			String hostId = APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID, "bankit.host" );
+			Host host = APILocator.getHostAPI().find( hostId, user, true );
 			String importDir = APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID, "cambi.import_dir" );
 			String selettorePath = APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID, "cambi.selettore.path" );
 			String cambiPath = APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID, "cambi.path" );

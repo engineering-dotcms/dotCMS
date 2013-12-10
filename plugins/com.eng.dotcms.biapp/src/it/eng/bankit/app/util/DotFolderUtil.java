@@ -40,8 +40,8 @@ public class DotFolderUtil {
 		try {
 			INDEX_PAGE = "index." + com.dotmarketing.util.Config.getStringProperty( "VELOCITY_PAGE_EXTENSION" );
 			User user = APILocator.getUserAPI().getSystemUser();
-			String hostName =	APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID , "bankit.host_name");			
-			defaultHost = APILocator.getHostAPI().find(hostName , user, true ); 
+			String hostId =	APILocator.getPluginAPI().loadProperty( IDeployConst.PLUGIN_ID , "bankit.host");			
+			defaultHost = APILocator.getHostAPI().find(hostId , user, true ); 
 			listaTemplates = APILocator.getTemplateAPI().findTemplatesAssignedTo( defaultHost );
 			initialized = true;
 		} catch ( Exception e ) {
