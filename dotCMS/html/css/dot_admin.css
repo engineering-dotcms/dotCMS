@@ -706,3 +706,6 @@ table.bgThumbnail td div a{border:1px solid #a0a0a0;padding:2px;display:block;}
 /* Help Dialog */
 div#_dotHelpMenu{color:red;}
 #_dotHelpResults{margin-left:230px;border-left:1px solid #ccc; padding-left:15px;}
+
+/* Role Administration */
+#permissionsCascadeMsg .warningText{font-weight:bold;color:red;padding-top:3px;width:100%; overflow:hidden;text-align:center;white-space: normal;margin-bottom:3px;}

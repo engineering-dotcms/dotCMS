@@ -390,18 +390,19 @@
 
 			var commentable = file.wfActionMapList[i].commentable;
 			console.log(name + ":"+ assignable + ":" + commentable);
+			var hasPushPublishActionlet = file.wfActionMapList[i].hasPushPublishActionlet;
 			var icon = file.wfActionMapList[i].icon;
 			var requiresCheckout = file.wfActionMapList[i].requiresCheckout;
 			var wfActionNameStr = file.wfActionMapList[i].wfActionNameStr;
 			var isLocked = file.isLocked;
 			var contentEditable = file.contentEditable;
 			if (!objId && requiresCheckout || (isLocked && contentEditable) && requiresCheckout) {
-				strHTML += '<a href="javascript: contentAdmin.executeWfAction(\'' + id + '\', ' + assignable +', ' + commentable +', \'' + objId +'\'); hidePopUp(\'context_menu_popup_'+objId+'\');" class="contextPopupMenu">';
+				strHTML += '<a href="javascript: contentAdmin.executeWfAction(\'' + id + '\', ' + assignable +', ' + commentable +', ' + hasPushPublishActionlet + ', \'' + objId +'\'); hidePopUp(\'context_menu_popup_'+objId+'\');" class="contextPopupMenu">';
     			strHTML += '<span class=\''+icon+'\'></span>';
         		strHTML += wfActionNameStr;
 				strHTML += '</a>';
 			}else if(!requiresCheckout)  {
-				strHTML += '<a href="javascript: contentAdmin.executeWfAction(\'' + id + '\', ' + assignable +', ' + commentable +', \'' + objId +'\'); hidePopUp(\'context_menu_popup_'+objId+'\');" class="contextPopupMenu">';
+				strHTML += '<a href="javascript: contentAdmin.executeWfAction(\'' + id + '\', ' + assignable +', ' + commentable +', ' + hasPushPublishActionlet + ', \'' + objId +'\'); hidePopUp(\'context_menu_popup_'+objId+'\');" class="contextPopupMenu">';
 				strHTML += '<span class=\''+icon+'\'></span>';
     			strHTML += wfActionNameStr;
 				strHTML += '</a>';
@@ -976,10 +977,10 @@
     	},
 
 
-    	executeWfAction: function(wfId, assignable, commentable, inode ){
+    	executeWfAction: function(wfId, assignable, commentable, hasPushPublishActionlet, inode ){
     		this.wfActionId=wfId;
 
-    		if(assignable || commentable){
+    		if(assignable || commentable || hasPushPublishActionlet){
     			var dia = dijit.byId("contentletWfDialog");
     			if(dia){
     				dia.destroyRecursive();
@@ -1018,8 +1019,9 @@
 		    		var expireDate 			= "";
 		    		var expireTime 			="";
 		    		var neverExpire 		="";
+		    		var whereToSend			="";
 					BrowserAjax.saveFileAction(selectedItem,wfActionAssign,wfActionId,wfActionComments,wfConId, publishDate,
-		    				publishTime, expireDate, expireTime, neverExpire, fileActionCallback);
+		    				publishTime, expireDate, expireTime, neverExpire, whereToSend, fileActionCallback);
  			}
 
     	},
@@ -1082,12 +1084,16 @@
 					: (dojo.byId("wfNeverExpire"))
 						? dojo.byId("wfNeverExpire").value
 								: "";
-
+			var whereToSend = (dijit.byId("whereToSend"))
+				? dijit.byId("whereToSend").getValue()
+					: (dojo.byId("whereToSend"))
+						? dojo.byId("whereToSend").value
+								: "";
 			// END: PUSH PUBLISHING ACTIONLET
 
 
     		BrowserAjax.saveFileAction(selectedItem,wfActionAssign,wfActionId,wfActionComments,wfConId, publishDate,
-    				publishTime, expireDate, expireTime, neverExpire, fileActionCallback);
+    				publishTime, expireDate, expireTime, neverExpire, whereToSend, fileActionCallback);
 
     	}
 

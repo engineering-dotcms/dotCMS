@@ -2,6 +2,7 @@ package com.dotmarketing.portlets.workflows.util;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -90,6 +91,9 @@ public class WorkflowEmailUtil {
 					new Class[] { DotResponseProxy.class }, dotInvocationHandler);
 
 			org.apache.velocity.context.Context ctx = VelocityUtil.getWebContext(requestProxy, responseProxy);
+			ctx.put("serverScheme", serverScheme);
+			ctx.put("serverPort", serverPort);
+			ctx.put("rmd", new GregorianCalendar().getTimeInMillis());
 			ctx.put("host", host);
 			ctx.put("host_id", host.getIdentifier());
 			ctx.put("user", processor.getUser());
