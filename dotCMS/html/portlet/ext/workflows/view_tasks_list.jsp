@@ -148,7 +148,7 @@
                 assignedRoleName = assignedRole.getName();
             }
         %>
-		<%Contentlet contentlet = new Contentlet();
+		<%Contentlet contentlet = null;
 
 			try{
 			 //contentlet = APILocator.getContentletAPI().findContentletByIdentifier(task.getWebasset(),false,lang, user, true);
@@ -157,9 +157,17 @@
 			 StringBuilder query = new StringBuilder();
 			 query.append("+identifier: ");
 			 query.append(task.getWebasset());
-			 query.append(" +languageId: ");
-			 query.append(defaultLanguage);
-			 contentlet = APILocator.getContentletAPI().search(query.toString(), 0, -1, null, user, true).get(0);
+			 //query.append(" +languageId: ");
+			 //query.append(defaultLanguage);
+			 List<Contentlet> conts = APILocator.getContentletAPI().search(query.toString(), 0, -1, null, user, true);
+			 for(Contentlet cont: conts){
+				 if(cont.getLanguageId()==defaultLanguage){
+					 contentlet = cont;
+					 break;
+				 }
+			 }
+			 if(null==contentlet)
+			 	contentlet = APILocator.getContentletAPI().search(query.toString(), 0, -1, null, user, true).get(0);
 			}
 			catch(Exception e){
 				Logger.error(this.getClass(), e.getMessage());	
