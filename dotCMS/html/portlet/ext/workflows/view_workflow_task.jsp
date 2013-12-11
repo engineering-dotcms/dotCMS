@@ -38,7 +38,17 @@
 <%
 
 	WorkflowTask task = APILocator.getWorkflowAPI().findTaskById(request.getParameter("taskId"));
-	Contentlet contentlet = APILocator.getContentletAPI().search("+identifier: "+task.getWebasset(), 0, -1, null, user, true).get(0);
+	
+	//FIX: aggiunta filtro sulla lingua di default
+	long defaultLanguage = APILocator.getLanguageAPI().getDefaultLanguage().getId();
+	StringBuilder query = new StringBuilder();
+	query.append("+identifier: ");
+	query.append(task.getWebasset());
+	query.append(" +languageId: ");
+	query.append(defaultLanguage);
+	
+	
+	Contentlet contentlet = APILocator.getContentletAPI().search(query.toString(), 0, -1, null, user, true).get(0);
 	Structure structure = contentlet.getStructure();
 
 	Role createdBy 		= APILocator.getRoleAPI().loadRoleById(task.getCreatedBy());

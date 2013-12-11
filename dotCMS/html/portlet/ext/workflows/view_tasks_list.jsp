@@ -152,7 +152,14 @@
 
 			try{
 			 //contentlet = APILocator.getContentletAPI().findContentletByIdentifier(task.getWebasset(),false,lang, user, true);
-			 contentlet = APILocator.getContentletAPI().search("+identifier: "+task.getWebasset(), 0, -1, null, user, true).get(0);
+			 // FIX: aggiunta filtro sulla lingua di default
+			 long defaultLanguage = APILocator.getLanguageAPI().getDefaultLanguage().getId();
+			 StringBuilder query = new StringBuilder();
+			 query.append("+identifier: ");
+			 query.append(task.getWebasset());
+			 query.append(" +languageId: ");
+			 query.append(defaultLanguage);
+			 contentlet = APILocator.getContentletAPI().search(query.toString(), 0, -1, null, user, true).get(0);
 			}
 			catch(Exception e){
 				Logger.error(this.getClass(), e.getMessage());	
