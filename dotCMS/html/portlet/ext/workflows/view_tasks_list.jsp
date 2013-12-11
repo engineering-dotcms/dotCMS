@@ -1,3 +1,4 @@
+<%@page import="com.dotmarketing.portlets.languagesmanager.model.Language"%>
 <%@page import="com.dotmarketing.portlets.workflows.actionlet.PushPublishActionlet"%>
 <%@page import="com.dotmarketing.portlets.workflows.model.WorkflowActionClass"%>
 <%@page import="com.dotmarketing.portlets.contentlet.model.Contentlet"%>
@@ -121,6 +122,7 @@
 			
 		</th>
 		<th nowrap="nowrap" style="text-align:center;"><a href="javascript: doOrderBy('<%="title".equals(searcher.getOrderBy())?"title desc":"title"%>')"><%=LanguageUtil.get(pageContext, "Title")%></a></th>
+		<th nowrap="nowrap" width="8%" style="text-align:center;"><a href="javascript: doOrderBy('<%="title".equals(searcher.getOrderBy())?"title desc":"title"%>')"><%=LanguageUtil.get(pageContext, "Language")%></a></th>
 
 		<th nowrap="nowrap" width="8%" style="text-align:center;"><a href="javascript: doOrderBy('<%="status".equals(searcher.getOrderBy())?"status desc":"status"%>')"><%=LanguageUtil.get(pageContext, "Status")%></a></th>
 		<th nowrap="nowrap" width="10%" style="text-align:center;"><a href="javascript: doOrderBy('<%="workflow_step.name".equals(searcher.getOrderBy())?"workflow_step.name desc":"workflow_step.name"%>')"><%=LanguageUtil.get(pageContext, "Workflow-Step")%></a></th>
@@ -148,8 +150,8 @@
                 assignedRoleName = assignedRole.getName();
             }
         %>
-		<%Contentlet contentlet = null;
-
+		<%	Contentlet contentlet = null;
+			StringBuilder flags = new StringBuilder();
 			try{
 			 //contentlet = APILocator.getContentletAPI().findContentletByIdentifier(task.getWebasset(),false,lang, user, true);
 			 // FIX: aggiunta filtro sulla lingua di default
@@ -160,14 +162,25 @@
 			 //query.append(" +languageId: ");
 			 //query.append(defaultLanguage);
 			 List<Contentlet> conts = APILocator.getContentletAPI().search(query.toString(), 0, -1, null, user, true);
+			 
+			 // recupero le lingue in cui il contenuto è presente
+			 
+			 for(Contentlet cont: conts){
+				 Language lang = APILocator.getLanguageAPI().getLanguage(cont.getLanguageId());
+				 flags.append("<img src=\"/html/images/languages/");
+				 flags.append(lang.getLanguageCode());
+				 flags.append("_");
+				 flags.append(lang.getCountryCode());
+				 flags.append(".gif\" border=\"0\" />&nbsp;");
+			 }
 			 for(Contentlet cont: conts){
 				 if(cont.getLanguageId()==defaultLanguage){
 					 contentlet = cont;
 					 break;
 				 }
 			 }
-			 if(null==contentlet)
-			 	contentlet = APILocator.getContentletAPI().search(query.toString(), 0, -1, null, user, true).get(0);
+			 if(null==contentlet && null!=conts && !conts.isEmpty())
+			 	contentlet = conts.get(0);
 			}
 			catch(Exception e){
 				Logger.error(this.getClass(), e.getMessage());	
@@ -182,8 +195,11 @@
 				
 			</td>
 			<td onClick="editTask('<%=task.getId()%>')">
-				<%=task.getTitle() %>
-				</td>
+				<%=contentlet.getTitle() %>
+			</td>
+			<td onClick="editTask('<%=task.getId()%>')">
+				<%=flags.toString() %>
+			</td>			
 			<td nowrap="true" align="center" width="1%" onClick="editTask('<%=task.getId()%>')">
 				<%if (contentlet.isLive()) {%>
 		            <span class="liveIcon"></span>

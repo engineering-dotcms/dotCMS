@@ -1,3 +1,4 @@
+<%@page import="com.dotmarketing.cache.StructureCache"%>
 <%@page import="com.dotmarketing.exception.DotSecurityException"%>
 <%@page import="com.dotmarketing.portlets.fileassets.business.IFileAsset"%>
 <%@page import="com.dotmarketing.portlets.contentlet.business.ContentletAPI"%>
@@ -168,6 +169,14 @@ dojo.ready(function(){
 <div id="contentPreviewDialog">
 	<div>
 		<table class="previewCon" align="center" style="width:100%">
+			<tr class="tRow">
+				<td class="fColumn">
+					<%= LanguageUtil.get(pageContext, "structure") %>
+				</td>
+				<td>
+					<strong><%= content.getStructure().getName()%></strong>
+				</td>
+			</tr>		
 			<%if (fields.size() > 0)  {%>
 				<tr class="tRow">
 					<td class="fColumn">
@@ -176,7 +185,7 @@ dojo.ready(function(){
 					<td>
 						<%= content.getTitle()%>
 					</td>
-				</tr>
+				</tr>				
 				<tr class="tRow">
 					<td class="fColumn">
 						<%= LanguageUtil.get(pageContext, "Identifier") %>

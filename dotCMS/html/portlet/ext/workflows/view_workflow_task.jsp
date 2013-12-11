@@ -1,3 +1,4 @@
+<%@page import="com.dotmarketing.portlets.languagesmanager.model.Language"%>
 <%@page import="com.dotmarketing.util.DateUtil"%>
 <%@page import="com.dotmarketing.business.Role"%>
 <%@ include file="/html/portlet/ext/workflows/init.jsp"%>
@@ -42,11 +43,22 @@
 	//FIX: aggiunta filtro sulla lingua di default
 	long defaultLanguage = APILocator.getLanguageAPI().getDefaultLanguage().getId();
 	StringBuilder query = new StringBuilder();
+	StringBuilder flags = new StringBuilder();
 	query.append("+identifier: ");
 	query.append(task.getWebasset());
 	//query.append(" +languageId: ");
 	//query.append(defaultLanguage);
 	List<Contentlet> conts = APILocator.getContentletAPI().search(query.toString(), 0, -1, null, user, true);
+	// recupero le lingue in cui il contenuto è presente
+	 
+	 for(Contentlet cont: conts){
+		 Language lang = APILocator.getLanguageAPI().getLanguage(cont.getLanguageId());
+		 flags.append("<img src=\"/html/images/languages/");
+		 flags.append(lang.getLanguageCode());
+		 flags.append("_");
+		 flags.append(lang.getCountryCode());
+		 flags.append(".gif\" border=\"0\" />&nbsp;");
+	 }
 	for(Contentlet cont: conts){
 	 	if(cont.getLanguageId()==defaultLanguage){
 			contentlet = cont;
@@ -54,7 +66,7 @@
 		}
 	}
 	if(null==contentlet)
-		contentlet = APILocator.getContentletAPI().search(query.toString(), 0, -1, null, user, true).get(0);
+		contentlet = conts.get(0);
 	
 	Structure structure = contentlet.getStructure();
 
@@ -247,7 +259,7 @@
 			<tr>
 				<th colspan="2" valign="bottom">
 					<div>
-						<div style="font-size:14pt;font-weight:normal;padding:5px;"><span class="documentIcon"></span>&nbsp;<a href="javascript:doEdit()"><%= task.getTitle() %></a>
+						<div style="font-size:14pt;font-weight:normal;padding:5px;"><span class="documentIcon"></span>&nbsp;<a href="javascript:doEdit()"><%= contentlet.getTitle() %></a>
 						<div style="float:right;border:1px solid silver;background: white;padding:5px;">
 							<%if (contentlet.isLive()) {%>
 					            <span class="liveIcon"></span>
@@ -302,6 +314,12 @@
 			</tr>
 			<%String latestComment = (comments != null && comments.size()>0) ? comments.get(0).getComment() :task.getDescription();  %>
 
+			<tr>
+				<td colspan="2">
+					<strong><%= LanguageUtil.get(pageContext, "Language") %>:</strong>
+					<%=flags.toString() %>
+				</td>
+			</tr>
 
 			<%if(UtilMethods.isSet(latestComment)){ %>
 				<tr>
@@ -385,20 +403,7 @@
 <!-- START Tabs -->
 	<div id="mainTabContainer" dolayout="false" dojoType="dijit.layout.TabContainer">
 		<div id="TabZero" dojoType="dijit.layout.ContentPane" title="<%= LanguageUtil.get(pageContext, "Preview") %>">
-
-
-
-
-
 				<jsp:include page="/html/portlet/ext/contentlet/view_contentlet_popup_inc.jsp"></jsp:include>
-
-
-
-
-
-
-
-
 		</div>
 	<!-- START Comments Tab -->
 		<div id="TabOne" dojoType="dijit.layout.ContentPane" title="<%= LanguageUtil.get(pageContext, "Comments") %>">

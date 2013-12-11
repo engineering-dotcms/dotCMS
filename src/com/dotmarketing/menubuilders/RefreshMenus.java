@@ -47,7 +47,7 @@ public class RefreshMenus {
 			if(map.size() ==0){
 				return true;
 			}
-			boolean oldShowOnMenu = (Boolean) map.get("show_on_menu");
+			boolean oldShowOnMenu = ((Integer) map.get("show_on_menu"))==1;
 			String oldTitle = (String) map.get("title");
 			String path = (String) map.get("parent_path") + (String)map.get("asset_name");
 			if(newFile.isShowOnMenu() != oldShowOnMenu){
@@ -82,7 +82,7 @@ public class RefreshMenus {
 			if(map.size() ==0){
 				return true;
 			}
-			boolean oldShowOnMenu = (Boolean) map.get("show_on_menu");
+			boolean oldShowOnMenu = ((Integer) map.get("show_on_menu"))==1;
 			String oldTitle = (String) map.get("title");
 			String path = (String) map.get("parent_path") + (String)map.get("page_url");
 			if(newFile.isShowOnMenu() != oldShowOnMenu){
