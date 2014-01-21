@@ -131,7 +131,7 @@ public class RssUtil implements ViewTool {
 					}else if(  lType.equalsIgnoreCase("A")   ){
 						try{					
 							FileAssetMap fileAssetMap = (FileAssetMap) content.get( "allegato" );
-							Logger.info( RssUtil.class, "fileAssetMap.getUri()  " + fileAssetMap.getUri() );
+							Logger.debug( RssUtil.class, "fileAssetMap.getUri()  " + fileAssetMap.getUri() );
 							link = basePath + fileAssetMap.getUri();
 						}catch (Exception e) {
 							e.printStackTrace();
@@ -174,7 +174,7 @@ public class RssUtil implements ViewTool {
 				 */
 				rifCambio = giornoString +meseString;
 				String query = UriUtils.encodeQuery( ";" + languageKeyHiperWave + "=" + language.getLanguageCode(), "UTF-8" );
-				Logger.info( RssUtil.class, " PATH CAMBI  " + basePath + pathCambi + "cambi_rif_" + rifCambio + ".html" + query );
+				Logger.debug( RssUtil.class, " PATH CAMBI  " + basePath + pathCambi + "cambi_rif_" + rifCambio + ".html" + query );
 				link = basePath + pathCambi + "cambi_rif_" + rifCambio + ".html" + query;
 			} else {
 				/*
