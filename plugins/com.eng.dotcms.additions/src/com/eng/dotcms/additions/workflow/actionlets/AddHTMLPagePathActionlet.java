@@ -30,8 +30,17 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 	 */
 	private static final long serialVersionUID = 1L;
 	
+	private List<String> homePageStructures; 
+	private static String START_PATH_COMMENT = "Il contenuto è consultabile al/ai seguente/i percorso/i:";
 	private static String PRE_SERVLET = "/servlets/workflowRedirect?p=";
 		
+	{
+		homePageStructures = new ArrayList<String>();
+		homePageStructures.add("BoxSidebar");
+		homePageStructures.add("InfoNews");
+		homePageStructures.add("Notiziasecondaria");
+		homePageStructures.add("Strillonp");
+	}
 	@Override
 	public List<WorkflowActionletParameter> getParameters() {
 		// TODO Auto-generated method stub
@@ -49,7 +58,7 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 	}
 
 	@Override
-	public void executeAction(WorkflowProcessor processor, Map<String, WorkflowActionClassParameter> params) throws WorkflowActionFailureException {
+	public void executeAction(WorkflowProcessor processor, Map<String, WorkflowActionClassParameter> params) throws WorkflowActionFailureException {		
 		try{
 			String SERVER_PORT = Config.CONTEXT.getAttribute("WEB_SERVER_HTTP_PORT").toString();			
 			String SERVER_SCHEMA = Config.CONTEXT.getAttribute("WEB_SERVER_SCHEME").toString();			
@@ -64,25 +73,35 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 			String _lastCommentId = (lastComment!=null)?lastComment.getId():"NULL";
 			Logger.debug(getClass(), "Last comment on this task: " + _lastCommentId);
 			List<String> paths = new ArrayList<String>();
-			if(processor.getContentlet().getStructure().getStructureType()!=Structure.STRUCTURE_TYPE_FILEASSET)
+			if(processor.getContentlet().getStructure().getStructureType()!=Structure.STRUCTURE_TYPE_FILEASSET){
+				Logger.info(getClass(), "Ecccomi!!!!");
+				Logger.info(getClass(), "Structure Type: " + processor.getContentlet().getStructure().getStructureType());
 				paths = getHTMLPagePaths(processor.getContentlet(), currentHost);
-			else
+			}else {
+				Logger.info(getClass(), "Call getFileAssetPath");
 				paths = getFileAssetPath(processor.getContentlet(), currentHost);
+				Logger.info(getClass(), "Path size: " + paths.size());
+			}
 			Logger.debug(getClass(), "Number of pages into the contentlet path: " + paths.size());
 			if(paths.size()>0){
 				lastCommentWithPaths.setPostedBy(processor.getContentlet().getModUser());			
 				StringBuilder commentText = new StringBuilder();
 				if(null!=lastComment && UtilMethods.isSet(lastComment.getComment())){
 					Logger.info(getClass(), "There is previous comment...");
-					commentText.append(lastComment.getComment());
+					String lastCommentString = lastComment.getComment();
+					if(lastCommentString.indexOf("_path_exists_")>0)
+						commentText.append(lastCommentString.substring(lastCommentString.indexOf("_path_exists_")));
+					else
+						commentText.append(lastCommentString);
 					commentText.append("<br /><br />");
 				}
-				commentText.append("Il contenuto è consultabile al/ai seguente/i percorso/i:");
+				commentText.append(START_PATH_COMMENT);
 				commentText.append("<br />");
 				commentText.append("<ul>");
 				for(String page:paths){
+					Logger.info(getClass(), "PATHHHH: " + page);
 					String[] splitted = page.split("[|]");
-					commentText.append("<li><a href=\"");
+					commentText.append("<li><a id=\"_path_exists_\" href=\"");
 					commentText.append(SERVER_SCHEMA);
 					commentText.append("://");
 					commentText.append(currentHost.getHostname());
@@ -106,7 +125,7 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 				APILocator.getWorkflowAPI().saveComment(lastCommentWithPaths);
 				processor.setWorkflowMessage(lastCommentWithPaths.getComment());
 				processor.getContentlet().setStringProperty(Contentlet.WORKFLOW_COMMENTS_KEY, lastCommentWithPaths.getComment());
-				Logger.info(getClass(), "Comment saved.");
+					Logger.info(getClass(), "Comment saved.");
 			}
 		}catch(DotDataException e){
 			e.printStackTrace();
@@ -118,28 +137,37 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 	private List<String> getHTMLPagePaths(Contentlet contentlet, Host currentHost) throws DotDataException, DotSecurityException {
 		Logger.debug(getClass(), "Current host: " + currentHost.getHostname());
 		List<String> paths = new ArrayList<String>();
-		
-		Identifier id = APILocator.getIdentifierAPI().find(contentlet.getIdentifier());
-		List<Identifier> ids = findByParentPath(id.getParentPath(),currentHost.getIdentifier());
-		Logger.info(getClass(), "Number of ids of htmlpage into the path: " + id.getParentPath() + " = " + ids.size());
-		for(Identifier identifier:ids){
+		if(!homePageStructures.contains(contentlet.getStructure().getVelocityVarName())){	
+			Identifier id = APILocator.getIdentifierAPI().find(contentlet.getIdentifier());
+			List<Identifier> ids = findByParentPath(id.getParentPath(),currentHost.getIdentifier());
+			Logger.info(getClass(), "Number of ids of htmlpage into the path: " + id.getParentPath() + " = " + ids.size());
+			for(Identifier identifier:ids){
+				StringBuilder page = new StringBuilder();
+				page.append("https://");
+				page.append(currentHost.getHostname());
+				page.append(identifier.getParentPath());
+				page.append(identifier.getAssetName());
+				page.append("|");
+				page.append(identifier.getParentPath());
+				page.append(identifier.getAssetName());
+				Logger.debug(getClass(), "URL to append: " + page.toString());
+				
+				paths.add(page.toString());
+			}
+		}else{
 			StringBuilder page = new StringBuilder();
 			page.append("https://");
 			page.append(currentHost.getHostname());
-			page.append(identifier.getParentPath());
-			page.append(identifier.getAssetName());
 			page.append("|");
-			page.append(identifier.getParentPath());
-			page.append(identifier.getAssetName());
-			Logger.debug(getClass(), "URL to append: " + page.toString());
-			
+			page.append("/");
 			paths.add(page.toString());
 		}
 		return paths;
+		
 	}
 	
 	private List<String> getFileAssetPath(Contentlet fileAsset, Host currentHost) throws DotDataException {
-		Logger.debug(getClass(), "Current host: " + currentHost.getHostname());
+		Logger.info(getClass(), "Current host: " + currentHost.getHostname());
 		List<String> paths = new ArrayList<String>();
 		Identifier identifier = APILocator.getIdentifierAPI().find(fileAsset.getIdentifier());
 		String[] split_point = identifier.getAssetName().split("[.]");
@@ -154,9 +182,13 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 		page.append(".");
 		if(split_point.length>0)
 			page.append(split_point[split_point.length-1]);
+		Logger.info(getClass(), "PAGE: " + page.toString());
+		page.append("_");
+		Logger.info(getClass(), "INODE: " + fileAsset.getInode());
+		page.append(fileAsset.getInode());		
 		page.append("&amp;random=");
 		page.append(new GregorianCalendar().getTimeInMillis());
-		Logger.debug(getClass(), "URL to append: " + page.toString());
+		Logger.info(getClass(), "URL to append: " + page.toString());
 		
 		paths.add(page.toString());
 		return paths;
