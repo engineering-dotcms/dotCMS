@@ -70,7 +70,7 @@
 	
 	Structure structure = contentlet.getStructure();
 
-	Role createdBy 		= APILocator.getRoleAPI().loadRoleById(task.getCreatedBy());
+	Role createdBy 		= APILocator.getRoleAPI().loadRoleById(contentlet.getModUser());
 	Role assignedTo 	= APILocator.getRoleAPI().loadRoleById(task.getAssignedTo());
 	WorkflowStep step 	= APILocator.getWorkflowAPI().findStepByContentlet(contentlet);
 	WorkflowScheme scheme = APILocator.getWorkflowAPI().findSchemeForStruct(contentlet.getStructure());

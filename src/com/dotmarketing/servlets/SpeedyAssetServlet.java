@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.net.URLEncoder;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
@@ -38,6 +39,7 @@ import com.dotmarketing.util.Config;
 import com.dotmarketing.util.Constants;
 import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.UtilMethods;
+import com.dotmarketing.util.WebKeys;
 import com.google.common.io.Files;
 import com.liferay.portal.PortalException;
 import com.liferay.portal.SystemException;
@@ -48,6 +50,7 @@ public class SpeedyAssetServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static String realPath = null;
 	private static String assetPath = "/assets";
+	private static String INODE_NOT_FOUND = "-1";
 	private static class ThreadLocalHTTPDate extends ThreadLocal<java.text.SimpleDateFormat>{
 		@Override
 		protected SimpleDateFormat initialValue() {
@@ -82,9 +85,7 @@ public class SpeedyAssetServlet extends HttpServlet {
 			Config.CONTEXT = this.getServletContext();
 			Logger.error(this, "Config.CONTEXT is null. RESETTING  Cannot Serve Files without this!!!!!!");
 		}
-
-
-
+		
 		File f;
 		boolean PREVIEW_MODE = false;
 		boolean EDIT_MODE = false;
@@ -121,30 +122,46 @@ public class SpeedyAssetServlet extends HttpServlet {
 			String relativePath = null;
 			if(request.getParameter("path") == null) {
 
-				// Getting the identifier from the path like /dotAsset/{identifier}.{ext} E.G. /dotAsset/1234.js
-				StringTokenizer _st = new StringTokenizer(request.getRequestURI(), "/");
-
-				Logger.debug(this, "Requesting by url: " + request.getRequestURI());
+				// Getting the identifier from the path like /dotAsset/{identifier}.{ext}_{inode} E.G. /dotAsset/1234.js_inode
+				String _uri = request.getRequestURI();
+				StringTokenizer _st = new StringTokenizer(_uri, "/");
+				
+				Logger.info(this, "Requesting by url: " + _uri);
 
 				String _fileName = null;
 				while(_st.hasMoreElements()){
 					_fileName = _st.nextToken();
 				}
 
-				Logger.debug(this, "Parsed filename: " + _fileName);
+				Logger.info(this, "Parsed filename: " + _fileName.split("[_]")[0]);
 
-				String identifier = UtilMethods.getFileName(_fileName);
+				String identifier = UtilMethods.getFileName(_fileName.split("[_]")[0]);
+				String inode = null;
+				try{
+					inode = _fileName.split("[_]")[1].split("&")[0];
+				}catch(ArrayIndexOutOfBoundsException e){
+					inode = "-1";
+				}
+				Logger.info(getClass(), "Identifier: ***"+identifier+"***");
+				Logger.info(getClass(), "Inode: ***"+inode+"***");
+				long languageId = APILocator.getLanguageAPI().getDefaultLanguage().getId();
+				if(!INODE_NOT_FOUND.equals(inode))
+					languageId = APILocator.getContentletAPI().search("+inode:"+inode, 0, -1, null, APILocator.getUserAPI().getSystemUser(), false).get(0).getLanguageId();
+				
+				
 				Identifier ident = null;
-				Logger.debug(SpeedyAssetServlet.class, "Loading identifier: " + identifier);
+				Logger.info(SpeedyAssetServlet.class, "Loading identifier: " + identifier);
+				Logger.info(SpeedyAssetServlet.class, "With inode: " + inode);
+				Logger.info(SpeedyAssetServlet.class, "in language: " + languageId);
 				try{
 					ident = APILocator.getIdentifierAPI().find(identifier);
 				}catch(Exception ex){
-					Logger.debug(SpeedyAssetServlet.class, "Identifier not found going to try as a File Asset", ex);
+					Logger.error(SpeedyAssetServlet.class, "Identifier not found going to try as a File Asset", ex);
 				}
 				if(ident != null && ident.getURI() != null && !ident.getURI().equals("")){
 
 					if(PREVIEW_MODE || EDIT_MODE){
-						uri = WorkingCache.getPathFromCache(ident.getURI(), ident.getHostId());
+						uri = WorkingCache.getPathFromCache(ident.getURI(), ident.getHostId(), languageId);
 						if(!UtilMethods.isSet(realPath)){
 							f = new File(Config.CONTEXT.getRealPath(assetPath + uri));
 						}else{
@@ -468,8 +485,8 @@ public class SpeedyAssetServlet extends HttpServlet {
 					}
 				}
 			} catch (Exception e) {
-				Logger.warn(this, e + " Error for = " + request.getRequestURI() + (request.getQueryString() != null?"?"+request.getQueryString():"") );
-				Logger.debug(this, "Error serving asset = " + request.getRequestURI() + (request.getQueryString() != null?"?"+request.getQueryString():""), e);
+				Logger.error(this, e + " Error for = " + request.getRequestURI() + (request.getQueryString() != null?"?"+request.getQueryString():"") );
+				Logger.error(this, "Error serving asset = " + request.getRequestURI() + (request.getQueryString() != null?"?"+request.getQueryString():""), e);
 
 			} finally {
 				if(to != null)
@@ -483,7 +500,7 @@ public class SpeedyAssetServlet extends HttpServlet {
 			}
 
 		} catch (Exception e) {
-			Logger.debug(this, "General Error occurred serving asset = " + request.getRequestURI() + (request.getQueryString() != null?"?"+request.getQueryString():""), e);
+			Logger.error(this, "General Error occurred serving asset = " + request.getRequestURI() + (request.getQueryString() != null?"?"+request.getQueryString():""), e);
 			//DOTCMS-1981
 			//response.sendError(404, "Asset not Found");
 		}

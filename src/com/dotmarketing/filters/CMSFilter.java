@@ -91,7 +91,7 @@ public class CMSFilter implements Filter {
 
         uri = URLDecoder.decode(uri, "UTF-8");
         
-        //Logger.info(CMSFilter.class, "******************* INIZIO FILTRO CMS "+uri+" *******************************");
+        //Logger.debug(CMSFilter.class, "******************* INIZIO FILTRO CMS "+uri+" *******************************");
 
 		Company company = PublicCompanyFactory.getDefaultCompany();
 
@@ -107,7 +107,7 @@ public class CMSFilter implements Filter {
 				uri = "/";
 			}
 			response.sendRedirect(uri);
-			//Logger.info(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  REDIRECT *******************************");
+			//Logger.debug(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  REDIRECT *******************************");
 			return;
 		}
 
@@ -121,20 +121,20 @@ public class CMSFilter implements Filter {
 			if(Xss.URLHasXSS(queryString)){
 				response.sendRedirect(uri);
 				
-				//Logger.info(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  REDIRECT *******************************");
+				//Logger.debug(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  REDIRECT *******************************");
 				return;
 			}
 			//http://jira.dotmarketing.net/browse/DOTCMS-6141
 			if(queryString.contains("\"")){
 				response.sendRedirect(uri+"?"+StringEscapeUtils.escapeHtml(StringEscapeUtils.unescapeHtml(queryString)));
-				//Logger.info(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  REDIRECT *******************************");
+				//Logger.debug(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  REDIRECT *******************************");
 				return;
 			}
 		}
 
         if (excludeURI(uri)) {
             chain.doFilter(request, response);
-            //Logger.info(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  CHAIN *******************************");
+            //Logger.debug(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  CHAIN *******************************");
             return;
         }
 
@@ -238,19 +238,20 @@ public class CMSFilter implements Filter {
             		params.append(StringPool.AMPERSAND);
             }
 			response.sendRedirect(uri + "/" + (params.length() > 0 ? "?" + params : ""));
-			//Logger.info(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  REDIRECT *******************************");
+			//Logger.debug(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  REDIRECT *******************************");
 			return;
 		}
 
-
+        Logger.debug(getClass(), "URI: " + uri);
 
         /* if edit mode */
         if (PREVIEW_MODE || EDIT_MODE) {
 			try {
 				pointer = LiveCache.getPathFromCache(uri, host);
-
+				Logger.debug(getClass(), "Pointer 1: " + pointer);
 				if(!UtilMethods.isSet(pointer)){//DOTCMS-7062
 					pointer = WorkingCache.getPathFromCache(uri, host);
+					Logger.debug(getClass(), "Pointer 1 - working: " + pointer);
 				}
 
             if (!UtilMethods.isSet(pointer) && (uri.endsWith(dotExtension) || InodeUtils.isSet(APILocator.getFolderAPI().findFolderByPath(uri, host,APILocator.getUserAPI().getSystemUser(),false).getInode()))) {
@@ -260,7 +261,7 @@ public class CMSFilter implements Filter {
                 }
                 request.getRequestDispatcher("/html/portlet/ext/htmlpages/page_not_found_404.jsp?url=" + url + "&hostId=" + host.getIdentifier()).forward(
                         req, res);
-                //Logger.info(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  DISPATCHER *******************************");
+                //Logger.debug(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  DISPATCHER *******************************");
                 return;
             }
             LogFactory.getLog(this.getClass()).debug("CMS preview pointer = " + uri + ":" + pointer);
@@ -306,7 +307,7 @@ public class CMSFilter implements Filter {
 					response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 				}
         		
-        		//Logger.info(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  ERROR *******************************");
+        		//Logger.debug(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  ERROR *******************************");
         		return;
         	}
 
@@ -315,7 +316,7 @@ public class CMSFilter implements Filter {
         // if absolute link somewhere else
         if (UtilMethods.isSet(pointer) && (pointer.startsWith(httpProtocol) || pointer.startsWith(httpsProtocol))) {
             response.sendRedirect(pointer);
-            //Logger.info(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  REDIRECT 1 *******************************");
+            //Logger.debug(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  REDIRECT 1 *******************************");
             return;
         }
 
@@ -419,7 +420,7 @@ public class CMSFilter implements Filter {
         }
         if (UtilMethods.isSet(pointer) && (pointer.startsWith(httpProtocol) || pointer.startsWith(httpsProtocol))) {
             response.sendRedirect(pointer);
-            //Logger.info(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  REDIRECT *******************************");
+            //Logger.debug(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  REDIRECT *******************************");
             return;
         }
 
@@ -504,7 +505,7 @@ public class CMSFilter implements Filter {
                 	boolean canRead = false;
                 	
                 	if(ident.getAssetType().equals("contentlet")){
-                		
+                		String liveInode, workingInode = null;
                 		// QUESTA PARTE VA RIVISTA MEGLIO...
 //                		boolean documentFileAsset = con.getStructure().getStructureType()==Structure.STRUCTURE_TYPE_FILEASSET && !uri.startsWith("/static/");
 //                		boolean documentFileAsset = con.getStructure().getStructureType()==Structure.STRUCTURE_TYPE_FILEASSET;
@@ -522,15 +523,23 @@ public class CMSFilter implements Filter {
 //            			}
 
                 		try{
-                			ContentletVersionInfo cinfo = APILocator.getVersionableAPI().getContentletVersionInfo(ident.getId(), con.getLanguageId());                			                			
+                			ContentletVersionInfo cinfo = APILocator.getVersionableAPI().getContentletVersionInfo(ident.getId(), con.getLanguageId());  
+                			liveInode = cinfo.getLiveInode();
+                			workingInode = cinfo.getWorkingInode();
 //                			// Alcune immagini sono caricate nella lingua di default
-//                			if(null==cinfo.getIdentifier() && endInImageExtension(uri))
-//                				cinfo = APILocator.getVersionableAPI().getContentletVersionInfo(ident.getId(), APILocator.getLanguageAPI().getDefaultLanguage().getId());
-                			if(cinfo.getLiveInode() != null && !cinfo.getLiveInode().trim().equals("")) {
-	                			Contentlet proxy  = APILocator.getContentletAPI().find(cinfo.getLiveInode(), user, true);
-	                			canRead = UtilMethods.isSet(proxy.getInode());
+                			if(null==cinfo.getIdentifier() && endInImageExtension(uri))
+                				cinfo = APILocator.getVersionableAPI().getContentletVersionInfo(ident.getId(), APILocator.getLanguageAPI().getDefaultLanguage().getId());
+                			if(!EDIT_MODE){
+	                			if(cinfo.getLiveInode() != null && !cinfo.getLiveInode().trim().equals("")) {
+		                			Contentlet proxy  = APILocator.getContentletAPI().find(cinfo.getLiveInode(), user, true);
+		                			canRead = UtilMethods.isSet(proxy.getInode());
+	                			}
+                			}else{
+                				if(cinfo.getWorkingInode() != null && !cinfo.getWorkingInode().trim().equals("")) {
+		                			Contentlet proxy  = APILocator.getContentletAPI().find(cinfo.getWorkingInode(), user, true);
+		                			canRead = UtilMethods.isSet(proxy.getInode());
+	                			}
                 			}
-
                 		}catch(Exception e){
     						Logger.warn(this, "Unable to find file asset contentlet with identifier " + ident.getId(), e);
                 		}
@@ -566,7 +575,7 @@ public class CMSFilter implements Filter {
 
 					        LogFactory.getLog(CMSFilter.class).debug("Unauthorized URI = " + uri);
 					        response.sendError(401, "The requested page/file is unauthorized");
-					        //Logger.info(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  UNAUTHORIZED *******************************");
+					        //Logger.debug(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  UNAUTHORIZED *******************************");
 					        return;
 
 					    } else {
@@ -575,7 +584,7 @@ public class CMSFilter implements Filter {
 					        // go to unauthorized page
 					        LogFactory.getLog(CMSFilter.class).warn("VELOCITY CHECKING PERMISSION: Page doesn't have any access for this user: "+uri);
 					        response.sendError(403, "The requested page/file is forbidden");
-					        //Logger.info(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  FORBIDDEN *******************************");
+					        //Logger.debug(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  FORBIDDEN *******************************");
 					        return;
 					    }
 
@@ -591,13 +600,14 @@ public class CMSFilter implements Filter {
 
             if (0 < pointer.indexOf(dotExtension)) {
             	//Serving a page through the velocity servlet
-            	//Logger.info(CMSFilter.class, "******************* INVOCATA VELOCITY SERVLET "+uri+"  *******************************");
+            	//Logger.debug(CMSFilter.class, "******************* INVOCATA VELOCITY SERVLET "+uri+"  *******************************");
                 request.getRequestDispatcher(pointer).forward(request, response);
             } else {
             	//Serving a regular asset through the speedy asset servlet
+            	Logger.debug(getClass(), "Pointer: " + pointer);
                 request.getRequestDispatcher("/dotAsset?path=" + pointer).forward(request, response);
             }
-            //Logger.info(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  *******************************");
+            //Logger.debug(CMSFilter.class, "******************* FINE FILTRO CMS "+uri+"  *******************************");
             return;
 
         }
@@ -678,7 +688,7 @@ public class CMSFilter implements Filter {
  	        for (String pluginID:pluginList) {
  	        	try {
  					String list=pAPI.loadPluginConfigProperty(pluginID, "cmsfilter.servlet.exclusions");
- 					//Logger.info(CMSFilter.class,"plugin "+pluginID+" cmsfilter.servlet.exclusions="+list);
+ 					//Logger.debug(CMSFilter.class,"plugin "+pluginID+" cmsfilter.servlet.exclusions="+list);
  					if (list!=null) {
  						String[] items=list.split(",");
  						if (items!=null && items.length>0) {

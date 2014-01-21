@@ -62,19 +62,21 @@ dojo.require("dotcms.dijit.FileBrowserDialog");
 		var ident
 		var ext=file.extension;
 		var ident =file.identifier+'.'+ext;
-		wysiwyg_win.document.forms[0].elements["src"].value = "/dotAsset/" + ident;
-		wysiwyg_win.ImageDialog.showPreviewImage("/dotAsset/" + ident);
+		var inode =file.inode;
+		wysiwyg_win.document.forms[0].elements["src"].value = "/dotAsset/" + ident + "_"+inode;
+		wysiwyg_win.ImageDialog.showPreviewImage("/dotAsset/" + ident + "_"+inode);
 	}
 	function addFileCallback(file) {
 		var ident
 		var ext=file.extension;
 		var ident =file.identifier+'.'+ext;
+		var inode =file.inode;
 		var fileExt = getFileExtension(file.name).toString();
 		<% String extension = com.dotmarketing.util.Config.getStringProperty("VELOCITY_PAGE_EXTENSION"); %>
 		if(fileExt == '<%= extension %>'){
 			wysiwyg_win.document.forms[0].elements["href"].value = file.pageURI;
 		}else{
-			wysiwyg_win.document.forms[0].elements["href"].value = /dotAsset/ + ident;
+			wysiwyg_win.document.forms[0].elements["href"].value = "/dotAsset/" + ident + "_"+inode;
 		}
 	}
 		

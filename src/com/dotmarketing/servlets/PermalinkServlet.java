@@ -15,8 +15,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.dotmarketing.beans.Identifier;
 import com.dotmarketing.beans.Trackback;
+import com.dotmarketing.beans.VersionInfo;
 import com.dotmarketing.business.APILocator;
+import com.dotmarketing.business.DotStateException;
 import com.dotmarketing.business.IdentifierCache;
+import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.factories.InodeFactory;
 import com.dotmarketing.factories.TrackbackFactory;
 import com.dotmarketing.portlets.contentlet.business.ContentletAPI;
@@ -136,7 +139,23 @@ public class PermalinkServlet extends HttpServlet {
 				redirect = redirect+UtilMethods.encodeURIComponent(iden.getURI());
 			}else{
 				/*Check if is a contentlet and redirect to the speedy asset servlet */
-				redirect = redirect+"/dotAsset/"+iden.getInode()+iden.getURI().substring(iden.getURI().lastIndexOf("."));
+				VersionInfo vi = null;
+				try {
+					vi = APILocator.getVersionableAPI().getVersionInfo(iden.getId());
+				} catch (DotStateException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (DotDataException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				String inode = "";
+				if(null!=vi){
+					inode = vi.getLiveInode();
+					if(null==inode)
+						inode = vi.getWorkingInode();	
+				}
+				redirect = redirect+"/dotAsset/"+iden.getInode()+iden.getURI().substring(iden.getURI().lastIndexOf("."))+"|"+inode;
 			}
 
 

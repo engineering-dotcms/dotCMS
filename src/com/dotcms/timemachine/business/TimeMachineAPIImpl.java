@@ -87,6 +87,7 @@ public class TimeMachineAPIImpl implements TimeMachineAPI {
 	public List<Date> getAvailableTimeMachineForSite(Host host) throws DotDataException {
 		List<Date> list = new ArrayList<Date>();
 		File tmPath = new File(ConfigUtils.getTimeMachinePath());
+		if(null!=tmPath)
 		for ( File file : tmPath.listFiles()) {
 			if ( file.isDirectory() && file.getName().startsWith("tm_")) {
 				File hostDir = new File(file.getAbsolutePath() + File.separator + "live" + File.separator + host.getHostname());

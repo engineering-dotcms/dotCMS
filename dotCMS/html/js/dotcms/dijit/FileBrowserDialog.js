@@ -377,7 +377,7 @@ dojo.declare("dotcms.dijit.FileBrowserDialog", [dijit._Widget, dijit._Templated]
 
    			if(asset.mimeType != null){
 	   			if(asset.mimeType.indexOf('image') >= 0)
-	   				assetThumbnail = '/thumbnail?w=100&h=100&id=' + asset.identifier;
+	   				assetThumbnail = '/thumbnail?w=100&h=100&id=' + asset.identifier + '&ind=' + asset.inode;
    			}
    		}
    		if (asset.type == 'htmlpage') {

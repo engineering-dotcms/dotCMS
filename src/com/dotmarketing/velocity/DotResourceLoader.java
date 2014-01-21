@@ -286,7 +286,7 @@ public class DotResourceLoader extends ResourceLoader {
                 		 LanguageAPI langAPI = APILocator.getLanguageAPI();
                 		 language = Long.toString(langAPI.getDefaultLanguage().getId());
                 	} else {
-                		throw new ResourceNotFoundException("Contentlet is a miss in the cache");
+                		throw new ResourceNotFoundException("1.Contentlet is a miss in the cache: " + arg0);
                 	}
             	}
                 
@@ -307,7 +307,7 @@ public class DotResourceLoader extends ResourceLoader {
                             contentlet = cc;
                         } else {
                             CacheLocator.getVeloctyResourceCache().addMiss(arg0);
-                            throw new ResourceNotFoundException("Contentlet is a miss in the cache");
+                            throw new ResourceNotFoundException("2.Contentlet is a miss in the cache: " + arg0);
                         }
                     }
                 }
@@ -355,7 +355,7 @@ public class DotResourceLoader extends ResourceLoader {
 
 	            Contentlet contentlet = null;
 	            if(CacheLocator.getVeloctyResourceCache().isMiss(arg0)){
-            		throw new ResourceNotFoundException("Contentlet is a miss in the cache");
+            		throw new ResourceNotFoundException("3.Contentlet is a miss in the cache: "+arg0);
             	}
 	            
 	            try {
@@ -367,7 +367,7 @@ public class DotResourceLoader extends ResourceLoader {
 	            
 	            if(contentlet == null || !InodeUtils.isSet(contentlet.getInode())){
                 	CacheLocator.getVeloctyResourceCache().addMiss(arg0);
-                	throw new ResourceNotFoundException("Contentlet is a miss in the cache");
+                	throw new ResourceNotFoundException("4.Contentlet is a miss in the cache: "+arg0);
                 }
 
 	            Logger.debug(this,"DotResourceLoader:\tWriting out contentlet inode = " + contentlet.getInode());

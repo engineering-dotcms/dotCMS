@@ -20,6 +20,7 @@ import java.util.Set;
 
 import org.apache.struts.Globals;
 
+import com.dotmarketing.business.APILocator;
 import com.dotmarketing.business.CacheLocator;
 import com.dotmarketing.business.DotCacheException;
 import com.dotmarketing.db.HibernateUtil;
@@ -90,6 +91,8 @@ public class LanguageFactoryImpl extends LanguageFactory {
 
         try {
             x = Long.parseLong(id);
+        } catch (NumberFormatException e) {
+        	x = getLanguageByCode(id).getId();
         } catch (Exception e) {
             Logger.error(LanguageFactoryImpl.class, "getLanguage failed passed id is not numeric.", e);
             throw new DotRuntimeException(e.toString(), e);
@@ -141,6 +144,24 @@ public class LanguageFactoryImpl extends LanguageFactory {
             return lang;
         } catch (DotHibernateException e) {
             Logger.error(LanguageFactoryImpl.class, "getLanguage failed:" + e, e);
+            throw new DotRuntimeException(e.toString());
+        }
+
+    }
+	
+    protected Language getLanguageByCode(String code) {
+		Language lang = null;
+        try {
+            HibernateUtil dh = new HibernateUtil(Language.class);
+            dh.setQuery("from language in class com.dotmarketing.portlets.languagesmanager.model.Language where language_code = ? ");
+            dh.setParam(code);
+            lang = (Language) dh.load();
+            if(lang != null){
+            	CacheLocator.getLanguageCache().addLanguage(lang);
+            }
+            return lang;
+        } catch (DotHibernateException e) {
+            Logger.error(LanguageFactoryImpl.class, "getLanguageByCode failed:" + e, e);
             throw new DotRuntimeException(e.toString());
         }
 

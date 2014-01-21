@@ -264,7 +264,7 @@
              disable4AllUsers();
         <%}%>
 		
-		var assignedTo = dijit.byId("assignedTo");
+		var assignedTo = dijit.byIdassignedTo("assignedTo");
 		assignedTo.displayedValue="";
 		assignedTo.setValue("<%=myRole.getId()%>");
 		doFilter();
@@ -277,6 +277,7 @@
 			}
 			else {
 				var assignedTo = dijit.byId("assignedTo");
+				alert(assignedTo);
 		        assignedTo.displayedValue="";
 		        
 		        assignedTo.attr("disabled","true");

@@ -63,6 +63,7 @@ public class RefreshMenus {
 			}
 			
 		}
+		catch(ClassCastException e){}
 		catch(Exception e){
 			Logger.warn(RefreshMenus.class, e.getMessage());
 		}

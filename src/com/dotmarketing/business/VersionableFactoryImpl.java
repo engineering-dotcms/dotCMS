@@ -249,7 +249,11 @@ public class VersionableFactoryImpl extends VersionableFactory {
          dh.setParam(identifier);
          dh.setParam(lang);
          Logger.debug(this.getClass(), "getContentletVersionInfo query: "+dh.getQuery());
-         contv = (ContentletVersionInfo)dh.load();
+         try{
+        	 contv = (ContentletVersionInfo)dh.load();
+         }catch(Exception e){
+        	 contv = new ContentletVersionInfo();
+         }
          return contv;
     }
     

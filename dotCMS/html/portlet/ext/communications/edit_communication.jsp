@@ -270,6 +270,7 @@
 <input type="hidden" name="wysiwyg_file" id="wysiwyg_file" value="">
 <input type="hidden" name="selectedwysiwyg_file" id="selectedwysiwyg_file" value="">
 <input type="hidden" name="selectedIdentwysiwyg_file" id="selectedIdentwysiwyg_file" value="">
+<input type="hidden" name="selectedInodewysiwyg_file" id="selectedInodewysiwyg_file" value="">
 <input type="hidden" name="folderwysiwyg_file" id="folderwysiwyg_file" value="">
 <input type="hidden" name="communicationType" value="email" /> 
 

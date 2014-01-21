@@ -74,7 +74,7 @@ public class Contentlet implements Serializable, Permissionable, Categorizable, 
     public static final String WORKFLOW_ACTION_KEY = "wfActionId";
     public static final String WORKFLOW_ASSIGN_KEY = "wfActionAssign";
     public static final String WORKFLOW_COMMENTS_KEY = "wfActionComments";
-    
+    public static final String HAS_PATH_IN_COMMENT = "_has_path_";
     
     public static final String WORKFLOW_PUBLISH_DATE = "wfPublishDate";
     public static final String WORKFLOW_PUBLISH_TIME = "wfPublishTime";
@@ -274,7 +274,7 @@ public class Contentlet implements Serializable, Permissionable, Categorizable, 
 		try{
 			return (Long)map.get(fieldVarName);
 		}catch (Exception e) {
-			 throw new DotRuntimeException("Unable to retrive field value", e);
+			 throw new DotRuntimeException("Unable to retrive field value: "+fieldVarName, e);
 		}
 	}
 	
@@ -286,7 +286,7 @@ public class Contentlet implements Serializable, Permissionable, Categorizable, 
 		try{
 			return (Boolean)map.get(fieldVarName);
 		}catch (Exception e) {
-			 throw new DotRuntimeException("Unable to retrive field value", e);
+			 throw new DotRuntimeException("Unable to retrive field value: "+fieldVarName, e);
 		}
 	}
 	
@@ -298,7 +298,7 @@ public class Contentlet implements Serializable, Permissionable, Categorizable, 
 		try{
 			return (Date)map.get(fieldVarName);
 		}catch (Exception e) {
-			 throw new DotRuntimeException("Unable to retrive field value", e);
+			 throw new DotRuntimeException("Unable to retrive field value: "+fieldVarName, e);
 		}
 	}
 	
@@ -310,7 +310,7 @@ public class Contentlet implements Serializable, Permissionable, Categorizable, 
 		try{
 			return (Float)map.get(fieldVarName);
 		}catch (Exception e) {
-			 throw new DotRuntimeException("Unable to retrive field value", e);
+			 throw new DotRuntimeException("Unable to retrive field value: "+fieldVarName, e);
 		}
 	}
 	

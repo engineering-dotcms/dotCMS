@@ -72,6 +72,7 @@ public class ThumbnailImage extends HttpServlet {
 		}
 
         String inode = request.getParameter("inode");
+        String _inode = request.getParameter("ind");
         String identifier = request.getParameter("id");
         Identifier ident = null;
 
@@ -252,7 +253,8 @@ public class ThumbnailImage extends HttpServlet {
             	    id = APILocator.getIdentifierAPI().find(identifier);
             	String contAssetPath = "";
             	if(id!=null && InodeUtils.isSet(id.getId()) && id.getAssetType().equals("contentlet")){
-            		Contentlet cont = APILocator.getContentletAPI().findContentletByIdentifier(identifier, false, APILocator.getLanguageAPI().getDefaultLanguage().getId(), user, false);
+            		Contentlet cont = APILocator.getContentletAPI().find(_inode, user, false);
+//            		Contentlet cont = APILocator.getContentletAPI().findContentletByIdentifier(identifier, false, APILocator.getLanguageAPI().getDefaultLanguage().getId(), user, false);
             		FileAsset fa = APILocator.getFileAssetAPI().fromContentlet(cont);
             		isSet = InodeUtils.isSet(cont.getInode());
             		fileName = fa.getFileName();
