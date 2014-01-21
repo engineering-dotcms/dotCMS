@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Plugin-Name: Controllo della salute delle macchine in cluster
+Deploy-Class: com.eng.dotcms.healthchecker.HealthCheckerDeployer
+Plugin-Version: 1.0
+Author: Graziano Aliberti - Engineering Ingegneria Informatica S.p.A

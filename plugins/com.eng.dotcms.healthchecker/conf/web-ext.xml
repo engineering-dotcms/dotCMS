@@ -1,0 +1,6 @@
+<servlet>
+	<description>Servlet che cambia il receiver per jGroups in modo da controllare eventi di suspect e viewAccept</description>
+	<servlet-name>change-receiver-jgroups</servlet-name>
+	<servlet-class>com.eng.dotcms.healthchecker.servlet.HealthServlet</servlet-class>
+	<load-on-startup>200</load-on-startup>
+</servlet>

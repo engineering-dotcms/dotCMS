@@ -99,8 +99,11 @@ public class EmergencySenderPluginDeployer implements PluginDeployer {
 			String jobDescription = pluginAPI.loadProperty(pluginId, "quartz.job.description");
 			String javaClassname = pluginAPI.loadProperty(pluginId, "quartz.job.java.classname");
 			String cronExpression = pluginAPI.loadProperty(pluginId, "quartz.job.cron.expression");
-			CronScheduledTask cronScheduledTask = new CronScheduledTask(jobName, jobGroup, jobDescription, javaClassname, new Date(), null, CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW, new HashMap<String, Object>(), cronExpression);
-			QuartzUtils.scheduleTask(cronScheduledTask);	
+			boolean enable = Boolean.parseBoolean(pluginAPI.loadProperty(pluginId, "quartz.job.enable"));
+			if(enable){
+				CronScheduledTask cronScheduledTask = new CronScheduledTask(jobName, jobGroup, jobDescription, javaClassname, new Date(), null, CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW, new HashMap<String, Object>(), cronExpression);
+				QuartzUtils.scheduleTask(cronScheduledTask);
+			}
 		}catch(DotDataException e){
 			Logger.error(this, e.getMessage(), e);
 			return false;

@@ -1,0 +1,5 @@
+	<tool>
+		<key>health</key>
+		<scope>application</scope>
+		<class>com.eng.dotcms.healthchecker.viewtool.HealthCheckerTool</class>
+	</tool>

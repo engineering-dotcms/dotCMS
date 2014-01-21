@@ -31,14 +31,16 @@ public class AdditionsDeployer extends PluginDeployer {
 			String jobPutDescription = pluginAPI.loadProperty(PLUGIN_ID, "job.description");
 			String javaPutClassname = pluginAPI.loadProperty(PLUGIN_ID, "job.classname");
 			String cronPutExpression = pluginAPI.loadProperty(PLUGIN_ID, "job.cron");
-			CronScheduledTask cronPutScheduledTask = new CronScheduledTask(jobPutName, jobPutGroup, jobPutDescription, javaPutClassname, new Date(), null, CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW, new HashMap<String, Object>(), cronPutExpression);
-			if(getQuartzJob()!=null) {
-                QuartzUtils.pauseJob("trigger19","group19");
-                QuartzUtils.removeTaskRuntimeValues("trigger19","group19");
-                QuartzUtils.removeJob("trigger19", "group19");
-            }
-			QuartzUtils.scheduleTask(cronPutScheduledTask);	
-			
+			boolean enable = Boolean.parseBoolean(pluginAPI.loadProperty(PLUGIN_ID, "job.enable"));
+			if(enable){
+				CronScheduledTask cronPutScheduledTask = new CronScheduledTask(jobPutName, jobPutGroup, jobPutDescription, javaPutClassname, new Date(), null, CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW, new HashMap<String, Object>(), cronPutExpression);
+				if(getQuartzJob()!=null) {
+	                QuartzUtils.pauseJob("trigger19","group19");
+	                QuartzUtils.removeTaskRuntimeValues("trigger19","group19");
+	                QuartzUtils.removeJob("trigger19", "group19");
+	            }
+				QuartzUtils.scheduleTask(cronPutScheduledTask);	
+			}
 		} catch (DotDataException e) {
 			Logger.error(this, e.getMessage());
 			return false;
