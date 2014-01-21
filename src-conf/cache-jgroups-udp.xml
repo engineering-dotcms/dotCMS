@@ -11,6 +11,7 @@
     <UDP bind_addr="${jgroups.bind_addr:127.0.0.1}"
     	 mcast_port="${jgroups.udp.mcast_port:45588}"
          mcast_addr="${jgroups.udp.mcast_addr:228.10.10.10}"
+         mcast_recv_buf_size="26214400"
          tos="8"
          loopback="true"
          discard_incompatible_packets="true"
@@ -18,7 +19,7 @@
          max_bundle_timeout="30"
          ip_ttl="${jgroups.udp.ip_ttl:2}"
          enable_bundling="true"
-         enable_diagnostics="true"
+         enable_diagnostics="false"
          thread_naming_pattern="cl"
 
          timer_type="new"
@@ -43,30 +44,34 @@
          oob_thread_pool.queue_max_size="10000"
          oob_thread_pool.rejection_policy="Run"/>
 
-    <PING timeout="2000"
+    <PING timeout="30000"
             num_initial_members="3"/>
     <MERGE2 max_interval="30000"
             min_interval="10000"/>
     <FD_SOCK/>
-    <FD_ALL/>
-    <VERIFY_SUSPECT timeout="1500"  />
+    <FD timeout="30000" max_tries="5" />
+    <VERIFY_SUSPECT timeout="30000"  />
     <BARRIER />
-    <pbcast.NAKACK use_stats_for_retransmission="false"
-                   exponential_backoff="0"
-                   use_mcast_xmit="true" gc_lag="0"
-                   retransmit_timeout="300,600,1200"
-                   discard_delivered_msgs="true"/>
-    <UNICAST timeout="300,600,1200"/>
+    <pbcast.NAKACK exponential_backoff="1000"
+                   use_mcast_xmit="true"
+                   use_mcast_xmit_req="true"
+                   retransmit_timeout="300,600,1200,2400,4800"
+                   discard_delivered_msgs="true"
+                   />
+    <UNICAST timeout="300,600,1200,2400,4800"/>
     <pbcast.STABLE stability_delay="1000" desired_avg_gossip="50000"
                    max_bytes="4M"/>
-    <pbcast.GMS print_local_addr="true" join_timeout="3000"
+    <pbcast.GMS print_local_addr="true" 
+    			join_timeout="15000"
+    			view_ack_collection_timeout="6000"
                 view_bundling="true"/>
-    <UFC max_credits="2M"
-         min_threshold="0.4"/>
-    <MFC max_credits="2M"
-         min_threshold="0.4"/>
+    <UFC max_credits="50M"
+         min_threshold="0.4" 
+         ignore_synchronous_response="true"/>
+    <MFC max_credits="50M"
+         min_threshold="0.4"
+         ignore_synchronous_response="true"/>
     <FRAG2 frag_size="60K"  />
     <pbcast.STREAMING_STATE_TRANSFER />
-    <!-- pbcast.STATE_TRANSFER  / -->
     <pbcast.FLUSH  />
 </config>
