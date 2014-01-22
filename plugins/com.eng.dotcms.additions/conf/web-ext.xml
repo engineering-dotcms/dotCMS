@@ -6,3 +6,11 @@
 	<servlet-name>WorkflowPreviewHTMLPageServlet</servlet-name>
 	<url-pattern>/servlets/workflowRedirect</url-pattern>
 </servlet-mapping>
+<servlet>
+	<servlet-name>GalleryServlet</servlet-name>
+	<servlet-class>com.eng.dotcms.additions.servlet.GalleryServlet</servlet-class>
+</servlet>
+<servlet-mapping>
+	<servlet-name>GalleryServlet</servlet-name>
+	<url-pattern>/servlets/media/fotogallery/gallery-stream</url-pattern>
+</servlet-mapping>

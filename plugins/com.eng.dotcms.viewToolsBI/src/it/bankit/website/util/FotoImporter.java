@@ -227,7 +227,7 @@ public class FotoImporter {
 			com.liferay.util.FileUtil.copyFile(thumbernailOriginal, tempFile2, false);
 			foto.setBinary("thumbnail", tempFile1);
 			Logger.error(this.getClass(), "NOME ORGINALE: " + thumbernailOriginal.getName());
-			generateThumbnailFileAsset(thumbernailOriginal.getName(), imageOriginal.getName(), f, l, tempFile2);
+//			generateThumbnailFileAsset(thumbernailOriginal.getName(), imageOriginal.getName(), f, l, tempFile2);
 		}
 
 		return foto;
