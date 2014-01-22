@@ -10,12 +10,8 @@
       "content_stemmer": {
         "type" : "stemmer",
         "name" : "english"
-      },
-      "bankit_stemmer": {
-        "type" : "stemmer",
-        "name" : "italian"
-      },      
-      "graziano_test_delimiter_filter" : {
+      },     
+      "delimiter_filter" : {
 		"type" : "word_delimiter",
         "catenate_all" : true,
         "catenate_numbers" : true,
@@ -40,8 +36,7 @@
           "lowercase",
           "asciifolding",
           "content_stemmer",
-          "bankit_stemmer",
-          "graziano_test_delimiter_filter"
+          "delimiter_filter"
         ],
         "type": "custom",
         "tokenizer": "standard"
@@ -52,7 +47,7 @@
           "lowercase",
           "asciifolding",
           "content_ngrams",
-          "graziano_test_delimiter_filter"
+          "delimiter_filter"
         ],
         "type": "custom",
         "tokenizer": "standard"
