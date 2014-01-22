@@ -325,7 +325,8 @@ public class PublisherQueueJob implements StatefulJob {
 	                	WorkflowStep currentStep = APILocator.getWorkflowAPI().findStepByContentlet(c);
 	                	if(!wfscheme.isMandatory() || currentStep.isResolved())
 	                		APILocator.getContentletAPI().publish(c, APILocator.getUserAPI().loadUserById(c.getModUser(), systemU, false), false);
-	                }
+	                }else
+	                	APILocator.getContentletAPI().publish(c, APILocator.getUserAPI().loadUserById(c.getModUser(), systemU, false), false);
 	            }
 	            catch(Exception e){
 	                Logger.debug(this, "content failed to publish: " +  e.getMessage());
