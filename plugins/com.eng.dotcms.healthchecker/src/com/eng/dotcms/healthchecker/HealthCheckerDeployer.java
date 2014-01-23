@@ -9,6 +9,7 @@ import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.util.Logger;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_ADD_HEALTH_TABLE;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CHECK_TABLE;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_ADD_HEALTH_CLUSTER_TABLE;
 
 public class HealthCheckerDeployer extends PluginDeployer {
 	
@@ -21,6 +22,8 @@ public class HealthCheckerDeployer extends PluginDeployer {
 					// create tables
 					dc.setSQL(ORACLE_ADD_HEALTH_TABLE);
 					dc.loadResult();
+					dc.setSQL(ORACLE_ADD_HEALTH_CLUSTER_TABLE);
+					dc.loadResult();
 				}
 				return true;
 			}catch(DotDataException e){
@@ -32,13 +35,17 @@ public class HealthCheckerDeployer extends PluginDeployer {
 		}
 	}
 
-	protected boolean existsTables(DotConnect dc) throws DotDataException{
-		dc.setSQL(ORACLE_CHECK_TABLE);		
-		Map<String, Object> row = dc.loadObjectResults().get(0); 
-		if(Integer.parseInt(row.get("exist").toString())==2)
-			return true;
-		else
+	protected boolean existsTables(DotConnect dc) {
+		try{
+			dc.setSQL(ORACLE_CHECK_TABLE);		
+			Map<String, Object> row = dc.loadObjectResults().get(0); 
+			if(Integer.parseInt(row.get("exist").toString())==2)
+				return true;
+			else
+				return false;
+		}catch(DotDataException e){
 			return false;
+		}
 	}
 	
 }

@@ -1,19 +1,13 @@
 package com.eng.dotcms.healthchecker;
 
-import java.util.Date;
 import java.util.List;
 
 import org.jgroups.Address;
-import org.jgroups.ChannelClosedException;
-import org.jgroups.ChannelNotConnectedException;
 import org.jgroups.JChannel;
-import org.jgroups.Message;
 import org.jgroups.ReceiverAdapter;
 import org.jgroups.View;
 
-import com.dotcms.publisher.util.TrustFactory;
 import com.dotmarketing.business.CacheLocator;
-import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.db.HibernateUtil;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotHibernateException;
@@ -22,21 +16,29 @@ import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.UtilMethods;
 import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
 import com.eng.dotcms.healthchecker.util.HealthUtil;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.client.urlconnection.HTTPSProperties;
 
+/**
+ * Classe dedicata alla gestione del canale jGroups utilizzato per monitorare la salute del cluster.
+ * 
+ * @author Graziano Aliberti - Engineering Ingegneria Informatica S.p.a
+ *
+ * @date Jan 22, 2014
+ */
 public class HealthClusterAdministrator extends ReceiverAdapter {
 	
 	private HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 	private JChannel channel;
+	private boolean cluster = false;
 	
-	public HealthClusterAdministrator() {
-	}
+	public HealthClusterAdministrator() {}
 	
+	/**
+	 * Inizializzazione canale. Viene utilizzata la stessa logica e lo stesso file di configurazione utilizzato per il canale principale.
+	 * 
+	 * @author Graziano Aliberti - Engineering Ingegneria Informatica S.p.a
+	 *
+	 * @date Jan 22, 2014
+	 */
 	public void init(){
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		if ((Config.getBooleanProperty("CACHE_CLUSTER_THROUGH_DB", false) == false)
@@ -81,6 +83,7 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 				channel.setReceiver(this);
 				channel.connect("dotCMSHealthCluster");
 				channel.setOpt(JChannel.LOCAL, false);
+				cluster = true;
 				Logger.debug(this, "***\t " + channel.toString(true));
 				Logger.info(this, "***\t Ending JGroups Health Cluster Setup");
 			} catch (Exception e1) {
@@ -90,36 +93,11 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 		}
 	}
 	
-//	public void testCluster(){
-//		Message msg = new Message(null, null, "TESTINGHEALTHCLUSTER");
-//		try {
-//			channel.send(msg);
-//			Logger.info(this, "Sending Ping to Cluster for Health " + new Date());
-//		} catch (ChannelNotConnectedException e) {
-//			Logger.error(this, e.getMessage(), e);
-//		} catch (ChannelClosedException e) {
-//			Logger.error(this, e.getMessage(), e);
-//		}
-//	}
-	
-//	@Override
-//	public void receive(Message msg) {
-//		super.receive(msg);
-//		Logger.info(this, "Messaggio ricevuto...");
-//		// controllo la view del canale e la memorizzo;
-//		Logger.info(this, "View attuale: " + HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView());
-//		int count = healthAPI.countLeave();
-//		Logger.info(this, "Numero di istanze in LEAVE: " + count);
-//		if(count>=0 || null==HealthChecker.INSTANCE.getLastView()){
-//			HealthChecker.INSTANCE.setLastView(HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView());
-//			Logger.info(this, "Last View into receive method: " + HealthChecker.INSTANCE.getLastView());
-//		}else
-//			Logger.info(this, "La view e' cambiata (viewId memorizzato="+HealthChecker.INSTANCE.getLastView().getVid().getId()+"" +
-//					") (viewId nuovo="+HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView().getVid().getId()+"): non la memorizzo...");		
-//	}
-
 	@SuppressWarnings("deprecation")
 	@Override
+	/**
+	 * Intercetto il metodo suspect, scatenato quando un nodo è uscito dal cluster.
+	 */
 	public void suspect(Address mbr) {		
 		// memorizzo il suspect all'interno del singleton
 		Logger.info(this, "Method suspect: 	There is a suspected member : " + mbr);
@@ -130,6 +108,9 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 
 	@SuppressWarnings("deprecation")
 	@Override
+	/**
+	 * Nuova view del cluster.
+	 */
 	public void viewAccepted(View new_view) {
 		Logger.info(this, "Method view: 	Cluster View is : " + new_view);
 		Logger.info(this, "viewAccepted + 	Cluster View is : " + new_view);
@@ -147,10 +128,21 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 			
 			// scrivo su DB
 			try{
+				boolean isCreator = HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView().getCreator().equals(HealthChecker.INSTANCE.getHealth().getAddress());
+				HibernateUtil.startTransaction();
 				healthAPI.storeHealthStatus(HealthChecker.INSTANCE.getHealth());
+				healthAPI.insertHealthClusterView(HealthChecker.INSTANCE.getHealth().getAddress(),
+						Config.getStringProperty("HEALTH_CHECKER_REST_PORT","80"),Config.getStringProperty("HEALTH_CHECKER_REST_PROTOCOL","http"),isCreator, 
+						HealthChecker.INSTANCE.getHealth().getStatus());
 				HealthChecker.INSTANCE.flush();
+				HibernateUtil.commitTransaction();
 			}catch(DotDataException e){
-				Logger.error(getClass(), "Errore scatenato: " + e.getClass());
+				try {
+					HibernateUtil.rollbackTransaction();
+				} catch (DotHibernateException e1) {
+					Logger.fatal(getClass(), "DotHibernateException: " + e1.getMessage());
+				}
+				Logger.error(getClass(), "Errore scatenato: " + e.getClass());				
 			}
 		}else { 
 			// recupero la lista degli indirizzi joinati
@@ -162,37 +154,44 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 					HealthChecker.INSTANCE.getHealth().setStatus(AddressStatus.JOIN);
 					HealthChecker.INSTANCE.getHealth().setClusterView(new_view);
 					HealthChecker.INSTANCE.getHealth().setWrittenBy(channel.getLocalAddress());
-					try {
-						healthAPI.storeHealthStatus(HealthChecker.INSTANCE.getHealth());						
-						// controllo se nell'altro cluster lo stesso nodo è stato joinato
-						boolean ctrl = true;
-						while(ctrl){
-							if(!HealthUtil.containsMember(CacheLocator.getCacheAdministrator().getJGroupsChannel().getView(),
-									HealthChecker.INSTANCE.getHealth().getAddress())) {
-								try {
-									Logger.info(getClass(), "Il nodo " + HealthChecker.INSTANCE.getHealth().getAddress() + " non e' inserito completamente nel cluster...");
-									Thread.sleep(3000);
-								} catch (InterruptedException e) {
-									Logger.error(getClass(), "Errore in wait");
-									ctrl = false;
-								}
-							}else{
-								Logger.info(getClass(), "Il nodo e' joinato nel cluster completamente...invoco il servizio per il flush della cache");
-								//TODO Sviluppo servizio REST per flush cache...
-								ClientConfig clientConfig = new DefaultClientConfig();
-								Client client = Client.create(clientConfig);
-						        WebResource webResource = client.resource("http://"+HealthChecker.INSTANCE.getHealth().getAddress().toString().split("[-]")[0]+"/api/health");
-						        String response = webResource.path("/joinCluster").get(String.class);
-						        Logger.info(getClass(), "RESPONSE: " + response);	
-						        ctrl = false;
+					// controllo se nell'altro cluster lo stesso nodo è stato joinato
+					boolean ctrl = true;
+					while(ctrl){
+						if(!HealthUtil.containsMember(CacheLocator.getCacheAdministrator().getJGroupsChannel().getView(),
+								HealthChecker.INSTANCE.getHealth().getAddress())) {
+							try {
+								Logger.info(getClass(), "Il nodo " + HealthChecker.INSTANCE.getHealth().getAddress() + " non e' inserito completamente nel cluster...");
+								Thread.sleep(2000);
+							} catch (InterruptedException e) {
+								Logger.error(getClass(), "Errore in wait");
+								ctrl = false;
 							}
-								
+						}else{							
+					        try{
+					        	HealthClusterViewStatus status = healthAPI.singleClusterView(HealthChecker.INSTANCE.getHealth().getAddress());
+					        	
+								Logger.info(getClass(), "Il nodo "+HealthChecker.INSTANCE.getHealth().getAddress()+" e' joinato nel cluster completamente...invoco il servizio per il flush della cache");
+						        String response = HealthUtil.callRESTService(status);
+						        Logger.info(getClass(), "RESPONSE: " + response);						        
+								HibernateUtil.startTransaction();
+								healthAPI.storeHealthStatus(HealthChecker.INSTANCE.getHealth());
+								healthAPI.insertHealthClusterView(HealthChecker.INSTANCE.getHealth().getAddress(),
+										Config.getStringProperty("HEALTH_CHECKER_REST_PORT","80"),Config.getStringProperty("HEALTH_CHECKER_REST_PROTOCOL","http"),status.isCreator(),
+										HealthChecker.INSTANCE.getHealth().getStatus());
+								HibernateUtil.commitTransaction();
+							}catch(DotDataException e){
+								try {
+									HibernateUtil.rollbackTransaction();
+								} catch (DotHibernateException e1) {
+									Logger.fatal(getClass(), "DotHibernateException: " + e1.getMessage());
+								}
+								Logger.error(getClass(), "Errore scatenato: " + e.getClass());				
+							}						      
+					        ctrl = false;
 						}
-						HealthChecker.INSTANCE.flush();
-						
-					} catch (DotDataException e) {
-						Logger.error(getClass(), "Errore scatenato da joined: " + e.getClass());						
+							
 					}
+					HealthChecker.INSTANCE.flush();
 				}
 			}
 		}
@@ -200,6 +199,14 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 	
 	public JChannel getJGroupsHealthChannel(){
 		return channel;
+	}
+
+	public boolean isCluster() {
+		return cluster;
+	}
+
+	public void setCluster(boolean cluster) {
+		this.cluster = cluster;
 	}
 	
 }

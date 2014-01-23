@@ -8,7 +8,12 @@ import org.jgroups.View;
 
 import com.dotmarketing.util.Logger;
 import com.eng.dotcms.healthchecker.HealthChecker;
+import com.eng.dotcms.healthchecker.HealthClusterViewStatus;
 import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
 
 public class HealthUtil {
 	
@@ -49,5 +54,31 @@ public class HealthUtil {
 			}
 		}
 		return joined;
+	}
+	
+	public static String getStringAddress(Address address){
+		String[] _address = address.toString().split("[-]");
+		StringBuilder sb = new StringBuilder();
+		for(int i=0; i<_address.length-1; i++){
+			sb.append(_address[i]);
+			sb.append("-");
+		}
+		return sb.toString().substring(0, sb.toString().length()-1); 
+	}
+	
+	
+	public static String callRESTService(HealthClusterViewStatus status){
+		ClientConfig clientConfig = new DefaultClientConfig();
+		Client client = Client.create(clientConfig);
+        WebResource webResource = client.resource(getRESTURL(status));
+        return webResource.path("/joinCluster").get(String.class);
+	}
+	
+
+	private static String getRESTURL(HealthClusterViewStatus status){
+		StringBuilder sb = new StringBuilder();
+		sb.append(status);
+		sb.append("/api/health");
+		return sb.toString();
 	}
 }

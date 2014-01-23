@@ -1,0 +1,16 @@
+	<portlet>
+		<portlet-name>EXT_HEALTH_CHECKER_CLUSTER_TOOL</portlet-name>
+		<display-name>Health checker cluster Tool</display-name>
+		<portlet-class>com.liferay.portlet.JSPPortlet</portlet-class>
+		<init-param>
+			<name>view-jsp</name>
+			<value>/plugins/com.eng.dotcms.healthchecker/view_health_cluster.jsp</value>
+		</init-param>
+		<expiration-cache>0</expiration-cache>
+		<supports>
+			<mime-type>text/html</mime-type>
+		</supports>
+		<security-role-ref>
+			<role-name>CMS Administrator</role-name>
+		</security-role-ref>	
+	</portlet>	
