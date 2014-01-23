@@ -1,4 +1,4 @@
-<%@page import="com.eng.dotcms.healthchecker.HealthChecker"%>
+<%@page import="com.dotmarketing.business.CacheLocator"%>
 <%@page import="java.util.GregorianCalendar"%>
 <%@page import="java.text.SimpleDateFormat"%>
 <%@page import="com.dotcms.enterprise.LicenseUtil"%>
@@ -70,10 +70,11 @@
   		<div id="clusterView" dojoType="dijit.layout.ContentPane" title="<%= LanguageUtil.get(pageContext, "health_checker_cluster_view") %>" >
   			<div>
 				Cluster View at <%=df.format(new GregorianCalendar().getTime())%>: <br />
-				<strong><%=HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView()%></strong>
+				<strong><%=CacheLocator.getCacheAdministrator().getJGroupsChannel().getView()%></strong>
 				<br />
-				Creator / Coordinator of the cluster: 
-				<strong><%=HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView().getCreator()%></strong>
+				<br />
+				Creator / Coordinator of the cluster:<br /> 
+				<strong><%=CacheLocator.getCacheAdministrator().getJGroupsChannel().getView().getCreator()%></strong>
 			</div>
 			<hr>
 			<div>&nbsp;</div>

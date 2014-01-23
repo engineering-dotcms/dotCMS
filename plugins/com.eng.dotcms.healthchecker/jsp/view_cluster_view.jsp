@@ -26,9 +26,9 @@
 
 <script type="text/javascript">
 
-function refreshCache(address,port,protocol){
-	var divResponse = dojo.byId("responseRefresh_"+address);
-	dijit.byId("refreshCacheBtn_"+address).setAttribute('disabled',true);
+function refreshCache(address,port,protocol,id){
+	var divResponse = dojo.byId("responseRefresh_"+id);
+	dijit.byId("refreshCacheBtn_"+id).setAttribute('disabled',true);
 	var body = document.getElementsByTagName("body")[0];
 	body.setAttribute("style","cursor: wait !important");
 	var xhrArgs = {
@@ -38,19 +38,19 @@ function refreshCache(address,port,protocol){
 			if(data.indexOf("OK") > -1){
 				dojo.style(divResponse, {color:'#009933'});
 				divResponse.innerHTML = '<%= LanguageUtil.get(pageContext, "health-refreshing-cache-ok") %>'
-				dijit.byId("refreshCacheBtn_"+address).setAttribute('disabled',false);
+				dijit.byId("refreshCacheBtn_"+id).setAttribute('disabled',false);
 				body.removeAttribute("style");
 			}else{
 				dojo.style(divResponse, {color:'#CC3333'});
 				divResponse.innerHTML = '<%= LanguageUtil.get(pageContext, "health-refreshing-cache-ko") %><br />'+data	
-				dijit.byId("refreshCacheBtn_"+address).setAttribute('disabled',false);
+				dijit.byId("refreshCacheBtn_"+id).setAttribute('disabled',false);
 				body.removeAttribute("style");
 			}
 		},
 		error: function(err) {
 			dojo.style(divResponse, {color:'#CC3333'});
 			divResponse.innerHTML = '<%= LanguageUtil.get(pageContext, "health-refreshing-cache-ko") %><br />'+error
-			dijit.byId("refreshCacheBtn_"+address).setAttribute('disabled',false);
+			dijit.byId("refreshCacheBtn_"+id).setAttribute('disabled',false);
 			body.removeAttribute("style");
 		}
 	}	
@@ -89,7 +89,7 @@ function refreshCache(address,port,protocol){
 			for(HealthClusterViewStatus singleView : view) {
 	%>
 
-				<tr <%if(singleView.isCreator()){%> class="viewCreator"<%}%> style="line-height:20px; padding-bottom: 15px">
+				<tr style="line-height:20px; padding-bottom: 15px">
 					<td style="padding-left: 10px; font-size: 12px;" >
 						<%=singleView.getAddress()%>
 					</td>
@@ -106,12 +106,14 @@ function refreshCache(address,port,protocol){
 						<%=df.format(singleView.getModDate())%>
 					</td>
 					<td style="padding-left: 10px; font-size: 12px" >
-						<button id="refreshCacheBtn_<%=singleView.getAddress()%>" type="button" dojoType="dijit.form.Button" onClick="refreshCache('<%=singleView.getAddress()%>','<%=singleView.getPort()%>','<%=singleView.getProtocol()%>')">
+						<%if("JOIN".equals(singleView.getStatus())) { %>
+						<button id="refreshCacheBtn_<%=singleView.getId()%>" type="button" dojoType="dijit.form.Button" onClick="refreshCache('<%=singleView.getAddress()%>','<%=singleView.getPort()%>','<%=singleView.getProtocol()%>','<%=singleView.getId()%>')">
                    			<span class="refreshIcon"></span>
                    			<%=LanguageUtil.get(pageContext,"refresh")%>
                 		</button>						
+                		<%}%>
 					</td>
-					<td id="responseRefresh_<%=singleView.getAddress()%>" style="padding-left: 10px; font-size: 12px" >
+					<td id="responseRefresh_<%=singleView.getId()%>" style="padding-left: 10px; font-size: 12px" >
 					</td>
 				</tr>
 
