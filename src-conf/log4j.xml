@@ -11,50 +11,57 @@
        	<param name="BufferSize" value="500" />
 		<param name="FailToSync" value="false" />
 		<appender-ref ref="FILE" />
-		<appender-ref ref="CONSOLE" />
+		<!-- appender-ref ref="CONSOLE" / -->
     </appender>
 
     <appender name="ASYNC-TEST" class="org.apache.log4j.appender.ActiveAsynchronousAppender">
         <param name="BufferSize" value="500" />
         <param name="FailToSync" value="false" />
         <appender-ref ref="TEST" />
-        <appender-ref ref="CONSOLE" />
+        <!-- appender-ref ref="CONSOLE" / -->
     </appender>
 
     <appender name="ASYNC-SECURITY" class="org.apache.log4j.appender.ActiveAsynchronousAppender">
        	<param name="BufferSize" value="500" />
-	<param name="FailToSync" value="false" />
-	<appender-ref ref="SECURITY"/>
-	<appender-ref ref="CONSOLE" />
+		<param name="FailToSync" value="false" />
+		<appender-ref ref="SECURITY"/>
+		<!-- appender-ref ref="CONSOLE" / -->
     </appender>
     
     <appender name="ASYNC-SITESEARCH" class="org.apache.log4j.appender.ActiveAsynchronousAppender">
        	<param name="BufferSize" value="500" />
-	<param name="FailToSync" value="false" />
-	<appender-ref ref="SITESEARCH"/>
-	<appender-ref ref="CONSOLE" />
+		<param name="FailToSync" value="false" />
+		<appender-ref ref="SITESEARCH"/>
+		<!-- appender-ref ref="CONSOLE" / -->
     </appender>
 
     <appender name="ASYNC-ADMINAUDIT" class="org.apache.log4j.appender.ActiveAsynchronousAppender">
        	<param name="BufferSize" value="500" />
-	<param name="FailToSync" value="false" />
+		<param name="FailToSync" value="false" />
        	<appender-ref ref="ADMINAUDIT"/>
-       	<appender-ref ref="CONSOLE" />
+       	<!-- appender-ref ref="CONSOLE" / -->
     </appender>
     
     <appender name="ASYNC-USERACTIVITY" class="org.apache.log4j.appender.ActiveAsynchronousAppender">
        	<param name="BufferSize" value="500" />
-	<param name="FailToSync" value="false" />
+		<param name="FailToSync" value="false" />
        	<appender-ref ref="USERS_ACTIVITY"/>
-       	<appender-ref ref="CONSOLE" />
+       	<!-- appender-ref ref="CONSOLE" / -->
     </appender>
     
-     <appender name="ASYNC-VELOCITY" class="org.apache.log4j.appender.ActiveAsynchronousAppender">
+    <appender name="ASYNC-VELOCITY" class="org.apache.log4j.appender.ActiveAsynchronousAppender">
        	<param name="BufferSize" value="500" />
-	<param name="FailToSync" value="false" />
-	<appender-ref ref="VELOCITY" />
-	<appender-ref ref="CONSOLE" />
+		<param name="FailToSync" value="false" />
+		<appender-ref ref="VELOCITY" />
+		<!-- appender-ref ref="CONSOLE" / -->
     </appender>
+	
+	<appender name="ASYNC-HEALTH-CHECKER" class="org.apache.log4j.appender.ActiveAsynchronousAppender">
+       	<param name="BufferSize" value="500" />
+		<param name="FailToSync" value="false" />
+		<appender-ref ref="HEALTH_CHECKER" />
+		<!-- appender-ref ref="CONSOLE" / -->
+    </appender>    
     
     <appender name="FILE" class="org.apache.log4j.DailyRollingFileAppender">
             <param name="File" value="/var/log/dotcms/logs/dotcms.log"/>
@@ -140,6 +147,17 @@
         </layout>
     </appender>
 
+	<appender name="HEALTH_CHECKER" class="org.apache.log4j.DailyRollingFileAppender">
+            <param name="File" value="/var/log/dotcms/logs/dotcms-cluster.log"/>
+            <param name="MaxFileSize" value="20MB"/>
+            <param name="MaxBackupIndex" value="10"/>
+	    	<param name="datePattern" value="'.'yyyy-MM-dd"/>	
+	    	<param name="append" value="true" />	
+            <layout class="org.apache.log4j.PatternLayout">
+                 <param name="ConversionPattern" value="[%d{dd/MM/yy HH:mm:ss:SSS z}] %5p %c{2}: %m%n" />
+            </layout>
+    </appender>
+
     <logger name="org.directwebremoting">
 	  <level value="warn"/> 
 	</logger>
@@ -223,6 +241,11 @@
 	<logger name="org.apache.velocity" additivity="false">
 	  <level value="warn"/> 
 	  <appender-ref ref="ASYNC-VELOCITY" />
+	</logger>
+	
+	<logger name="com.eng.dotcms.healthchecker" additivity="false">
+	  <level value="info"/> 
+	  <appender-ref ref="ASYNC-HEALTH-CHECKER" />
 	</logger>
 	
     <root>
