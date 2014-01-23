@@ -23,6 +23,7 @@ import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_GET_NODE_LEA
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_INSERT_HEALTH_CLUSTER_VIEW;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_GET_HEALTH_CLUSTER_VIEW_STATUS;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_GET_SINGLE_CLUSTER_VIEW_STATUS;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_DELETE_HEALTH_CLUSTER_VIEW;
 
 public class HealthCheckerAPI {
 	
@@ -162,6 +163,12 @@ public class HealthCheckerAPI {
 			return status;	
 		}
 		return null;	
+	}
+	
+	public void deleteHealthClusterView(Address address) throws DotDataException {
+		dc.setSQL(ORACLE_DELETE_HEALTH_CLUSTER_VIEW);
+		dc.addParam(HealthUtil.getStringAddress(address));
+		dc.loadResult();
 	}
 	
 }

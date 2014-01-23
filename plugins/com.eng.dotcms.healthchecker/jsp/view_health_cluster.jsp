@@ -1,3 +1,6 @@
+<%@page import="com.eng.dotcms.healthchecker.HealthChecker"%>
+<%@page import="java.util.GregorianCalendar"%>
+<%@page import="java.text.SimpleDateFormat"%>
 <%@page import="com.dotcms.enterprise.LicenseUtil"%>
 <%@ include file="/html/plugins/com.eng.dotcms.healthchecker/init.jsp" %>
 <%@page import="com.liferay.portal.util.WebKeys"%>
@@ -11,7 +14,8 @@
 	String portletId1 = "EXT_HEALTH_CHECKER_CLUSTER_TOOL";
 	Portlet portlet1 = PortletManagerUtil.getPortletById(company.getCompanyId(), portletId1);
 	String strutsAction = ParamUtil.get(request, "struts_action", null);
-
+	SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss",WebAPILocator.getUserWebAPI().getLoggedInUser(request).getLocale());
+	
 	if (!com.dotmarketing.util.UtilMethods.isSet(strutsAction) || strutsAction.equals(portlet1.getInitParams().get("view-action"))) {
 		List<CrumbTrailEntry> crumbTrailEntries = new ArrayList<CrumbTrailEntry>();
 		crumbTrailEntries.add(new CrumbTrailEntry(LanguageUtil.get(pageContext, "javax.portlet.title." + portletId1), null));
@@ -65,7 +69,11 @@
 
   		<div id="clusterView" dojoType="dijit.layout.ContentPane" title="<%= LanguageUtil.get(pageContext, "health_checker_cluster_view") %>" >
   			<div>
-				THIS IS THE CLUSTER VIEW
+				Cluster View at <%=df.format(new GregorianCalendar().getTime())%>: <br />
+				<strong><%=HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView()%></strong>
+				<br />
+				Creator / Coordinator of the cluster: 
+				<strong><%=HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView().getCreator()%></strong>
 			</div>
 			<hr>
 			<div>&nbsp;</div>

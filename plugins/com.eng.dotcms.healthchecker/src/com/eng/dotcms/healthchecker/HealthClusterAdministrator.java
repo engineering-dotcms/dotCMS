@@ -160,7 +160,7 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 						if(!HealthUtil.containsMember(CacheLocator.getCacheAdministrator().getJGroupsChannel().getView(),
 								HealthChecker.INSTANCE.getHealth().getAddress())) {
 							try {
-								Logger.info(getClass(), "Il nodo " + HealthChecker.INSTANCE.getHealth().getAddress() + " non e' inserito completamente nel cluster...");
+								Logger.debug(getClass(), "Il nodo " + HealthChecker.INSTANCE.getHealth().getAddress() + " non e' inserito completamente nel cluster...");
 								Thread.sleep(2000);
 							} catch (InterruptedException e) {
 								Logger.error(getClass(), "Errore in wait");
@@ -168,11 +168,11 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 							}
 						}else{							
 					        try{
-					        	HealthClusterViewStatus status = healthAPI.singleClusterView(HealthChecker.INSTANCE.getHealth().getAddress());
-					        	
-								Logger.info(getClass(), "Il nodo "+HealthChecker.INSTANCE.getHealth().getAddress()+" e' joinato nel cluster completamente...invoco il servizio per il flush della cache");
+					        	HealthClusterViewStatus status = healthAPI.singleClusterView(HealthChecker.INSTANCE.getHealth().getAddress());					        	
+								Logger.info(getClass(), "Node "+HealthChecker.INSTANCE.getHealth().getAddress()+" back into the cluster: flushing cache...");
 						        String response = HealthUtil.callRESTService(status);
-						        Logger.info(getClass(), "RESPONSE: " + response);						        
+						        if("OK".equals(response))
+						        	Logger.info(getClass(), "Cache on node "+HealthChecker.INSTANCE.getHealth().getAddress()+" successful flushed!");						        
 								HibernateUtil.startTransaction();
 								healthAPI.storeHealthStatus(HealthChecker.INSTANCE.getHealth());
 								healthAPI.insertHealthClusterView(HealthChecker.INSTANCE.getHealth().getAddress(),

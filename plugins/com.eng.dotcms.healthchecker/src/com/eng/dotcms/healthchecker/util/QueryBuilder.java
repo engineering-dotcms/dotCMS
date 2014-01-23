@@ -37,6 +37,8 @@ public class QueryBuilder {
 	
 	public static final String ORACLE_INSERT_HEALTH_CLUSTER_VIEW		=	"INSERT INTO HEALTH_CLUSTER_VIEW (ID, ADDRESS, PORT, PROTOCOL, STATUS, CREATOR, MOD_DATE) VALUES (?,?,?,?,?,?,SYSDATE)";
 	
+	public static final String ORACLE_DELETE_HEALTH_CLUSTER_VIEW		=	"DELETE FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ?";
+	
 	public static final String ORACLE_GET_HEALTH_CLUSTER_VIEW_STATUS	=	"SELECT hcv.ID, hcv.ADDRESS, hcv.PORT, hcv.PROTOCOL, hcv.STATUS, hcv.CREATOR, hcv.MOD_DATE " +
 																			"FROM HEALTH_CLUSTER_VIEW hcv " +
 																			"ORDER BY hcv.MOD_DATE desc";

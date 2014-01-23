@@ -31,6 +31,7 @@ public class HealthServlet extends HttpServlet {
 				// elimino i vecchi records riguardanti il nodo attuale in quanto sono in riavvio.
 				healthAPI.deleteHealthStatus(HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress(), AddressStatus.LEAVE);
 				healthAPI.deleteHealthStatus(HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress(), AddressStatus.JOIN);
+				healthAPI.deleteHealthClusterView(HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress());
 				// inserisco il nodo nella cluster view con status JOINED.
 				boolean isCreator = HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView().getCreator().equals(HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress());
 				healthAPI.insertHealthClusterView(HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress(),

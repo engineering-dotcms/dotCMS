@@ -27,8 +27,8 @@
 <script type="text/javascript">
 
 function refreshCache(address,port,protocol){
-	var divResponse = dojo.byId("responseRefresh");
-	dijit.byId("refreshCacheBtn").setAttribute('disabled',true);
+	var divResponse = dojo.byId("responseRefresh_"+address);
+	dijit.byId("refreshCacheBtn_"+address).setAttribute('disabled',true);
 	var body = document.getElementsByTagName("body")[0];
 	body.setAttribute("style","cursor: wait !important");
 	var xhrArgs = {
@@ -38,19 +38,19 @@ function refreshCache(address,port,protocol){
 			if(data.indexOf("OK") > -1){
 				dojo.style(divResponse, {color:'#009933'});
 				divResponse.innerHTML = '<%= LanguageUtil.get(pageContext, "health-refreshing-cache-ok") %>'
-				dijit.byId("refreshCacheBtn").setAttribute('disabled',false);
+				dijit.byId("refreshCacheBtn_"+address).setAttribute('disabled',false);
 				body.removeAttribute("style");
 			}else{
 				dojo.style(divResponse, {color:'#CC3333'});
 				divResponse.innerHTML = '<%= LanguageUtil.get(pageContext, "health-refreshing-cache-ko") %><br />'+data	
-				dijit.byId("refreshCacheBtn").setAttribute('disabled',false);
+				dijit.byId("refreshCacheBtn_"+address).setAttribute('disabled',false);
 				body.removeAttribute("style");
 			}
 		},
 		error: function(err) {
 			dojo.style(divResponse, {color:'#CC3333'});
 			divResponse.innerHTML = '<%= LanguageUtil.get(pageContext, "health-refreshing-cache-ko") %><br />'+error
-			dijit.byId("refreshCacheBtn").setAttribute('disabled',false);
+			dijit.byId("refreshCacheBtn_"+address).setAttribute('disabled',false);
 			body.removeAttribute("style");
 		}
 	}	
@@ -106,12 +106,12 @@ function refreshCache(address,port,protocol){
 						<%=df.format(singleView.getModDate())%>
 					</td>
 					<td style="padding-left: 10px; font-size: 12px" >
-						<button id="refreshCacheBtn" type="button" dojoType="dijit.form.Button" onClick="refreshCache('<%=singleView.getAddress()%>','<%=singleView.getPort()%>','<%=singleView.getProtocol()%>')">
+						<button id="refreshCacheBtn_<%=singleView.getAddress()%>" type="button" dojoType="dijit.form.Button" onClick="refreshCache('<%=singleView.getAddress()%>','<%=singleView.getPort()%>','<%=singleView.getProtocol()%>')">
                    			<span class="refreshIcon"></span>
                    			<%=LanguageUtil.get(pageContext,"refresh")%>
                 		</button>						
 					</td>
-					<td id="responseRefresh" style="padding-left: 10px; font-size: 12px" >
+					<td id="responseRefresh_<%=singleView.getAddress()%>" style="padding-left: 10px; font-size: 12px" >
 					</td>
 				</tr>
 
