@@ -85,7 +85,7 @@ public class GalleryServlet extends HttpServlet {
 							File photoThumbnail = (File)photo.get("thumbnail");
 							if(UtilMethods.isSet(photoThumbnail)){
 								img.setSrc(bPath);
-								img.setTn("/contentAsset/raw-data/"+photo.getInode()+"/thumbnail?w=150&amp;h=150");
+								img.setTn("/contentAsset/raw-data/"+photo.getIdentifier()+"/thumbnail?w=150&amp;h=150");
 								img.setTitle(photo.getTitle());
 								img.setCaption("");
 								img.setPause("3");
@@ -93,7 +93,7 @@ public class GalleryServlet extends HttpServlet {
 						}else{
 							FileAsset fileAsset = (FileAsset)photo.get("fileAsset");							
 							img.setSrc(bPath);
-							img.setTn("/contentAsset/image-thumbnail/"+fileAsset.getInode()+"/fileAsset?w=150&amp;h=150");
+							img.setTn("/contentAsset/image-thumbnail/"+fileAsset.getIdentifier()+"/fileAsset?w=150&amp;h=150");
 							img.setTitle(photo.getTitle());
 							img.setCaption("");
 							img.setPause("3");
@@ -106,21 +106,36 @@ public class GalleryServlet extends HttpServlet {
 				}
 				
 			} catch (DotHibernateException e) {
+				Logger.error(getClass(), "DotHibernateException: "+e.getMessage());
 				printEmpty(out);
 			} catch (DotRuntimeException e) {
+				Logger.error(getClass(), "DotRuntimeException: "+e.getMessage());
 				printEmpty(out);
 			} catch (DotSecurityException e) {
+				Logger.error(getClass(), "DotSecurityException: "+e.getMessage());
 				printEmpty(out);
 			} catch (DotDataException e) {
+				Logger.error(getClass(), "DotDataException: "+e.getMessage());
 				printEmpty(out);
 			} catch (JAXBException e) {
 				Logger.fatal(getClass(), e.getMessage());
 			} catch (Exception e) {
-				
+				Logger.error(getClass(), "Exception: "+e.getMessage());
+				printEmpty(out);
 			}
+		}else{
+			Logger.error(getClass(), "Need id parameter!");
+			printEmpty(out);
 		}
 			
 	}
+
+	
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {		
+		doGet(req, resp);
+	}
+	
 
 	private StringBuilder getQuery(String folderId, String _languageId) {
 		StringBuilder sb = new StringBuilder();
@@ -156,11 +171,5 @@ public class GalleryServlet extends HttpServlet {
 		}
 		
 	}
-	
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {		
-		doGet(req, resp);
-	}
-	
 	
 }
