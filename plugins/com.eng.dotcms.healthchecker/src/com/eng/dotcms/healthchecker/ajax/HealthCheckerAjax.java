@@ -11,10 +11,6 @@ import com.dotmarketing.servlets.ajax.AjaxAction;
 import com.dotmarketing.util.Logger;
 import com.eng.dotcms.healthchecker.HealthClusterViewStatus;
 import com.eng.dotcms.healthchecker.util.HealthUtil;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
 
 public class HealthCheckerAjax extends AjaxAction {
 	
@@ -47,10 +43,7 @@ public class HealthCheckerAjax extends AjaxAction {
 		status.setAddress(address);
 		status.setPort(port);
 		status.setProtocol(protocol);
-		ClientConfig clientConfig = new DefaultClientConfig();
-		Client client = Client.create(clientConfig);
-        WebResource webResource = client.resource(HealthUtil.getRESTURL(status));
-        String responseRest = webResource.path("/joinCluster").get(String.class);
+        String responseRest = HealthUtil.callRESTService(status);
         response.getWriter().println(responseRest);
 	}
 	
