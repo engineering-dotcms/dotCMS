@@ -102,15 +102,7 @@ public class HealthCheckerAPI {
 		try{
 			dc.setSQL(ORACLE_GET_NODE_LEAVE);
 			dc.addParam(HealthUtil.getStringAddress(address));
-			List<Map<String, Object>> map = dc.loadObjectResults();
-			// se non ci sono righe etichettate con il mio indirizzo allora sono nel cluster
-			if(map.size()==0)
-				return false;
-			else {
-				// se c'è almeno una riga prendo la prima (più recente) e controllo lo stato.
-				String status = (String)map.get(0).get("status");
-				return status.equals(AddressStatus.LEAVE)?true:false;
-			}
+			return dc.loadObjectResults().size()>0;
 		}catch(DotDataException e){
 			return false;
 		}
@@ -177,6 +169,10 @@ public class HealthCheckerAPI {
 		dc.setSQL(ORACLE_DELETE_HEALTH_CLUSTER_VIEW);
 		dc.addParam(HealthUtil.getStringAddress(address));
 		dc.loadResult();
+	}
+	
+	public boolean isNodeInCluster(Address address) throws DotDataException {
+		return !isLeaveNode(address);
 	}
 	
 }
