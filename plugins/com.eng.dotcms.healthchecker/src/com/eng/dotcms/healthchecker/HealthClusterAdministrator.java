@@ -149,6 +149,14 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 			List<Address> joined = HealthUtil.getJoined(new_view);
 			Logger.info(getClass(), "Joined size: " + joined.size());
 			if(joined.size()>0){
+				/**
+				 * Il controllo sugli indirizzi "joinati" viene fatto solo ed esclusivamente partendo dal presupposto che questi indirizzi
+				 * siano presenti in tabella nello stato "LEAVE". 
+				 * 
+				 * Per gli indirizzi che si joinano per la prima volta questo non è il punto in cui vengono inseriti, ma nella HealthServlet
+				 * che in init inserisce la nuova riga.
+				 * 
+				 */
 				for(Address newone:joined){
 					HealthChecker.INSTANCE.getHealth().setAddress(newone);
 					HealthChecker.INSTANCE.getHealth().setStatus(AddressStatus.JOIN);
@@ -168,17 +176,28 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 							}
 						}else{							
 					        try{
-					        	HealthClusterViewStatus status = healthAPI.singleClusterView(HealthChecker.INSTANCE.getHealth().getAddress());					        	
-								Logger.info(getClass(), "Node "+HealthChecker.INSTANCE.getHealth().getAddress()+" back into the cluster: flushing cache...");
-						        String response = HealthUtil.callRESTService(status);
-						        if("OK".equals(response))
-						        	Logger.info(getClass(), "Cache on node "+HealthChecker.INSTANCE.getHealth().getAddress()+" successful flushed!");						        
-								HibernateUtil.startTransaction();
+					        	/**
+					        	 * In questo caso il nodo è rientrato anche nel canale principale e quindi posso procedere a:
+					        	 * 
+					        	 *  1. Recupero della riga contenente lo stato;
+					        	 *  2. Inserire la riga contenente il nuovo stato di JOIN;
+					        	 *  3. Inserire la riga nella tabella dello status per l'amministrazione da backend;
+					        	 *  4. Eliminazione delle precedenti righe contenenti lo stato LEAVE (in questo modo il nodo sa di essere nel
+					        	 *     cluster nuovamente;
+					        	 *  5. Chiamata al suo servizio REST per il flush della cache e quindi per il riallineamento.   
+					        	 */
+					        	HealthClusterViewStatus status = healthAPI.singleClusterView(HealthChecker.INSTANCE.getHealth().getAddress());
+					        	HibernateUtil.startTransaction();					        	
 								healthAPI.storeHealthStatus(HealthChecker.INSTANCE.getHealth());
 								healthAPI.insertHealthClusterView(HealthChecker.INSTANCE.getHealth().getAddress(),
 										Config.getStringProperty("HEALTH_CHECKER_REST_PORT","80"),Config.getStringProperty("HEALTH_CHECKER_REST_PROTOCOL","http"),status.isCreator(),
 										HealthChecker.INSTANCE.getHealth().getStatus());
-								HibernateUtil.commitTransaction();
+								healthAPI.deleteHealthStatus(HealthChecker.INSTANCE.getHealth().getAddress(), AddressStatus.LEAVE);
+								HibernateUtil.commitTransaction();					        						        	
+								Logger.info(getClass(), "Node "+HealthChecker.INSTANCE.getHealth().getAddress()+" back into the cluster: flushing cache...");
+						        String response = HealthUtil.callRESTService(status);
+						        if("OK".equals(response))
+						        	Logger.info(getClass(), "Cache on node "+HealthChecker.INSTANCE.getHealth().getAddress()+" successful flushed!");								
 							}catch(DotDataException e){
 								try {
 									HibernateUtil.rollbackTransaction();
@@ -189,7 +208,6 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 							}						      
 					        ctrl = false;
 						}
-							
 					}
 					HealthChecker.INSTANCE.flush();
 				}

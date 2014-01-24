@@ -22,6 +22,15 @@
 	font-style: italic;	
 	background-color: #E0E9F6;
 }
+
+.reloadCache {
+	background: url(/html/plugins/com.eng.dotcms.healthchecker/images/arrow_refresh.png);
+	width:32px;
+	height:32px;
+	display:inline-block;
+	vertical-align:middle;
+	text-align: center;
+}
 </style>
 
 <script type="text/javascript">
@@ -62,7 +71,7 @@ function refreshCache(address,port,protocol,id){
 
 <div style="padding-top: 5px">
 			
-			<table  class="listingTable" style="width:75%; float:left; margin: 0 0 0 10px">
+			<table  class="listingTable" style="width:90%; float:left; margin: 0 0 0 10px">
 				<tr style="line-height:20px; padding-bottom: 15px">					
 					<th nowrap="nowrap" style="padding-left: 10px; width: 20%">
 						<%= LanguageUtil.get(pageContext, "health_Server") %>
@@ -76,12 +85,12 @@ function refreshCache(address,port,protocol,id){
 					<th align="center" style="padding-left: 10px; width: 5%">
 						<%= LanguageUtil.get(pageContext, "health_Status") %>
 					</th>
-					<th align="right" style="padding-left: 10px; width: 25%">
+					<th align="right" style="padding-left: 10px; width: 20%">
 						<%= LanguageUtil.get(pageContext, "health_Date") %>
 					</th>
 					<th align="center" style="padding-left: 10px; width: 5%">
 					</th>	
-					<th align="center" style="padding-left: 10px; width: 35%">
+					<th align="center" style="padding-left: 10px; width: 40%">
 					</th>				
 				</tr>
 	<%
@@ -100,17 +109,16 @@ function refreshCache(address,port,protocol,id){
 						<%=singleView.getProtocol()%>
 					</td>					
 					<td style="padding-left: 10px; font-size: 12px" >
-						<%=singleView.getStatus()%>
+						<img src="/html/plugins/com.eng.dotcms.healthchecker/images/<%=singleView.getStatus().toLowerCase()%>_cluster.png" alt="<%=singleView.getStatus()%>" title="<%=singleView.getStatus()%>" />
 					</td>
 					<td style="padding-left: 10px; font-size: 12px" >
 						<%=df.format(singleView.getModDate())%>
 					</td>
 					<td style="padding-left: 10px; font-size: 12px" >
 						<%if("JOIN".equals(singleView.getStatus())) { %>
-						<button id="refreshCacheBtn_<%=singleView.getId()%>" type="button" dojoType="dijit.form.Button" onClick="refreshCache('<%=singleView.getAddress()%>','<%=singleView.getPort()%>','<%=singleView.getProtocol()%>','<%=singleView.getId()%>')">
-                   			<span class="refreshIcon"></span>
-                   			<%=LanguageUtil.get(pageContext,"refresh")%>
-                		</button>						
+						<button id="refreshCacheBtn_<%=singleView.getId()%>" iconClass="reloadCache" dojoType="dijit.form.Button" onClick="refreshCache('<%=singleView.getAddress()%>','<%=singleView.getPort()%>','<%=singleView.getProtocol()%>','<%=singleView.getId()%>')">
+							<strong><%= LanguageUtil.get(pageContext, "health_Reload_Cache") %></strong>
+						</button>						
                 		<%}%>
 					</td>
 					<td id="responseRefresh_<%=singleView.getId()%>" style="padding-left: 10px; font-size: 12px" >

@@ -29,7 +29,12 @@
 <div class="portlet-wrapper">
 	<%@ include file="/html/portlet/ext/common/sub_nav_inc.jsp" %>
 </div>
+<style>
 
+#clusterViewDetail {
+	margin: 0 0 0 10px;
+}
+</style>
 <script type="text/javascript">
 	dojo.require("dijit.form.NumberTextBox");
     dojo.require("dojox.layout.ContentPane");
@@ -68,12 +73,12 @@
 	<div id="mainTabContainer" dojoType="dijit.layout.TabContainer" dolayout="false">
 
   		<div id="clusterView" dojoType="dijit.layout.ContentPane" title="<%= LanguageUtil.get(pageContext, "health_checker_cluster_view") %>" >
-  			<div>
-				Cluster View at <%=df.format(new GregorianCalendar().getTime())%>: <br />
+  			<div id="clusterViewDetail">
+				<%= LanguageUtil.get(pageContext, "health_Cluster_View") %> <%=df.format(new GregorianCalendar().getTime())%>: <br />
 				<strong><%=CacheLocator.getCacheAdministrator().getJGroupsChannel().getView()%></strong>
 				<br />
 				<br />
-				Creator / Coordinator of the cluster:<br /> 
+				<%= LanguageUtil.get(pageContext, "health_Creator") %>:<br /> 
 				<strong><%=CacheLocator.getCacheAdministrator().getJGroupsChannel().getView().getCreator()%></strong>
 			</div>
 			<hr>
