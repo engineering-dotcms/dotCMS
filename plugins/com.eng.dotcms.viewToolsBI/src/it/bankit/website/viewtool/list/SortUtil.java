@@ -112,41 +112,41 @@ public class SortUtil {
 	private String generateInternalSortOrder( String hwSortOrder, Collection<Structure> structures ) {
 		StringBuilder sortOrder = new StringBuilder();
 		String internalSortOrder = ( UtilMethods.isSet( hwSortOrder ) ? hwSortOrder : "-D#T" );
-		if ( internalSortOrder.matches( HW_SORT_ORDER_EXPRESION ) ) {
-			String direction = DEFAULT_SORT_DIRECTION;
-			for ( char curChar : internalSortOrder.toCharArray() ) {
-				if ( curChar == '-' ) {
-					direction = INVERSE_SORT_DIRECTION;
-					continue;
-				}
-				if ( sortOrder.length() > 0 ) {
-					sortOrder.append( ',' );
-				}
-				String[] curMapping = null;
-				switch ( curChar ) {
-				case 'T':
-					curMapping = titleMapping;
-					break;
-				case '#':
-					curMapping = sequenceMapping;
-					break;
-				case 'D':
-					curMapping = dataEmanazioneMapping;
-					break;
-				case 'C':
-					curMapping = dataCreazioneMapping;
-					break;
-				case 'P':
-					curMapping = dataPubblicazioneMapping;
-					break;
-				default:
-					LOG.warn( "Unsupported Order Type Format:" + curChar );
-				}
-				sortOrder.append( internalMappingOrder( structures, curMapping, direction ) );
-				direction = DEFAULT_SORT_DIRECTION;// return to default
+		if(!internalSortOrder.matches( HW_SORT_ORDER_EXPRESION )){
+			LOG.warn(internalSortOrder+ " non corretto: setto al valore di default (-D#T)");
+			internalSortOrder = "-D#T";
+		}
+		String direction = DEFAULT_SORT_DIRECTION;
+		for ( char curChar : internalSortOrder.toCharArray() ) {
+			if ( curChar == '-' ) {
+				direction = INVERSE_SORT_DIRECTION;
+				continue;
 			}
-		} else {
-			LOG.error( "Invalid Hyperwave Sort order format" );
+			if ( sortOrder.length() > 0 ) {
+				sortOrder.append( ',' );
+			}
+			String[] curMapping = null;
+			switch ( curChar ) {
+			case 'T':
+				curMapping = titleMapping;
+				break;
+			case '#':
+				curMapping = sequenceMapping;
+				break;
+			case 'D':
+				curMapping = dataEmanazioneMapping;
+				break;
+			case 'C':
+				curMapping = dataCreazioneMapping;
+				break;
+			case 'P':
+				curMapping = dataPubblicazioneMapping;
+				break;
+			default:
+				LOG.warn( "Unsupported Order Type Format:" + curChar );
+			}
+			sortOrder.append( internalMappingOrder( structures, curMapping, direction ) );
+			direction = DEFAULT_SORT_DIRECTION;// return to default
 		}
 		return sortOrder.toString();
 	}

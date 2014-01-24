@@ -1,4 +1,9 @@
-package com.eng.dotcms.additions.servlet;
+package it.bankit.website.servlet;
+
+import it.bankit.website.jaxb.Album;
+import it.bankit.website.jaxb.Gallery;
+import it.bankit.website.jaxb.Img;
+import it.bankit.website.viewtool.list.SortUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,10 +30,6 @@ import com.dotmarketing.portlets.folders.model.Folder;
 import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.UtilMethods;
 import com.dotmarketing.util.WebKeys;
-import com.eng.dotcms.additions.jaxb.Album;
-import com.eng.dotcms.additions.jaxb.Gallery;
-import com.eng.dotcms.additions.jaxb.Img;
-import com.eng.dotcms.additions.util.SortUtil;
 
 /**
  * Servlet che sostituisce la pagina gallery.html adibita alla generazione di un XML da dare in pasto al player flash delle photogallery

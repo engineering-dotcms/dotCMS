@@ -28,3 +28,12 @@
 	<filter-name>LanguageFilter</filter-name>
 	<url-pattern>*.jsp</url-pattern>
 </filter-mapping>
+
+<servlet>
+	<servlet-name>GalleryServlet</servlet-name>
+	<servlet-class>it.bankit.website.servlet.GalleryServlet</servlet-class>
+</servlet>
+<servlet-mapping>
+	<servlet-name>GalleryServlet</servlet-name>
+	<url-pattern>/servlets/media/fotogallery/gallery-stream</url-pattern>
+</servlet-mapping>

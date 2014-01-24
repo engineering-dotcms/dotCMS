@@ -1,4 +1,4 @@
-package com.eng.dotcms.additions.jaxb;
+package it.bankit.website.jaxb;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
