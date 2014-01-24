@@ -28,10 +28,16 @@ public class HealthCheckerTool implements ViewTool {
 		return checkCacheStatus();
 	}
 	
+	@SuppressWarnings("deprecation")
+	public String getAddress(){
+		return cacheChannel.getLocalAddress().toString();
+	}
+	
 	/**
 	 * Questo metodo controlla se il nodo in esame è nel cluster jGroups
 	 * @return
 	 */
+	@SuppressWarnings("deprecation")
 	private boolean checkCacheStatus(){
 		boolean cacheHealth = !healthAPI.isLeaveNode(healthClusterChannel.getLocalAddress());
 		Logger.info(getClass(), "Cluster View  (Health): 	"+healthClusterChannel.getView().toString());
