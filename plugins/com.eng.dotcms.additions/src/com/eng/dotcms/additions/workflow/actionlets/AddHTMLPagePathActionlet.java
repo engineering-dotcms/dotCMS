@@ -74,13 +74,13 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 			Logger.debug(getClass(), "Last comment on this task: " + _lastCommentId);
 			List<String> paths = new ArrayList<String>();
 			if(processor.getContentlet().getStructure().getStructureType()!=Structure.STRUCTURE_TYPE_FILEASSET){
-				Logger.info(getClass(), "Ecccomi!!!!");
-				Logger.info(getClass(), "Structure Type: " + processor.getContentlet().getStructure().getStructureType());
+				Logger.debug(getClass(), "Ecccomi!!!!");
+				Logger.debug(getClass(), "Structure Type: " + processor.getContentlet().getStructure().getStructureType());
 				paths = getHTMLPagePaths(processor.getContentlet(), currentHost);
 			}else {
-				Logger.info(getClass(), "Call getFileAssetPath");
+				Logger.debug(getClass(), "Call getFileAssetPath");
 				paths = getFileAssetPath(processor.getContentlet(), currentHost);
-				Logger.info(getClass(), "Path size: " + paths.size());
+				Logger.debug(getClass(), "Path size: " + paths.size());
 			}
 			Logger.debug(getClass(), "Number of pages into the contentlet path: " + paths.size());
 			if(paths.size()>0){
@@ -89,17 +89,16 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 				if(null!=lastComment && UtilMethods.isSet(lastComment.getComment())){
 					Logger.info(getClass(), "There is previous comment...");
 					String lastCommentString = lastComment.getComment();
-					if(lastCommentString.indexOf("_path_exists_")>0)
-						commentText.append(lastCommentString.substring(lastCommentString.indexOf("_path_exists_")));
-					else
-						commentText.append(lastCommentString);
-					commentText.append("<br /><br />");
+					if(lastCommentString.indexOf("_path_exists_")<0){
+						commentText.append(lastCommentString);						
+						commentText.append("<br /><br />");
+					}
 				}
 				commentText.append(START_PATH_COMMENT);
 				commentText.append("<br />");
 				commentText.append("<ul>");
 				for(String page:paths){
-					Logger.info(getClass(), "PATHHHH: " + page);
+					Logger.debug(getClass(), "PATHHHH: " + page);
 					String[] splitted = page.split("[|]");
 					commentText.append("<li><a id=\"_path_exists_\" href=\"");
 					commentText.append(SERVER_SCHEMA);
@@ -125,7 +124,7 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 				APILocator.getWorkflowAPI().saveComment(lastCommentWithPaths);
 				processor.setWorkflowMessage(lastCommentWithPaths.getComment());
 				processor.getContentlet().setStringProperty(Contentlet.WORKFLOW_COMMENTS_KEY, lastCommentWithPaths.getComment());
-					Logger.info(getClass(), "Comment saved.");
+				Logger.info(getClass(), "Comment saved.");
 			}
 		}catch(DotDataException e){
 			e.printStackTrace();
@@ -140,7 +139,7 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 		if(!homePageStructures.contains(contentlet.getStructure().getVelocityVarName())){	
 			Identifier id = APILocator.getIdentifierAPI().find(contentlet.getIdentifier());
 			List<Identifier> ids = findByParentPath(id.getParentPath(),currentHost.getIdentifier());
-			Logger.info(getClass(), "Number of ids of htmlpage into the path: " + id.getParentPath() + " = " + ids.size());
+			Logger.debug(getClass(), "Number of ids of htmlpage into the path: " + id.getParentPath() + " = " + ids.size());
 			for(Identifier identifier:ids){
 				StringBuilder page = new StringBuilder();
 				page.append("https://");
@@ -150,8 +149,7 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 				page.append("|");
 				page.append(identifier.getParentPath());
 				page.append(identifier.getAssetName());
-				Logger.debug(getClass(), "URL to append: " + page.toString());
-				
+				Logger.debug(getClass(), "URL to append: " + page.toString());				
 				paths.add(page.toString());
 			}
 		}else{
@@ -167,7 +165,7 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 	}
 	
 	private List<String> getFileAssetPath(Contentlet fileAsset, Host currentHost) throws DotDataException {
-		Logger.info(getClass(), "Current host: " + currentHost.getHostname());
+		Logger.debug(getClass(), "Current host: " + currentHost.getHostname());
 		List<String> paths = new ArrayList<String>();
 		Identifier identifier = APILocator.getIdentifierAPI().find(fileAsset.getIdentifier());
 		String[] split_point = identifier.getAssetName().split("[.]");
@@ -182,13 +180,13 @@ public class AddHTMLPagePathActionlet extends WorkFlowActionlet {
 		page.append(".");
 		if(split_point.length>0)
 			page.append(split_point[split_point.length-1]);
-		Logger.info(getClass(), "PAGE: " + page.toString());
+		Logger.debug(getClass(), "PAGE: " + page.toString());
 		page.append("_");
-		Logger.info(getClass(), "INODE: " + fileAsset.getInode());
+		Logger.debug(getClass(), "INODE: " + fileAsset.getInode());
 		page.append(fileAsset.getInode());		
 		page.append("&amp;random=");
 		page.append(new GregorianCalendar().getTimeInMillis());
-		Logger.info(getClass(), "URL to append: " + page.toString());
+		Logger.debug(getClass(), "URL to append: " + page.toString());
 		
 		paths.add(page.toString());
 		return paths;
