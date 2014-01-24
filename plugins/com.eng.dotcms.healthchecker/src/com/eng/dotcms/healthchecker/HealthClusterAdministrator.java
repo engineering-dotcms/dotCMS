@@ -120,17 +120,13 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 		
 		// controllo se vengo da un suspect...
 		if(null!=HealthChecker.INSTANCE.getHealth().getAddress()){
-			boolean contains = HealthUtil.containsMember(new_view,HealthChecker.INSTANCE.getHealth().getAddress());
-			if(contains)
-				HealthChecker.INSTANCE.getHealth().setStatus(AddressStatus.JOIN);
-			else
-				HealthChecker.INSTANCE.getHealth().setStatus(AddressStatus.LEAVE);
-			
+			HealthChecker.INSTANCE.getHealth().setStatus(AddressStatus.LEAVE);
 			// scrivo su DB
 			try{
 				boolean isCreator = HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView().getCreator().equals(HealthChecker.INSTANCE.getHealth().getAddress());
 				HibernateUtil.startTransaction();
 				healthAPI.storeHealthStatus(HealthChecker.INSTANCE.getHealth());
+				healthAPI.deleteHealthStatus(HealthChecker.INSTANCE.getHealth().getAddress(),AddressStatus.JOIN);
 				healthAPI.insertHealthClusterView(HealthChecker.INSTANCE.getHealth().getAddress(),
 						Config.getStringProperty("HEALTH_CHECKER_REST_PORT","80"),Config.getStringProperty("HEALTH_CHECKER_REST_PROTOCOL","http"),isCreator, 
 						HealthChecker.INSTANCE.getHealth().getStatus());
