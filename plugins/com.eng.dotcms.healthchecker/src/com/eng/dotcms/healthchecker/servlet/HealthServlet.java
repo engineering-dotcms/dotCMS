@@ -37,6 +37,9 @@ public class HealthServlet extends HttpServlet {
 				healthAPI.insertHealthClusterView(HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress(),
 						Config.getStringProperty("HEALTH_CHECKER_REST_PORT","80"),Config.getStringProperty("HEALTH_CHECKER_REST_PROTOCOL","http"),isCreator,
 						AddressStatus.JOIN);
+//				if(!isCreator) // probabilmente la view è cambiata oppure non sono io...tento l'aggiornamento
+//					healthAPI.updateHealthClusterViewCreator(HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView().getCreator(),true);
+				
 				HibernateUtil.commitTransaction();
 				
 			} catch (DotDataException e) {

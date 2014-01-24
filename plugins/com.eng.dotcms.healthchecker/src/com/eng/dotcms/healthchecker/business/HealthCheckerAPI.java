@@ -24,6 +24,7 @@ import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_INSERT_HEALT
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_GET_HEALTH_CLUSTER_VIEW_STATUS;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_GET_SINGLE_CLUSTER_VIEW_STATUS;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_DELETE_HEALTH_CLUSTER_VIEW;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_UPDATE_HEALTH_CLUSTER_CREATOR;
 
 public class HealthCheckerAPI {
 	
@@ -123,6 +124,20 @@ public class HealthCheckerAPI {
 		dc.addParam(protocol);
 		dc.addParam(status.toString());
 		dc.addParam(isCreator?"Y":"N");
+		dc.loadResult();			
+	}
+	
+	/**
+	 * Aggiorna il coordinator della cluster view.
+	 * 
+	 * @author Graziano Aliberti - Engineering Ingegneria Informatica S.p.a
+	 *
+	 * @date Jan 22, 2014
+	 */
+	public void updateHealthClusterViewCreator(Address address, boolean isCreator) throws DotDataException {
+		dc.setSQL(ORACLE_UPDATE_HEALTH_CLUSTER_CREATOR);
+		dc.addParam(isCreator?"Y":"N");
+		dc.addParam(HealthUtil.getStringAddress(address));
 		dc.loadResult();			
 	}
 	
