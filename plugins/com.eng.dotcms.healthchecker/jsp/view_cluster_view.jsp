@@ -1,3 +1,6 @@
+<%@page import="com.eng.dotcms.healthchecker.util.HealthUtil"%>
+<%@page import="com.eng.dotcms.healthchecker.HealthChecker"%>
+<%@page import="org.jgroups.Address"%>
 <%@page import="java.text.DateFormat"%>
 <%@page import="com.dotmarketing.business.web.WebAPILocator"%>
 <%@page import="java.text.SimpleDateFormat"%>
@@ -13,6 +16,10 @@
 	HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 	List<HealthClusterViewStatus> view = healthAPI.clusterView();
 	SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss",WebAPILocator.getUserWebAPI().getLoggedInUser(request).getLocale());
+	
+	Address myAddress = HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress();
+	
+	String _myAddress = HealthUtil.getStringAddress(myAddress);
 	
 %>
 
@@ -98,7 +105,7 @@ function refreshCache(address,port,protocol,id){
 			for(HealthClusterViewStatus singleView : view) {
 	%>
 
-				<tr style="line-height:20px; padding-bottom: 15px">
+				<tr style="line-height:20px; padding-bottom: 15px; <%if(_myAddress.equals(singleView.getAddress())) {%> font-weight: bold;<%}%>">
 					<td style="padding-left: 10px; font-size: 12px;" >
 						<%=singleView.getAddress()%>
 					</td>

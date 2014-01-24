@@ -27,6 +27,3 @@ if(APILocator.getRoleAPI().doesUserHaveRole(user, APILocator.getRoleAPI().loadCM
 }
 
 String referer = new URLEncoder().encode("/c/portal/layout?p_l_id=" + layoutId + "&p_p_id=EXT_HEALTH_CHECKER_CLUSTER_TOOL&");%>
-<%	if(LicenseUtil.getLevel()<300){ %>
-<%@ include file="/html/plugins/com.eng.dotcms.healthchecker/not_licensed.jsp" %>
-<%return;} %>
