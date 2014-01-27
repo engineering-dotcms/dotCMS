@@ -277,8 +277,8 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 							}						
 						}else{
 							try {
-								HealthClusterViewStatus status = healthAPI.singleClusterView(HealthChecker.INSTANCE.getHealth().getAddress());
-								Logger.info(getClass(), "Il nodo " + newone + " sta tentando di rientrare nel cluster dopo aver superato il tempo massimo di attesa (5 minuti): chiamo il restart...");
+								HealthClusterViewStatus status = healthAPI.singleClusterView(newone);
+								Logger.info(getClass(), "Il nodo " + newone + " sta tentando di rientrare nel cluster dopo aver superato il tempo massimo di attesa ("+(MAX_REJOIN_TIME/1000)+" secondi): chiamo il restart...");
 								HealthUtil.callRESTService(status, "/forceJoinCluster");
 							} catch (DotDataException e) {
 								Logger.error(getClass(), "Errore scatenato: " + e.getClass(),e);
