@@ -193,6 +193,7 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 					long now = new GregorianCalendar().getTimeInMillis();
 					long lastLeaveTime = healthAPI.getDateOfLastLeaveEvent(newone);
 					if(now-lastLeaveTime<=MAX_REJOIN_TIME) {
+						Logger.info(getClass(), "Posso procedere con il re-inserimento nel cluster...");
 						HealthChecker.INSTANCE.getHealth().setAddress(newone);
 						HealthChecker.INSTANCE.getHealth().setStatus(AddressStatus.JOIN);
 						HealthChecker.INSTANCE.getHealth().setClusterView(new_view);
@@ -203,7 +204,7 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 							if(!HealthUtil.containsMember(CacheLocator.getCacheAdministrator().getJGroupsChannel().getView(),
 									HealthChecker.INSTANCE.getHealth().getAddress())) {
 								try {
-									Logger.debug(getClass(), "Il nodo " + HealthChecker.INSTANCE.getHealth().getAddress() + " non e' inserito completamente nel cluster...");
+									Logger.info(getClass(), "Il nodo " + HealthChecker.INSTANCE.getHealth().getAddress() + " non e' inserito completamente nel cluster...");
 									Thread.sleep(2000);
 								} catch (InterruptedException e) {
 									Logger.error(getClass(), "Errore in wait");
@@ -211,6 +212,7 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 								}
 							}else{							
 						        try{
+						        	Logger.info(getClass(), "Pronto per reinserire il nodo nel cluster.");
 						        	/**
 						        	 * In questo caso il nodo è rientrato anche nel canale principale e quindi posso procedere a:
 						        	 * 
@@ -239,7 +241,7 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 									} catch (DotHibernateException e1) {
 										Logger.fatal(getClass(), "DotHibernateException: " + e1.getMessage());
 									}
-									Logger.error(getClass(), "Errore scatenato: " + e.getClass());				
+									Logger.error(getClass(), "Errore scatenato: " + e.getClass(),e);
 								}						      
 						        ctrl = false;
 							}
@@ -247,10 +249,10 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 					}else{
 						try {
 							HealthClusterViewStatus status = healthAPI.singleClusterView(HealthChecker.INSTANCE.getHealth().getAddress());
-							Logger.warn(getClass(), "Il nodo " + newone + " sta tentando di rientrare nel cluster dopo aver superato il tempo massimo di attesa (5 minuti): chiamo il restart...");
+							Logger.info(getClass(), "Il nodo " + newone + " sta tentando di rientrare nel cluster dopo aver superato il tempo massimo di attesa (5 minuti): chiamo il restart...");
 							HealthUtil.callRESTService(status, "/forceJoinCluster");
 						} catch (DotDataException e) {
-							Logger.error(getClass(), "Errore scatenato: " + e.getClass());
+							Logger.error(getClass(), "Errore scatenato: " + e.getClass(),e);
 							HealthChecker.INSTANCE.flush();
 						}
 					}
