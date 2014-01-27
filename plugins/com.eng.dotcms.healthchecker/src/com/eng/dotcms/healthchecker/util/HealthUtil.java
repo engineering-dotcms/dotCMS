@@ -28,13 +28,7 @@ public class HealthUtil {
 		}
 		return false;
 	}
-	
-	public static boolean isMerge(View view){
-		int indexOf = view.toString().indexOf("MergeView");
-		Logger.info(HealthUtil.class, "IndexOf: " + indexOf);
-		return indexOf>=0;
-	}
-	
+
 	/**
 	 * La nuova View deve contenere per forza più dati della vecchia
 	 * @param new_view
@@ -45,12 +39,8 @@ public class HealthUtil {
 		HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 		List<Address> joined = new ArrayList<Address>();
 		for(Address new_view_addr : new_view.getMembers()){
-			Logger.debug(HealthUtil.class, "Address: " + new_view_addr);
-			Logger.debug(HealthUtil.class, "Local Address: " + HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress());
 			if(!HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress().equals(new_view_addr)){
-				Logger.debug(HealthUtil.class, "Provo a vedere se e' LEAVE");
 				if(healthAPI.isLeaveNode(new_view_addr)){
-					Logger.debug(HealthUtil.class, "E' LEAVE...");
 					joined.add(new_view_addr);
 				}
 			}
@@ -77,8 +67,11 @@ public class HealthUtil {
 	}
 	
 	public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
+		Logger.info(HealthUtil.class, "Date 1: " + date1);
+		Logger.info(HealthUtil.class, "Date 2: " + date2);
 		if(null!=date2){
-		    long diffInMillies = date1.getTime() - date2.getTime();		    
+		    long diffInMillies = date1.getTime() - date2.getTime();
+		    Logger.info(HealthUtil.class, "Diff in milliseconds: " + diffInMillies);
 		    return timeUnit.convert(diffInMillies,timeUnit);
 		}else
 			return -1;
