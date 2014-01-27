@@ -18,12 +18,13 @@ public class HealthService extends WebResource {
 
 	private HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 	private PluginAPI pluginAPI = APILocator.getPluginAPI();
+	public static String STATUS_OK = "OK";
 	
 	@SuppressWarnings("deprecation")
 	@GET
 	@Path("/joinCluster")
 	public String flushCache() {
-		String ctrl = "OK";
+		String ctrl = STATUS_OK;
 		try {
 			Logger.info(getClass(), "Retrieve ACK for flush cache event when I rejoin the cluster.");
 			CacheLocator.getCacheAdministrator().flushAlLocalOnlyl();
@@ -39,7 +40,7 @@ public class HealthService extends WebResource {
 	@GET
 	@Path("/forceJoinCluster")
 	public String restart() {
-		String ctrl = "OK";
+		String ctrl = STATUS_OK;
 		try {
 			String scriptFolder = pluginAPI.loadProperty("com.eng.dotcms.healthchecker", "script.folder");
 			String scriptName = pluginAPI.loadProperty("com.eng.dotcms.healthchecker", "script.name");

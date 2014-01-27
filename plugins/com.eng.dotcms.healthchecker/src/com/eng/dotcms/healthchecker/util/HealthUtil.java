@@ -78,8 +78,7 @@ public class HealthUtil {
 	
 	public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
 		if(null!=date2){
-		    long diffInMillies = date2.getTime() - date1.getTime();
-		    Logger.info(HealthUtil.class, "DIFFERENZA: " + diffInMillies);
+		    long diffInMillies = date1.getTime() - date2.getTime();		    
 		    return timeUnit.convert(diffInMillies,timeUnit);
 		}else
 			return -1;

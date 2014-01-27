@@ -10,6 +10,7 @@ import org.jgroups.JChannel;
 import org.jgroups.ReceiverAdapter;
 import org.jgroups.View;
 
+import com.dotcms.rest.HealthService;
 import com.dotmarketing.business.CacheLocator;
 import com.dotmarketing.db.HibernateUtil;
 import com.dotmarketing.exception.DotDataException;
@@ -104,39 +105,63 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 	 * Intercetto il metodo suspect, scatenato quando un nodo è uscito dal cluster.
 	 */
 	public void suspect(Address mbr) {
-		int countSuspect = HealthChecker.INSTANCE.getCountSuspect();
-		if(countSuspect<=MAX_COUNT_SUSPECT) {
-			countSuspect++;
-			// memorizzo il suspect all'interno del singleton
-			Logger.info(this, "Method suspect: 	There is a suspected member : " + mbr);
-			Logger.info(this, "suspect + 		There is a suspected member : " + mbr);
-			HealthChecker.INSTANCE.getHealth().setAddress(mbr);
-			HealthChecker.INSTANCE.getHealth().setWrittenBy(channel.getLocalAddress());
-			HealthChecker.INSTANCE.setCountSuspect(countSuspect);
-		}else{ // raggiunto il limite di suspect accettate senza ricevere una view...il nodo è dichiarato fuori dal cluster.
-			HealthChecker.INSTANCE.setCountSuspect(0);
-			Logger.warn(getClass(), "Raggiunto il limite massimo di chiamate ("+MAX_COUNT_SUSPECT+") al metodo suspect senza chiamare il viewAccepted: il nodo è fouri dal cluster.");
-			// resetto il count per evitare continue chiamate al suspect senza un viewAccepted.
-			HealthChecker.INSTANCE.getHealth().setStatus(AddressStatus.LEAVE);
-			// scrivo su DB
-			try{
-				boolean isCreator = HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView().getCreator().equals(HealthChecker.INSTANCE.getHealth().getAddress());
-				HibernateUtil.startTransaction();
-				healthAPI.storeHealthStatus(HealthChecker.INSTANCE.getHealth());
-				healthAPI.deleteHealthStatus(HealthChecker.INSTANCE.getHealth().getAddress(),AddressStatus.JOIN);
-				healthAPI.insertHealthClusterView(HealthChecker.INSTANCE.getHealth().getAddress(),
-						Config.getStringProperty("HEALTH_CHECKER_REST_PORT","80"),Config.getStringProperty("HEALTH_CHECKER_REST_PROTOCOL","http"),isCreator, 
-						HealthChecker.INSTANCE.getHealth().getStatus());
-				HealthChecker.INSTANCE.flush();
-				HibernateUtil.commitTransaction();
-			}catch(DotDataException e){
-				try {
-					HibernateUtil.rollbackTransaction();
-				} catch (DotHibernateException e1) {
-					Logger.fatal(getClass(), "DotHibernateException: " + e1.getMessage());
+		try{
+			boolean isAlreadyLeave = healthAPI.isLeaveNode(mbr);
+			if(isAlreadyLeave) {
+				Logger.info(getClass(), "Method suspect:  The node " + mbr + " is already out of cluster and I can't re-join. Force restart...");
+				HealthClusterViewStatus status = healthAPI.singleClusterView(mbr);
+				String response = HealthUtil.callRESTService(status, "/forceJoinCluster");
+				if(HealthService.STATUS_OK.equals(response)) {
+					HibernateUtil.startTransaction();
+					healthAPI.deleteHealthClusterView(mbr);
+					healthAPI.deleteHealthStatus(mbr, AddressStatus.LEAVE);
+					healthAPI.deleteHealthStatus(mbr, AddressStatus.JOIN);
+					HibernateUtil.commitTransaction();
+					Logger.info(getClass(), "Method suspect:  The node " + mbr + " was successful restarted...it will come back into the cluster as soon as possible.");					
 				}
-					Logger.error(getClass(), "Errore scatenato: " + e.getClass());				
+			}else{				
+				int countSuspect = HealthChecker.INSTANCE.getCountSuspect();
+				if(countSuspect<=MAX_COUNT_SUSPECT) {
+					countSuspect++;
+					// memorizzo il suspect all'interno del singleton
+					Logger.info(this, "Method suspect: 	There is a suspected member : " + mbr);
+					Logger.info(this, "suspect + 		There is a suspected member : " + mbr);
+					HealthChecker.INSTANCE.getHealth().setAddress(mbr);
+					HealthChecker.INSTANCE.getHealth().setWrittenBy(channel.getLocalAddress());
+					HealthChecker.INSTANCE.setCountSuspect(countSuspect);
+				}else{ // raggiunto il limite di suspect accettate senza ricevere una view...il nodo è dichiarato fuori dal cluster.
+					HealthChecker.INSTANCE.setCountSuspect(0);
+					Logger.warn(getClass(), "Raggiunto il limite massimo di chiamate ("+MAX_COUNT_SUSPECT+") al metodo suspect senza chiamare il viewAccepted: il nodo è fouri dal cluster.");
+					// resetto il count per evitare continue chiamate al suspect senza un viewAccepted.
+					HealthChecker.INSTANCE.getHealth().setStatus(AddressStatus.LEAVE);
+					// scrivo su DB
+					try{
+						boolean isCreator = HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView().getCreator().equals(HealthChecker.INSTANCE.getHealth().getAddress());
+						HibernateUtil.startTransaction();
+						healthAPI.storeHealthStatus(HealthChecker.INSTANCE.getHealth());
+						healthAPI.deleteHealthStatus(HealthChecker.INSTANCE.getHealth().getAddress(),AddressStatus.JOIN);
+						healthAPI.insertHealthClusterView(HealthChecker.INSTANCE.getHealth().getAddress(),
+								Config.getStringProperty("HEALTH_CHECKER_REST_PORT","80"),Config.getStringProperty("HEALTH_CHECKER_REST_PROTOCOL","http"),isCreator, 
+								HealthChecker.INSTANCE.getHealth().getStatus());
+						HealthChecker.INSTANCE.flush();
+						HibernateUtil.commitTransaction();
+					}catch(DotDataException e){
+						try {
+							HibernateUtil.rollbackTransaction();
+						} catch (DotHibernateException e1) {
+							Logger.fatal(getClass(), "DotHibernateException: " + e1.getMessage());
+						}
+							Logger.error(getClass(), "Errore scatenato: " + e.getClass());				
+					}
+				}	
 			}
+		}catch(DotDataException e){
+			try {
+				HibernateUtil.rollbackTransaction();
+			} catch (DotHibernateException e1) {
+				Logger.fatal(getClass(), "DotHibernateException: " + e1.getMessage());
+			}
+				Logger.error(getClass(), "Errore scatenato: " + e.getClass());				
 		}
 	}
 
@@ -237,7 +262,7 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 										HibernateUtil.commitTransaction();					        						        	
 										Logger.info(getClass(), "Node "+HealthChecker.INSTANCE.getHealth().getAddress()+" back into the cluster: flushing cache...");
 								        String response = HealthUtil.callRESTService(status,"/joinCluster");
-								        if("OK".equals(response))
+								        if(HealthService.STATUS_OK.equals(response))
 								        	Logger.info(getClass(), "Cache on node "+HealthChecker.INSTANCE.getHealth().getAddress()+" successful flushed!");								
 									}catch(DotDataException e){
 										try {
