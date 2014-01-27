@@ -78,17 +78,6 @@ function refreshCache(address,port,protocol,id){
 	var deferred = dojo.xhrPost(xhrArgs);	
 }
 
-function movePage(x) {
-    var cp=parseInt(dojo.byId('currentPage').textContent);
-    var id = dojo.byId('currentPage');
-    if(typeof id.textContent == "undefined"){
-            cp=parseInt(dojo.byId('currentPage').innerText);
-            dojo.byId('currentPage').innerText=cp+x;
-    }
-    else
-            dojo.byId('currentPage').textContent=cp+x;
-    loadTable();
-}
 </script>
 
 <div style="padding-top: 5px">
@@ -149,20 +138,7 @@ function movePage(x) {
 
 
 		<%}%>
-			</table><br />			
-			<div dojoType="dijit.layout.ContentPane" region="bottom">
-                <span id="tools">
-                   <button id="prevBtn" type="button" dojoType="dijit.form.Button" onClick="movePage(-1)">
-	                   <span class="previousIcon"></span>
-	               </button>
-	               
-	               <span id="currentPage"><%=pageNumber %></span> / <span id="totalPages"></span>
-	               
-	               <button id="nextBtn" type="button" dojoType="dijit.form.Button" onClick="movePage(1)">
-                       <span class="nextIcon"></span>
-                   </button>
-                </span>
-            </div>
+			</table><br />						
 		<%if(!hasServers){ %>
 			<table style="width: 99%; border: 1px solid #D0D0D0">
 				<tr>
@@ -171,6 +147,3 @@ function movePage(x) {
 			</table>
 		<%}%>
 </div>
-
-
-
