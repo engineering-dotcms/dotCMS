@@ -32,16 +32,16 @@ public class HealthServlet extends HttpServlet {
 				// elimino i vecchi records riguardanti il nodo attuale in quanto sono in riavvio.
 				healthAPI.deleteHealthStatus(localAddress, AddressStatus.LEAVE);
 				healthAPI.deleteHealthStatus(localAddress, AddressStatus.JOIN);
-				healthAPI.deleteHealthClusterView(localAddress);				
-				HealthClusterAdministrator clusterAdmin = new HealthClusterAdministrator();
-				clusterAdmin.init();
-				HealthChecker.INSTANCE.setClusterAdmin(clusterAdmin);				
-				// inserisco il nodo nella cluster view con status JOINED.
+				healthAPI.deleteHealthClusterView(localAddress);
 				boolean isCreator = CacheLocator.getCacheAdministrator().getJGroupsChannel().getView().getCreator().equals(localAddress);
 				healthAPI.insertHealthClusterView(localAddress,
 						Config.getStringProperty("HEALTH_CHECKER_REST_PORT","80"),Config.getStringProperty("HEALTH_CHECKER_REST_PROTOCOL","http"),isCreator,
 						AddressStatus.JOIN);
-				HibernateUtil.commitTransaction();
+				HibernateUtil.commitTransaction();				
+				HealthClusterAdministrator clusterAdmin = new HealthClusterAdministrator();				
+				clusterAdmin.init();
+				HealthChecker.INSTANCE.setClusterAdmin(clusterAdmin);				
+				// inserisco il nodo nella cluster view con status JOINED.
 				
 			} catch (DotDataException e) {
 				Logger.error(getClass(), "Error in init HealthServlet: " + e.getMessage());
