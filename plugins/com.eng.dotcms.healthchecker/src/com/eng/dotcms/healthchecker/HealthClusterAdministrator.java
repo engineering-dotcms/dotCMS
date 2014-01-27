@@ -178,6 +178,7 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 			List<Address> joined = HealthUtil.getJoined(new_view);
 			Logger.info(getClass(), "Joined size: " + joined.size());
 			if(joined.size()>0){
+				long now = new GregorianCalendar().getTimeInMillis();
 				/**
 				 * Il controllo sugli indirizzi "joinati" viene fatto solo ed esclusivamente partendo dal presupposto che questi indirizzi
 				 * siano presenti in tabella nello stato "LEAVE". 
@@ -190,73 +191,80 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 				 * 
 				 */
 				for(Address newone:joined){
-					long now = new GregorianCalendar().getTimeInMillis();
-					long lastLeaveTime = healthAPI.getDateOfLastLeaveEvent(newone);
-					if(now-lastLeaveTime<=MAX_REJOIN_TIME) {
-						Logger.info(getClass(), "Posso procedere con il re-inserimento nel cluster...");
-						HealthChecker.INSTANCE.getHealth().setAddress(newone);
-						HealthChecker.INSTANCE.getHealth().setStatus(AddressStatus.JOIN);
-						HealthChecker.INSTANCE.getHealth().setClusterView(new_view);
-						HealthChecker.INSTANCE.getHealth().setWrittenBy(channel.getLocalAddress());
-						// controllo se nell'altro cluster lo stesso nodo è stato joinato
-						boolean ctrl = true;
-						while(ctrl){
-							if(!HealthUtil.containsMember(CacheLocator.getCacheAdministrator().getJGroupsChannel().getView(),
-									HealthChecker.INSTANCE.getHealth().getAddress())) {
-								try {
-									Logger.info(getClass(), "Il nodo " + HealthChecker.INSTANCE.getHealth().getAddress() + " non e' inserito completamente nel cluster...");
-									Thread.sleep(2000);
-								} catch (InterruptedException e) {
-									Logger.error(getClass(), "Errore in wait");
-									ctrl = false;
-								}
-							}else{							
-						        try{
-						        	Logger.info(getClass(), "Pronto per reinserire il nodo nel cluster.");
-						        	/**
-						        	 * In questo caso il nodo è rientrato anche nel canale principale e quindi posso procedere a:
-						        	 * 
-						        	 *  1. Recupero della riga contenente lo stato;
-						        	 *  2. Inserire la riga contenente il nuovo stato di JOIN;
-						        	 *  3. Inserire la riga nella tabella dello status per l'amministrazione da backend;
-						        	 *  4. Eliminazione delle precedenti righe contenenti lo stato LEAVE (in questo modo il nodo sa di essere nel
-						        	 *     cluster nuovamente;
-						        	 *  5. Chiamata al suo servizio REST per il flush della cache e quindi per il riallineamento.   
-						        	 */
-						        	HealthClusterViewStatus status = healthAPI.singleClusterView(HealthChecker.INSTANCE.getHealth().getAddress());
-						        	HibernateUtil.startTransaction();					        	
-									healthAPI.storeHealthStatus(HealthChecker.INSTANCE.getHealth());
-									healthAPI.insertHealthClusterView(HealthChecker.INSTANCE.getHealth().getAddress(),
-											Config.getStringProperty("HEALTH_CHECKER_REST_PORT","80"),Config.getStringProperty("HEALTH_CHECKER_REST_PROTOCOL","http"),status.isCreator(),
-											HealthChecker.INSTANCE.getHealth().getStatus());
-									healthAPI.deleteHealthStatus(HealthChecker.INSTANCE.getHealth().getAddress(), AddressStatus.LEAVE);
-									HibernateUtil.commitTransaction();					        						        	
-									Logger.info(getClass(), "Node "+HealthChecker.INSTANCE.getHealth().getAddress()+" back into the cluster: flushing cache...");
-							        String response = HealthUtil.callRESTService(status,"/joinCluster");
-							        if("OK".equals(response))
-							        	Logger.info(getClass(), "Cache on node "+HealthChecker.INSTANCE.getHealth().getAddress()+" successful flushed!");								
-								}catch(DotDataException e){
+					try{
+						
+						Logger.info(getClass(), "Data corrente: " + now);
+						
+						long lastLeaveTime = healthAPI.getDateOfLastLeaveEvent(newone);
+						Logger.info(getClass(), "Last Leave Time: " + lastLeaveTime);
+						if(now-lastLeaveTime<=MAX_REJOIN_TIME) {
+							Logger.info(getClass(), "Posso procedere con il re-inserimento nel cluster...");
+							HealthChecker.INSTANCE.getHealth().setAddress(newone);
+							HealthChecker.INSTANCE.getHealth().setStatus(AddressStatus.JOIN);
+							HealthChecker.INSTANCE.getHealth().setClusterView(new_view);
+							HealthChecker.INSTANCE.getHealth().setWrittenBy(channel.getLocalAddress());
+							// controllo se nell'altro cluster lo stesso nodo è stato joinato
+							boolean ctrl = true;
+							while(ctrl){
+								if(!HealthUtil.containsMember(CacheLocator.getCacheAdministrator().getJGroupsChannel().getView(),
+										HealthChecker.INSTANCE.getHealth().getAddress())) {
 									try {
-										HibernateUtil.rollbackTransaction();
-									} catch (DotHibernateException e1) {
-										Logger.fatal(getClass(), "DotHibernateException: " + e1.getMessage());
+										Logger.info(getClass(), "Il nodo " + HealthChecker.INSTANCE.getHealth().getAddress() + " non e' inserito completamente nel cluster...");
+										Thread.sleep(2000);
+									} catch (InterruptedException e) {
+										Logger.error(getClass(), "Errore in wait");
+										ctrl = false;
 									}
-									Logger.error(getClass(), "Errore scatenato: " + e.getClass(),e);
-								}						      
-						        ctrl = false;
+								}else{							
+							        try{
+							        	Logger.info(getClass(), "Pronto per reinserire il nodo nel cluster.");
+							        	/**
+							        	 * In questo caso il nodo è rientrato anche nel canale principale e quindi posso procedere a:
+							        	 * 
+							        	 *  1. Recupero della riga contenente lo stato;
+							        	 *  2. Inserire la riga contenente il nuovo stato di JOIN;
+							        	 *  3. Inserire la riga nella tabella dello status per l'amministrazione da backend;
+							        	 *  4. Eliminazione delle precedenti righe contenenti lo stato LEAVE (in questo modo il nodo sa di essere nel
+							        	 *     cluster nuovamente;
+							        	 *  5. Chiamata al suo servizio REST per il flush della cache e quindi per il riallineamento.   
+							        	 */
+							        	HealthClusterViewStatus status = healthAPI.singleClusterView(HealthChecker.INSTANCE.getHealth().getAddress());
+							        	HibernateUtil.startTransaction();					        	
+										healthAPI.storeHealthStatus(HealthChecker.INSTANCE.getHealth());
+										healthAPI.insertHealthClusterView(HealthChecker.INSTANCE.getHealth().getAddress(),
+												Config.getStringProperty("HEALTH_CHECKER_REST_PORT","80"),Config.getStringProperty("HEALTH_CHECKER_REST_PROTOCOL","http"),status.isCreator(),
+												HealthChecker.INSTANCE.getHealth().getStatus());
+										healthAPI.deleteHealthStatus(HealthChecker.INSTANCE.getHealth().getAddress(), AddressStatus.LEAVE);
+										HibernateUtil.commitTransaction();					        						        	
+										Logger.info(getClass(), "Node "+HealthChecker.INSTANCE.getHealth().getAddress()+" back into the cluster: flushing cache...");
+								        String response = HealthUtil.callRESTService(status,"/joinCluster");
+								        if("OK".equals(response))
+								        	Logger.info(getClass(), "Cache on node "+HealthChecker.INSTANCE.getHealth().getAddress()+" successful flushed!");								
+									}catch(DotDataException e){
+										try {
+											HibernateUtil.rollbackTransaction();
+										} catch (DotHibernateException e1) {
+											Logger.fatal(getClass(), "DotHibernateException: " + e1.getMessage());
+										}
+										Logger.error(getClass(), "Errore scatenato: " + e.getClass(),e);
+									}						      
+							        ctrl = false;
+								}
+							}						
+						}else{
+							try {
+								HealthClusterViewStatus status = healthAPI.singleClusterView(HealthChecker.INSTANCE.getHealth().getAddress());
+								Logger.info(getClass(), "Il nodo " + newone + " sta tentando di rientrare nel cluster dopo aver superato il tempo massimo di attesa (5 minuti): chiamo il restart...");
+								HealthUtil.callRESTService(status, "/forceJoinCluster");
+							} catch (DotDataException e) {
+								Logger.error(getClass(), "Errore scatenato: " + e.getClass(),e);
+								HealthChecker.INSTANCE.flush();
 							}
-						}						
-					}else{
-						try {
-							HealthClusterViewStatus status = healthAPI.singleClusterView(HealthChecker.INSTANCE.getHealth().getAddress());
-							Logger.info(getClass(), "Il nodo " + newone + " sta tentando di rientrare nel cluster dopo aver superato il tempo massimo di attesa (5 minuti): chiamo il restart...");
-							HealthUtil.callRESTService(status, "/forceJoinCluster");
-						} catch (DotDataException e) {
-							Logger.error(getClass(), "Errore scatenato: " + e.getClass(),e);
-							HealthChecker.INSTANCE.flush();
 						}
+						HealthChecker.INSTANCE.flush();
 					}
-					HealthChecker.INSTANCE.flush();
+				}catch(Exception e){
+					e.printStackTrace();
 				}
 			}
 		}
