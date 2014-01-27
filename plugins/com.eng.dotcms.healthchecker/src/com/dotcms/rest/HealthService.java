@@ -47,6 +47,7 @@ public class HealthService extends WebResource {
 			Logger.info(getClass(), "Retrieve ACK for restart the system.");
 			ProcessBuilder pb = new ProcessBuilder("/bin/bash", scriptFolder+scriptName);
 			pb.start();
+			flushCache();
 		} catch (DotDataException e) {
 			Logger.error(getClass(), "DotDataException: Error in restart system.");
 			ctrl = "KO";
