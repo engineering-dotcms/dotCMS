@@ -110,6 +110,28 @@ public class HealthCheckerAPI {
 	}
 	
 	/**
+	 * Restituisce la data in millisecondi dell'ultimo evento di leave del nodo.
+	 * 
+	 * @author Graziano Aliberti - Engineering Ingegneria Informatica S.p.a
+	 *
+	 * @date Jan 27, 2014
+	 */
+	public long getDateOfLastLeaveEvent(Address address) {
+		try{
+			dc.setSQL(ORACLE_GET_NODE_LEAVE);
+			dc.addParam(HealthUtil.getStringAddress(address));
+			List<Map<String, Object>> rs = dc.loadObjectResults();
+			if(rs.size()>0){
+				Map<String, Object> row = rs.get(0);
+				return ((Date)row.get("mod_date")).getTime();
+			}
+			return -1;
+		}catch(DotDataException e){
+			return -1;
+		}
+	}
+	
+	/**
 	 * Memorizza il nuovo nodo nel cluster.
 	 * 
 	 * @author Graziano Aliberti - Engineering Ingegneria Informatica S.p.a

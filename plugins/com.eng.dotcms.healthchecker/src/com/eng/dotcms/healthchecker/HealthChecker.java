@@ -8,6 +8,7 @@ public class HealthChecker {
 	public static HealthChecker INSTANCE = new HealthChecker();
 	private HealthClusterAdministrator clusterAdmin;
 	private View lastView = null; 
+	private int countSuspect = 0;
 	
 	private HealthChecker(){
 		health = new Health();
@@ -36,6 +37,14 @@ public class HealthChecker {
 
 	public void setLastView(View lastView) {
 		this.lastView = lastView;
+	}
+
+	public int getCountSuspect() {
+		return countSuspect;
+	}
+
+	public void setCountSuspect(int countSuspect) {
+		this.countSuspect = countSuspect;
 	}
 
 	public void flush(){

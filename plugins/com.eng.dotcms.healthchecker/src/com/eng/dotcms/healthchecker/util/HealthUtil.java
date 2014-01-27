@@ -67,11 +67,11 @@ public class HealthUtil {
 	}
 	
 	
-	public static String callRESTService(HealthClusterViewStatus status){
+	public static String callRESTService(HealthClusterViewStatus status, String operation){
 		ClientConfig clientConfig = new DefaultClientConfig();
 		Client client = Client.create(clientConfig);
         WebResource webResource = client.resource(getRESTURL(status));
-        return webResource.path("/joinCluster").get(String.class);
+        return webResource.path(operation).get(String.class);
 	}
 	
 

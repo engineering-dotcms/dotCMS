@@ -43,7 +43,7 @@ public class HealthCheckerAjax extends AjaxAction {
 		status.setAddress(address);
 		status.setPort(port);
 		status.setProtocol(protocol);
-        String responseRest = HealthUtil.callRESTService(status);
+        String responseRest = HealthUtil.callRESTService(status,"/joinCluster");
         response.getWriter().println(responseRest);
 	}
 	

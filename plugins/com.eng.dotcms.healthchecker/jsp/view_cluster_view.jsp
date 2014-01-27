@@ -21,6 +21,9 @@
 	
 	String _myAddress = HealthUtil.getStringAddress(myAddress);
 	
+	int pageNumber=1;
+	if(request.getParameter("pageNumber")!=null) 
+	    pageNumber=Integer.parseInt(request.getParameter("pageNumber"));
 %>
 
 <style type="text/css">
@@ -73,6 +76,18 @@ function refreshCache(address,port,protocol,id){
 	dojo.style(divResponse, {color:'#FFCC33'});
 	divResponse.innerHTML = '<%= LanguageUtil.get(pageContext, "health-refreshing-cache") %>'
 	var deferred = dojo.xhrPost(xhrArgs);	
+}
+
+function movePage(x) {
+    var cp=parseInt(dojo.byId('currentPage').textContent);
+    var id = dojo.byId('currentPage');
+    if(typeof id.textContent == "undefined"){
+            cp=parseInt(dojo.byId('currentPage').innerText);
+            dojo.byId('currentPage').innerText=cp+x;
+    }
+    else
+            dojo.byId('currentPage').textContent=cp+x;
+    loadTable();
 }
 </script>
 
@@ -134,8 +149,20 @@ function refreshCache(address,port,protocol,id){
 
 
 		<%}%>
-			</table><br>			
-
+			</table><br />			
+			<div dojoType="dijit.layout.ContentPane" region="bottom">
+                <span id="tools">
+                   <button id="prevBtn" type="button" dojoType="dijit.form.Button" onClick="movePage(-1)">
+	                   <span class="previousIcon"></span>
+	               </button>
+	               
+	               <span id="currentPage"><%=pageNumber %></span> / <span id="totalPages"></span>
+	               
+	               <button id="nextBtn" type="button" dojoType="dijit.form.Button" onClick="movePage(1)">
+                       <span class="nextIcon"></span>
+                   </button>
+                </span>
+            </div>
 		<%if(!hasServers){ %>
 			<table style="width: 99%; border: 1px solid #D0D0D0">
 				<tr>
