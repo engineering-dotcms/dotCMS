@@ -1,7 +1,9 @@
 package com.eng.dotcms.healthchecker.util;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.jgroups.Address;
 import org.jgroups.View;
@@ -74,6 +76,14 @@ public class HealthUtil {
         return webResource.path(operation).get(String.class);
 	}
 	
+	public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
+		if(null!=date2){
+		    long diffInMillies = date2.getTime() - date1.getTime();
+		    Logger.info(HealthUtil.class, "DIFFERENZA: " + diffInMillies);
+		    return timeUnit.convert(diffInMillies,timeUnit);
+		}else
+			return -1;
+	}
 
 	private static String getRESTURL(HealthClusterViewStatus status){
 		StringBuilder sb = new StringBuilder();
@@ -81,4 +91,7 @@ public class HealthUtil {
 		sb.append("/api/health");
 		return sb.toString();
 	}
+	
+	
+	
 }

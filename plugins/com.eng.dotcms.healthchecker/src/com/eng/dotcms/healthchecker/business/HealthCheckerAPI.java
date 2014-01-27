@@ -116,18 +116,18 @@ public class HealthCheckerAPI {
 	 *
 	 * @date Jan 27, 2014
 	 */
-	public long getDateOfLastLeaveEvent(Address address) {
+	public Date getDateOfLastLeaveEvent(Address address) {
 		try{
 			dc.setSQL(ORACLE_GET_NODE_LEAVE);
 			dc.addParam(HealthUtil.getStringAddress(address));
 			List<Map<String, Object>> rs = dc.loadObjectResults();
 			if(rs.size()>0){
 				Map<String, Object> row = rs.get(0);
-				return ((Date)row.get("mod_date")).getTime();
+				return (Date)row.get("mod_date");
 			}
-			return -1;
+			return null;
 		}catch(DotDataException e){
-			return -1;
+			return null;
 		}
 	}
 	

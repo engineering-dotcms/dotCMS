@@ -1,7 +1,9 @@
 package com.eng.dotcms.healthchecker;
 
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.jgroups.Address;
 import org.jgroups.JChannel;
@@ -178,7 +180,7 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 			List<Address> joined = HealthUtil.getJoined(new_view);
 			Logger.info(getClass(), "Joined size: " + joined.size());
 			if(joined.size()>0){
-				long now = new GregorianCalendar().getTimeInMillis();
+				Date now = new GregorianCalendar().getTime();
 				/**
 				 * Il controllo sugli indirizzi "joinati" viene fatto solo ed esclusivamente partendo dal presupposto che questi indirizzi
 				 * siano presenti in tabella nello stato "LEAVE". 
@@ -192,12 +194,8 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 				 */
 				for(Address newone:joined){
 					try{
-						
-						Logger.info(getClass(), "Data corrente: " + now);
-						
-						long lastLeaveTime = healthAPI.getDateOfLastLeaveEvent(newone);
-						Logger.info(getClass(), "Last Leave Time: " + lastLeaveTime);
-						if(now-lastLeaveTime<=MAX_REJOIN_TIME) {
+						long diffInMilliseconds = HealthUtil.getDateDiff(now, healthAPI.getDateOfLastLeaveEvent(newone), TimeUnit.MILLISECONDS);
+						if(diffInMilliseconds<=MAX_REJOIN_TIME) {
 							Logger.info(getClass(), "Posso procedere con il re-inserimento nel cluster...");
 							HealthChecker.INSTANCE.getHealth().setAddress(newone);
 							HealthChecker.INSTANCE.getHealth().setStatus(AddressStatus.JOIN);
@@ -262,10 +260,10 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 							}
 						}
 						HealthChecker.INSTANCE.flush();
+					}catch(Exception e){
+						e.printStackTrace();
 					}
-				}catch(Exception e){
-					e.printStackTrace();
-				}
+				}				
 			}
 		}
 	}	
