@@ -105,7 +105,7 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 	 */
 	public void suspect(Address mbr) {
 		int countSuspect = HealthChecker.INSTANCE.getCountSuspect();
-		if(countSuspect<MAX_COUNT_SUSPECT) {
+		if(countSuspect<=MAX_COUNT_SUSPECT) {
 			countSuspect++;
 			// memorizzo il suspect all'interno del singleton
 			Logger.info(this, "Method suspect: 	There is a suspected member : " + mbr);
@@ -114,6 +114,7 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 			HealthChecker.INSTANCE.getHealth().setWrittenBy(channel.getLocalAddress());
 			HealthChecker.INSTANCE.setCountSuspect(countSuspect);
 		}else{ // raggiunto il limite di suspect accettate senza ricevere una view...il nodo è dichiarato fuori dal cluster.
+			HealthChecker.INSTANCE.setCountSuspect(0);
 			Logger.warn(getClass(), "Raggiunto il limite massimo di chiamate ("+MAX_COUNT_SUSPECT+") al metodo suspect senza chiamare il viewAccepted: il nodo è fouri dal cluster.");
 			// resetto il count per evitare continue chiamate al suspect senza un viewAccepted.
 			HealthChecker.INSTANCE.getHealth().setStatus(AddressStatus.LEAVE);
