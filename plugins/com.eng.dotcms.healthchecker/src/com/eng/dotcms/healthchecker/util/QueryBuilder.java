@@ -4,7 +4,7 @@ public class QueryBuilder {
 	
 	public static final String ORACLE_CHECK_TABLE 						=	"SELECT COUNT(*) as exist " +
 																			"FROM user_tables " +
-																			"WHERE table_name in ( 'HEALTH_EVENT', 'HEALTH_CLUSTER_VIEW' )";
+																			"WHERE table_name in ( 'HEALTH_EVENT', 'HEALTH_CLUSTER_VIEW' , 'HEALTH_LOCK' )";
 
 	public static final String ORACLE_ADD_HEALTH_TABLE					=	"CREATE TABLE HEALTH_EVENT ( " +
 																			"	ADDRESS			VARCHAR2(30)  										NOT NULL, " +
@@ -25,6 +25,18 @@ public class QueryBuilder {
 																			"	MOD_DATE		TIMESTAMP	  										NOT NULL, " +																			
 																			" 	CONSTRAINT health_cluster_pk PRIMARY KEY(ID)" +
 																			")";
+		
+	public static final String ORACLE_ADD_HEALTH_LOCK_TABLE				=	"CREATE TABLE HEALTH_LOCK ( " +
+																			"	ADDRESS			VARCHAR2(30)  													NOT NULL, " +
+																			"	OPERATION		VARCHAR2(10) check (OPERATION in ('FLUSHING','RESTARTING'))  	NOT NULL, " +
+																			" 	CONSTRAINT health_lock_pk PRIMARY KEY(ADDRESS)" +
+																			")";
+	
+	public static final String ORACLE_INSERT_LOCK						=	"INSERT INTO HEALTH_LOCK (ADDRESS, OPERATION) VALUES (?, ?)";
+	
+	public static final String ORACLE_DELETE_LOCK						=	"DELETE FROM HEALTH_LOCK WHERE ADDRESS = ? AND OPERATION = ?";
+	
+	public static final String ORACLE_SELECT_LOCK						=	"SELECT count(*) AS NUM_OP FROM HEALTH_LOCK WHERE ADDRESS = ? AND OPERATION = ?";
 	
 	public static final String ORACLE_CREATE_INDEX_ADDRESS_EVENT		=	"CREATE INDEX idx_health_event_addr ON HEALTH_EVENT (ADDRESS)";
 	
@@ -32,6 +44,7 @@ public class QueryBuilder {
 	
 	public static final String ORACLE_CREATE_INDEX_STATUS_VIEW			=	"CREATE INDEX idx_health_view_status ON HEALTH_CLUSTER_VIEW (STATUS)";
 	
+	public static final String ORACLE_CREATE_INDEX_OP_LOCK				=	"CREATE INDEX idx_health_lock_op ON HEALTH_LOCK (OPERATION)";	
 	
 	public static final String ORACLE_INSERT_HEALTH						=	"INSERT INTO HEALTH_EVENT (ADDRESS, CLUSTER_VIEW, STATUS, WRITTEN_BY, MOD_DATE) VALUES (?,?,?,?,SYSDATE)";
 	
@@ -57,8 +70,8 @@ public class QueryBuilder {
 	
 	public static final String ORACLE_DELETE_HEALTH_CLUSTER_VIEW		=	"DELETE FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ?";
 	
-	public static final String ORACLE_GET_HEALTH_CLUSTER_VIEW_STATUS	=	"SELECT hcv.ID, hcv.ADDRESS, hcv.PORT, hcv.PROTOCOL, hcv.STATUS, hcv.CREATOR, hcv.MOD_DATE " +
-																			"FROM HEALTH_CLUSTER_VIEW hcv " +
+	public static final String ORACLE_GET_HEALTH_CLUSTER_VIEW_STATUS	=	"SELECT hcv.ID, hcv.ADDRESS, hcv.PORT, hcv.PROTOCOL, hcv.STATUS, hcv.CREATOR, hcv.MOD_DATE, hl.OPERATION " +
+																			"FROM HEALTH_CLUSTER_VIEW hcv LEFT JOIN HEALTH_LOCK hl ON hcv.ADDRESS = hl.ADDRESS " +
 																			"ORDER BY hcv.MOD_DATE desc";
 	
 	public static final String ORACLE_GET_SINGLE_CLUSTER_VIEW_STATUS	=	"SELECT * FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ?";

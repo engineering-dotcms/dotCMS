@@ -1,3 +1,4 @@
+<%@page import="com.eng.dotcms.healthchecker.Operation"%>
 <%@page import="com.eng.dotcms.healthchecker.util.HealthUtil"%>
 <%@page import="com.eng.dotcms.healthchecker.HealthChecker"%>
 <%@page import="org.jgroups.Address"%>
@@ -20,15 +21,11 @@
 	Address myAddress = HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress();
 	
 	String _myAddress = HealthUtil.getStringAddress(myAddress);
-	
-	int pageNumber=1;
-	if(request.getParameter("pageNumber")!=null) 
-	    pageNumber=Integer.parseInt(request.getParameter("pageNumber"));
 %>
 
 <style type="text/css">
 
-.viewCreator {
+.restarting {
 	font-style: italic;	
 	background-color: #E0E9F6;
 }
@@ -82,7 +79,7 @@ function refreshCache(address,port,protocol,id){
 
 <div style="padding-top: 5px">
 			
-			<table  class="listingTable" style="width:90%; float:left; margin: 0 0 0 10px">
+			<table  class="listingTable" style="width:95%; float:left; margin: 0 0 0 10px">
 				<tr style="line-height:20px; padding-bottom: 15px">					
 					<th nowrap="nowrap" style="padding-left: 10px; width: 20%">
 						<%= LanguageUtil.get(pageContext, "health_Server") %>
@@ -101,6 +98,8 @@ function refreshCache(address,port,protocol,id){
 					</th>
 					<th align="center" style="padding-left: 10px; width: 5%">
 					</th>	
+					<th align="center" style="padding-left: 10px; width: 5%">
+					</th>					
 					<th align="center" style="padding-left: 10px; width: 40%">
 					</th>				
 				</tr>
@@ -108,8 +107,7 @@ function refreshCache(address,port,protocol,id){
 			boolean hasServers = view.size()>0;
 			for(HealthClusterViewStatus singleView : view) {
 	%>
-
-				<tr style="line-height:20px; padding-bottom: 15px; <%if(_myAddress.equals(singleView.getAddress())) {%> font-weight: bold;<%}%>">
+				<tr <%if(Operation.RESTARTING.equals(singleView.getOperation())) {%> class="restarting" <%}%> style="line-height:20px; padding-bottom: 15px; <%if(_myAddress.equals(singleView.getAddress())) {%> font-weight: bold;<%}%>">
 					<td style="padding-left: 10px; font-size: 12px;" >
 						<%=singleView.getAddress()%>
 					</td>
@@ -126,12 +124,18 @@ function refreshCache(address,port,protocol,id){
 						<%=df.format(singleView.getModDate())%>
 					</td>
 					<td style="padding-left: 10px; font-size: 12px" >
-						<%if("JOIN".equals(singleView.getStatus())) { %>
-						<button id="refreshCacheBtn_<%=singleView.getId()%>" iconClass="reloadCache" dojoType="dijit.form.Button" onClick="refreshCache('<%=singleView.getAddress()%>','<%=singleView.getPort()%>','<%=singleView.getProtocol()%>','<%=singleView.getId()%>')">
-							<strong><%= LanguageUtil.get(pageContext, "health_Reload_Cache") %></strong>
-						</button>						
+						<%if(UtilMethods.isSet(singleView.getOperation().toString())){
+							out.println(singleView.getOperation().toString());
+						}%>
+					</td>
+					<td style="padding-left: 10px; font-size: 12px" >
+						<%if("JOIN".equals(singleView.getStatus())) {%>
+							<button <%if(Operation.FLUSHING.equals(singleView.getOperation())) {%> disabled="true" <%}%> id="refreshCacheBtn_<%=singleView.getId()%>" iconClass="reloadCache" dojoType="dijit.form.Button" onClick="refreshCache('<%=singleView.getAddress()%>','<%=singleView.getPort()%>','<%=singleView.getProtocol()%>','<%=singleView.getId()%>')">
+								<strong><%= LanguageUtil.get(pageContext, "health_Reload_Cache") %></strong>
+							</button>						
                 		<%}%>
 					</td>
+					
 					<td id="responseRefresh_<%=singleView.getId()%>" style="padding-left: 10px; font-size: 12px" >
 					</td>
 				</tr>

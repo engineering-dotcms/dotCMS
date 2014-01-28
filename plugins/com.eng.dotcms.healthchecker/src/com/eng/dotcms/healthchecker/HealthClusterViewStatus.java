@@ -12,6 +12,9 @@ public class HealthClusterViewStatus {
 	private boolean creator;
 	private Date modDate;
 	
+	// from health_lock
+	private Operation operation;
+	
 	public String getId() {
 		return id;
 	}
@@ -53,8 +56,13 @@ public class HealthClusterViewStatus {
 	}
 	public void setCreator(boolean creator) {
 		this.creator = creator;
+	}	
+	public Operation getOperation() {
+		return operation;
 	}
-	
+	public void setOperation(Operation operation) {
+		this.operation = operation;
+	}
 	public String toString(){
 		StringBuilder sb = new StringBuilder();
 		sb.append(protocol);

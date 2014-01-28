@@ -14,8 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.jgroups.Address;
-
-import com.dotcms.enterprise.salesforce.SalesForceUtils;
 import com.dotmarketing.beans.Host;
 import com.dotmarketing.business.web.WebAPILocator;
 import com.dotmarketing.cache.VirtualLinksCache;

@@ -8,11 +8,13 @@ import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.util.Logger;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_ADD_HEALTH_TABLE;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_ADD_HEALTH_LOCK_TABLE;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CHECK_TABLE;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_ADD_HEALTH_CLUSTER_TABLE;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CREATE_INDEX_ADDRESS_EVENT;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CREATE_INDEX_ADDRESS_VIEW;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CREATE_INDEX_STATUS_VIEW;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CREATE_INDEX_OP_LOCK;
 
 public class HealthCheckerDeployer extends PluginDeployer {
 	
@@ -27,12 +29,16 @@ public class HealthCheckerDeployer extends PluginDeployer {
 					dc.loadResult();
 					dc.setSQL(ORACLE_ADD_HEALTH_CLUSTER_TABLE);
 					dc.loadResult();
+					dc.setSQL(ORACLE_ADD_HEALTH_LOCK_TABLE);
+					dc.loadResult();					
 					dc.setSQL(ORACLE_CREATE_INDEX_ADDRESS_EVENT);
 					dc.loadResult();
 					dc.setSQL(ORACLE_CREATE_INDEX_ADDRESS_VIEW);
 					dc.loadResult();
 					dc.setSQL(ORACLE_CREATE_INDEX_STATUS_VIEW);
-					dc.loadResult();					
+					dc.loadResult();
+					dc.setSQL(ORACLE_CREATE_INDEX_OP_LOCK);
+					dc.loadResult();										
 				}
 				return true;
 			}catch(DotDataException e){
@@ -48,7 +54,7 @@ public class HealthCheckerDeployer extends PluginDeployer {
 		try{
 			dc.setSQL(ORACLE_CHECK_TABLE);		
 			Map<String, Object> row = dc.loadObjectResults().get(0); 
-			if(Integer.parseInt(row.get("exist").toString())==2)
+			if(Integer.parseInt(row.get("exist").toString())==3)
 				return true;
 			else
 				return false;

@@ -15,6 +15,7 @@ import com.dotmarketing.util.Logger;
 import com.eng.dotcms.healthchecker.AddressStatus;
 import com.eng.dotcms.healthchecker.HealthChecker;
 import com.eng.dotcms.healthchecker.HealthClusterAdministrator;
+import com.eng.dotcms.healthchecker.Operation;
 import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
 
 public class HealthServlet extends HttpServlet {
@@ -33,6 +34,8 @@ public class HealthServlet extends HttpServlet {
 				healthAPI.deleteHealthStatus(localAddress, AddressStatus.LEAVE);
 				healthAPI.deleteHealthStatus(localAddress, AddressStatus.JOIN);
 				healthAPI.deleteHealthClusterView(localAddress);
+				healthAPI.deleteHealthLock(localAddress, Operation.RESTARTING);
+				healthAPI.deleteHealthLock(localAddress, Operation.FLUSHING);
 				boolean isCreator = CacheLocator.getCacheAdministrator().getJGroupsChannel().getView().getCreator().equals(localAddress);
 				// inserisco il nodo nella cluster view con status JOINED.
 				healthAPI.insertHealthClusterView(localAddress,

@@ -1,6 +1,5 @@
 package com.eng.dotcms.healthchecker.business;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,12 +12,16 @@ import com.dotmarketing.common.db.DotConnect;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.util.Logger;
 import com.eng.dotcms.healthchecker.AddressStatus;
-import com.eng.dotcms.healthchecker.Health;
+import com.eng.dotcms.healthchecker.HealthEvent;
 import com.eng.dotcms.healthchecker.HealthClusterViewStatus;
+import com.eng.dotcms.healthchecker.Operation;
 import com.eng.dotcms.healthchecker.util.HealthUtil;
 
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_INSERT_HEALTH;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_DELETE_HEALTH;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_INSERT_LOCK;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_DELETE_LOCK;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_SELECT_LOCK;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CHECK_LEAVE;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_GET_NODE_LEAVE;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_INSERT_HEALTH_CLUSTER_VIEW;
@@ -42,7 +45,7 @@ public class HealthCheckerAPI {
 	 * @param health
 	 * @throws DotDataException
 	 */
-	public void storeHealthStatus(Health health) throws DotDataException {
+	public void storeHealthStatus(HealthEvent health) throws DotDataException {
 		dc.setSQL(ORACLE_INSERT_HEALTH);
 		dc.addParam(HealthUtil.getStringAddress(health.getAddress()));
 		dc.addParam(health.getClusterView().toString());
@@ -57,7 +60,7 @@ public class HealthCheckerAPI {
 	 * @param health
 	 * @throws DotDataException
 	 */
-	public void deleteHealthStatus(Health health) throws DotDataException {
+	public void deleteHealthStatus(HealthEvent health) throws DotDataException {
 		dc.setSQL(ORACLE_DELETE_HEALTH);
 		dc.addParam(HealthUtil.getStringAddress(health.getAddress()));
 		dc.addParam(health.getStatus().toString());
@@ -114,33 +117,6 @@ public class HealthCheckerAPI {
 			}
 			return false;
 		}catch(DotDataException e){
-			return false;
-		}
-	}
-	
-	/**
-	 * Dato un nodo controlla se è etichettato come fuori dal cluster.
-	 * 
-	 * @param address
-	 * @return
-	 * @throws DotDataException
-	 */
-	private boolean isJoined(Address address, Date leaveModDate) {
-		try{
-			dc.setSQL(ORACLE_CHECK_JOIN_AFTER_LEAVE);
-			dc.addParam(HealthUtil.getStringAddress(address));
-			dc.addParam(leaveModDate);
-			List<Map<String, Object>> rs = dc.loadObjectResults();
-			if(rs.size()>0){
-				Map<String, Object> row = rs.get(0);
-				
-				BigDecimal count = (BigDecimal)row.get("num_joined_after");
-				return count.intValue()>0;
-			}
-			return dc.loadObjectResults().size()>0;
-		}catch(DotDataException e){			
-			return false;			
-		}catch(Exception e){
 			return false;
 		}
 	}
@@ -213,6 +189,7 @@ public class HealthCheckerAPI {
 			String creator = (String)record.get("creator");
 			status.setCreator(creator.equals("Y")?true:false);
 			status.setModDate((Date)record.get("mod_date"));
+			status.setOperation(Operation.fromString((String)record.get("operation")));
 			result.add(status);
 		}
 		return result;
@@ -238,14 +215,75 @@ public class HealthCheckerAPI {
 		return null;	
 	}
 	
+	
+	/**
+	 * Dato un Address elimina tutte le righe nella tabella HEALTH_CLUSTER_VIEW
+	 * 
+	 * @author Graziano Aliberti - Engineering Ingegneria Informatica S.p.a
+	 *
+	 * @date Jan 28, 2014
+	 */
 	public void deleteHealthClusterView(Address address) throws DotDataException {
 		dc.setSQL(ORACLE_DELETE_HEALTH_CLUSTER_VIEW);
 		dc.addParam(HealthUtil.getStringAddress(address));
 		dc.loadResult();
 	}
 	
-	public boolean isNodeInCluster(Address address) throws DotDataException {
-		return !isLeaveNode(address);
+	public void insertHealthLock(Address address, Operation op) throws DotDataException {
+		insertHealthLock(HealthUtil.getStringAddress(address), op);
+	}
+	
+	public void insertHealthLock(String address, Operation op) throws DotDataException {
+		dc.setSQL(ORACLE_INSERT_LOCK);
+		dc.addParam(address);
+		dc.addParam(op.toString());
+		dc.loadResult();
+	}
+	
+	public void deleteHealthLock(Address address, Operation op) throws DotDataException {
+		deleteHealthLock(HealthUtil.getStringAddress(address), op);
+	}
+	
+	public void deleteHealthLock(String address, Operation op) throws DotDataException {
+		dc.setSQL(ORACLE_DELETE_LOCK);
+		dc.addParam(address);
+		dc.addParam(op.toString());
+		dc.loadResult();
+	}
+	
+	public boolean isHealthLock(Address address, Operation op) throws DotDataException {
+		dc.setSQL(ORACLE_SELECT_LOCK);
+		dc.addParam(HealthUtil.getStringAddress(address));
+		dc.addParam(op.toString());
+		List<Map<String, Object>> rs = dc.loadObjectResults();
+		int num_op = Integer.parseInt(rs.get(0).get("num_op").toString());
+		return num_op>0;				
+	}
+	
+	/**
+	 * Dato un nodo controlla se è etichettato come fuori dal cluster.
+	 * 
+	 * @param address
+	 * @return
+	 * @throws DotDataException
+	 */
+	private boolean isJoined(Address address, Date leaveModDate) {
+		try{
+			dc.setSQL(ORACLE_CHECK_JOIN_AFTER_LEAVE);
+			dc.addParam(HealthUtil.getStringAddress(address));
+			dc.addParam(leaveModDate);
+			List<Map<String, Object>> rs = dc.loadObjectResults();
+			if(rs.size()>0){
+				Map<String, Object> row = rs.get(0);
+				int count = Integer.parseInt(row.get("num_joined_after").toString());
+				return count>0;
+			}
+			return dc.loadObjectResults().size()>0;
+		}catch(DotDataException e){			
+			return false;			
+		}catch(Exception e){
+			return false;
+		}
 	}
 	
 }

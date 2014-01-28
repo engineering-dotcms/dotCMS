@@ -3,7 +3,7 @@ package com.eng.dotcms.healthchecker;
 import org.jgroups.Address;
 import org.jgroups.View;
 
-public class Health {
+public class HealthEvent {
 	
 	private Address address;
 	private View clusterView;
