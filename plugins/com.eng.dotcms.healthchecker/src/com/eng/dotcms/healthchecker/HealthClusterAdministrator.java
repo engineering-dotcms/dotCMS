@@ -111,14 +111,8 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 				Logger.info(getClass(), "Method suspect:  The node " + mbr + " is already out of cluster and I can't re-join. Force restart...");
 				HealthClusterViewStatus status = healthAPI.singleClusterView(mbr);
 				String response = HealthUtil.callRESTService(status, "/forceJoinCluster");
-				if(HealthService.STATUS_OK.equals(response)) {
-					HibernateUtil.startTransaction();
-					healthAPI.deleteHealthClusterView(mbr);
-					healthAPI.deleteHealthStatus(mbr, AddressStatus.LEAVE);
-					healthAPI.deleteHealthStatus(mbr, AddressStatus.JOIN);
-					HibernateUtil.commitTransaction();
-					Logger.info(getClass(), "Method suspect:  The node " + mbr + " was successful restarted...it will come back into the cluster as soon as possible.");					
-				}
+				if(HealthService.STATUS_OK.equals(response))					
+					Logger.info(getClass(), "Method suspect:  The node " + mbr + " was successful restarted...it will come back into the cluster as soon as possible.");				
 			}else{				
 				int countSuspect = HealthChecker.INSTANCE.getCountSuspect();
 				if(countSuspect<=MAX_COUNT_SUSPECT) {
