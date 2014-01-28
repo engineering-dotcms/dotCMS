@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 import org.jgroups.Address;
 import org.jgroups.View;
 
-import com.dotmarketing.util.Logger;
 import com.eng.dotcms.healthchecker.HealthChecker;
 import com.eng.dotcms.healthchecker.HealthClusterViewStatus;
 import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
@@ -67,11 +66,8 @@ public class HealthUtil {
 	}
 	
 	public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
-		Logger.info(HealthUtil.class, "Date 1: " + date1);
-		Logger.info(HealthUtil.class, "Date 2: " + date2);
 		if(null!=date2){
 		    long diffInMillies = date1.getTime() - date2.getTime();
-		    Logger.info(HealthUtil.class, "Diff in milliseconds: " + diffInMillies);
 		    return timeUnit.convert(diffInMillies,timeUnit);
 		}else
 			return -1;

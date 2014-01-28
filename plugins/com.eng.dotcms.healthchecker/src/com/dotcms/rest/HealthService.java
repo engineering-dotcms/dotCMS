@@ -26,7 +26,7 @@ public class HealthService extends WebResource {
 	public String flushCache() {
 		String ctrl = STATUS_OK;
 		try {
-			Logger.info(getClass(), "Retrieve ACK for flush cache event when I rejoin the cluster.");
+			Logger.info(getClass(), "Received ACK for flush cache event when I rejoin the cluster.");
 			CacheLocator.getCacheAdministrator().flushAlLocalOnlyl();
 			Logger.info(getClass(), "Cache flushed correctly.");
 			healthAPI.deleteHealthStatus(CacheLocator.getCacheAdministrator().getJGroupsChannel().getLocalAddress(), AddressStatus.LEAVE);
@@ -44,7 +44,7 @@ public class HealthService extends WebResource {
 		try {
 			String scriptFolder = pluginAPI.loadProperty("com.eng.dotcms.healthchecker", "script.folder");
 			String scriptName = pluginAPI.loadProperty("com.eng.dotcms.healthchecker", "script.name");
-			Logger.info(getClass(), "Retrieve ACK for restart the system.");
+			Logger.info(getClass(), "Received ACK for restart the system.");
 			ProcessBuilder pb = new ProcessBuilder("/bin/bash", scriptFolder+scriptName);
 			pb.start();
 		} catch (DotDataException e) {

@@ -25,6 +25,7 @@ import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_GET_HEALTH_C
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_GET_SINGLE_CLUSTER_VIEW_STATUS;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_DELETE_HEALTH_CLUSTER_VIEW;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_UPDATE_HEALTH_CLUSTER_CREATOR;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CHECK_JOIN_AFTER_LEAVE;
 
 public class HealthCheckerAPI {
 	
@@ -103,6 +104,31 @@ public class HealthCheckerAPI {
 		try{
 			dc.setSQL(ORACLE_GET_NODE_LEAVE);
 			dc.addParam(HealthUtil.getStringAddress(address));
+			List<Map<String, Object>> rs = dc.loadObjectResults();
+			if(rs.size()>0){
+				Map<String, Object> row = rs.get(0);
+				Date lastLeave = (Date)row.get("mod_date");
+				boolean isJoinedAfter = isJoined(address,lastLeave);
+				return !isJoinedAfter;
+			}
+			return false;
+		}catch(DotDataException e){
+			return false;
+		}
+	}
+	
+	/**
+	 * Dato un nodo controlla se è etichettato come fuori dal cluster.
+	 * 
+	 * @param address
+	 * @return
+	 * @throws DotDataException
+	 */
+	private boolean isJoined(Address address, Date leaveModDate) {
+		try{
+			dc.setSQL(ORACLE_CHECK_JOIN_AFTER_LEAVE);
+			dc.addParam(HealthUtil.getStringAddress(address));
+			dc.addParam(leaveModDate);
 			return dc.loadObjectResults().size()>0;
 		}catch(DotDataException e){
 			return false;

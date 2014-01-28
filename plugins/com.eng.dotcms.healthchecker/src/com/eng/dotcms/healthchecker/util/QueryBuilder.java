@@ -7,22 +7,22 @@ public class QueryBuilder {
 																			"WHERE table_name in ( 'HEALTH_EVENT', 'HEALTH_CLUSTER_VIEW' )";
 
 	public static final String ORACLE_ADD_HEALTH_TABLE					=	"CREATE TABLE HEALTH_EVENT ( " +
-																			"	ADDRESS			VARCHAR2(30)  									NOT NULL, " +
-																			"	CLUSTER_VIEW	VARCHAR2(400) 									NOT NULL, " +
+																			"	ADDRESS			VARCHAR2(30)  										NOT NULL, " +
+																			"	CLUSTER_VIEW	VARCHAR2(400) 										NOT NULL, " +
 																			"	STATUS			VARCHAR2(10) check (STATUS in ('JOIN','LEAVE'))  	NOT NULL, " +
-																			"	WRITTEN_BY		VARCHAR2(30)  									NOT NULL, " +
-																			"	MOD_DATE		TIMESTAMP	  									NOT NULL, " +
+																			"	WRITTEN_BY		VARCHAR2(30)  										NOT NULL, " +
+																			"	MOD_DATE		TIMESTAMP	  										NOT NULL, " +
 																			" 	CONSTRAINT health_checker_pk PRIMARY KEY(ADDRESS,STATUS)" +
 																			")";
 	
 	public static final String ORACLE_ADD_HEALTH_CLUSTER_TABLE			=	"CREATE TABLE HEALTH_CLUSTER_VIEW ( " +
-																			"	ID				VARCHAR2(36)  									NOT NULL, " +			
-																			"	ADDRESS			VARCHAR2(30)  									NOT NULL, " +
-																			"	PORT			VARCHAR2(10)  									NOT NULL, " +
-																			"	PROTOCOL		VARCHAR2(5)   									NOT NULL, " +
+																			"	ID				VARCHAR2(36)  										NOT NULL, " +			
+																			"	ADDRESS			VARCHAR2(30)  										NOT NULL, " +
+																			"	PORT			VARCHAR2(10)  										NOT NULL, " +
+																			"	PROTOCOL		VARCHAR2(5)   										NOT NULL, " +
 																			"	STATUS			VARCHAR2(10) check (STATUS in ('JOIN','LEAVE'))  	NOT NULL, " +
 																			"	CREATOR			CHAR 		 check (CREATOR in ('N','Y'))   		NOT NULL, " +
-																			"	MOD_DATE		TIMESTAMP	  									NOT NULL, " +																			
+																			"	MOD_DATE		TIMESTAMP	  										NOT NULL, " +																			
 																			" 	CONSTRAINT health_cluster_pk PRIMARY KEY(ID)" +
 																			")";
 	
@@ -56,4 +56,6 @@ public class QueryBuilder {
 																			"ORDER BY hcv.MOD_DATE desc";
 	
 	public static final String ORACLE_GET_SINGLE_CLUSTER_VIEW_STATUS	=	"SELECT * FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ?";
+	
+	public static final String ORACLE_CHECK_JOIN_AFTER_LEAVE			=	"SELECT count(*) FROM HEALTH_EVENT WHERE ADDRESS = ? AND STATUS = 'JOIN' AND MOD_DATE > ?";
 }
