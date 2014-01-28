@@ -31,6 +31,8 @@ public class HealthFilter implements Filter {
 	
 	private HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 	
+	private static String DEFAULT_PATH_TO_PAGE = "/application/error/out-of-cluster.html";
+	
 	@Override
 	public void destroy() {
 		
@@ -101,8 +103,25 @@ public class HealthFilter implements Filter {
 							}
 						}
 					}else{
-						Logger.warn(getClass(), "The virtual link for cluster error page (cms406page) doesn't exists. I can't block the backend user activity. Please create the Vanity URL"); 
-						chain.doFilter(request, response);
+						req.getSession().removeAttribute(WebKeys.USER_ID);
+						req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.CMS_USER);
+						req.getSession().removeAttribute("PENDING_ALERT_SEEN");
+						req.getSession().removeAttribute("createAccountForm");
+						req.getSession().removeAttribute("checkoutForm");
+				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.REDIRECT_AFTER_LOGIN);
+				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.LOGGED_IN_USER_CATS);
+				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.LOGGED_IN_USER_TAGS);
+				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.USER_FAVORITES);
+				        
+				        Cookie idCookie = new Cookie(com.dotmarketing.util.WebKeys.CMS_USER_ID_COOKIE, null);
+				        idCookie.setMaxAge(0);
+				        idCookie.setPath("/");
+				        res.addCookie(idCookie);
+				        
+				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.PREVIEW_MODE_SESSION);
+				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.EDIT_MODE_SESSION);
+				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.ADMIN_MODE_SESSION);
+				        request.getRequestDispatcher(DEFAULT_PATH_TO_PAGE).forward(req, res);						
 					}
 					
 					// if we have virtual link and page exists, redirect or forward
