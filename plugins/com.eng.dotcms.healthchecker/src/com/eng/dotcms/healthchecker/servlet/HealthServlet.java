@@ -24,7 +24,7 @@ public class HealthServlet extends HttpServlet {
 	
 	@SuppressWarnings("deprecation")
 	public void init(ServletConfig config) throws ServletException {
-		Logger.info(getClass(), "BEGIN 	Init Health Cluster Handle: change the receiver for JGroups");
+		Logger.info(getClass(), "BEGIN 	Init Health Cluster Handle");
 		if(Config.getBooleanProperty("DIST_INDEXATION_ENABLED", false)){
 			Address localAddress = CacheLocator.getCacheAdministrator().getJGroupsChannel().getLocalAddress();			
 			HealthCheckerAPI healthAPI = new HealthCheckerAPI();
@@ -56,6 +56,6 @@ public class HealthServlet extends HttpServlet {
 				}
 			}		
 		}
-		Logger.info(getClass(), "END 	Init Health Cluster Handle: change the receiver for JGroups");
+		Logger.info(getClass(), "END 	Init Health Cluster Handle");
 	}
 }

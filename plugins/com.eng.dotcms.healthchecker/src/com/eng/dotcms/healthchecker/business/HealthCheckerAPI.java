@@ -189,7 +189,7 @@ public class HealthCheckerAPI {
 			String creator = (String)record.get("creator");
 			status.setCreator(creator.equals("Y")?true:false);
 			status.setModDate((Date)record.get("mod_date"));
-			status.setOperation(Operation.fromString((String)record.get("operation")));
+			status.setOperation(null==record.get("operation")?null:Operation.fromString((String)record.get("operation")));
 			result.add(status);
 		}
 		return result;

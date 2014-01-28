@@ -107,7 +107,7 @@ function refreshCache(address,port,protocol,id){
 			boolean hasServers = view.size()>0;
 			for(HealthClusterViewStatus singleView : view) {
 	%>
-				<tr <%if(Operation.RESTARTING.equals(singleView.getOperation())) {%> class="restarting" <%}%> style="line-height:20px; padding-bottom: 15px; <%if(_myAddress.equals(singleView.getAddress())) {%> font-weight: bold;<%}%>">
+				<tr <%if(null!=singleView.getOperation() && Operation.RESTARTING.equals(singleView.getOperation())) {%> class="restarting" <%}%> style="line-height:20px; padding-bottom: 15px; <%if(_myAddress.equals(singleView.getAddress())) {%> font-weight: bold;<%}%>">
 					<td style="padding-left: 10px; font-size: 12px;" >
 						<%=singleView.getAddress()%>
 					</td>
@@ -124,13 +124,13 @@ function refreshCache(address,port,protocol,id){
 						<%=df.format(singleView.getModDate())%>
 					</td>
 					<td style="padding-left: 10px; font-size: 12px" >
-						<%if(UtilMethods.isSet(singleView.getOperation().toString())){
+						<%if(null!=singleView.getOperation() && UtilMethods.isSet(singleView.getOperation().toString())){
 							out.println(singleView.getOperation().toString());
 						}%>
 					</td>
 					<td style="padding-left: 10px; font-size: 12px" >
 						<%if("JOIN".equals(singleView.getStatus())) {%>
-							<button <%if(Operation.FLUSHING.equals(singleView.getOperation())) {%> disabled="true" <%}%> id="refreshCacheBtn_<%=singleView.getId()%>" iconClass="reloadCache" dojoType="dijit.form.Button" onClick="refreshCache('<%=singleView.getAddress()%>','<%=singleView.getPort()%>','<%=singleView.getProtocol()%>','<%=singleView.getId()%>')">
+							<button <%if(null!=singleView.getOperation() && Operation.FLUSHING.equals(singleView.getOperation())) {%> disabled="true" <%}%> id="refreshCacheBtn_<%=singleView.getId()%>" iconClass="reloadCache" dojoType="dijit.form.Button" onClick="refreshCache('<%=singleView.getAddress()%>','<%=singleView.getPort()%>','<%=singleView.getProtocol()%>','<%=singleView.getId()%>')">
 								<strong><%= LanguageUtil.get(pageContext, "health_Reload_Cache") %></strong>
 							</button>						
                 		<%}%>
