@@ -276,6 +276,14 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 										        }
 								        	}else{
 								        		Logger.info(getClass(), "Node "+HealthChecker.INSTANCE.getHealthEvent().getAddress()+" back into the cluster but no update were made on cache. I don't flush it.");
+								        		HibernateUtil.startTransaction();					        	
+									        	healthAPI.deleteHealthLock(HealthChecker.INSTANCE.getHealthEvent().getAddress(), Operation.FLUSHING);
+												healthAPI.storeHealthStatus(HealthChecker.INSTANCE.getHealthEvent());
+												healthAPI.insertHealthClusterView(HealthChecker.INSTANCE.getHealthEvent().getAddress(),
+														Config.getStringProperty("HEALTH_CHECKER_REST_PORT","80"),Config.getStringProperty("HEALTH_CHECKER_REST_PROTOCOL","http"),status.isCreator(),
+														HealthChecker.INSTANCE.getHealthEvent().getStatus(),HealthChecker.INSTANCE.getHealthEvent().getModDate());
+												healthAPI.deleteHealthStatus(HealthChecker.INSTANCE.getHealthEvent().getAddress(), AddressStatus.LEAVE);
+												HibernateUtil.commitTransaction();	
 								        	}
 										}catch(DotDataException e){
 											try {
