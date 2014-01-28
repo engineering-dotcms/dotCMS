@@ -274,8 +274,22 @@ public class HealthCheckerAPI {
 	 * @throws DotDataException
 	 */
 	public boolean needFlushCache(Date leaveDate, Date joinDate) throws DotDataException {
+		Logger.info(getClass(), "needFlushCache: leaveDate: " + leaveDate + "; joinDate: " + joinDate);
 		if(null!=leaveDate){
-			int count = checkContentlet(leaveDate, joinDate) + checkContainer(leaveDate, joinDate) + checkHtmlPage(leaveDate, joinDate) + checkTemplate(leaveDate, joinDate);
+			int count = checkContentlet(leaveDate, joinDate);
+			if(count>0)
+				return true;
+			else
+				count += checkContainer(leaveDate, joinDate);
+			if(count>0)
+				return true;
+			else
+				count += checkHtmlPage(leaveDate, joinDate);
+			if(count>0)
+				return true;
+			else
+				count += checkTemplate(leaveDate, joinDate);
+			
 			return count > 0;
 		}else
 			return false;
@@ -283,36 +297,44 @@ public class HealthCheckerAPI {
 	}
 	
 	private int checkContentlet(Date leaveDate, Date joinDate) throws DotDataException {
+		Logger.info(getClass(), "CheckContentlet: start");
 		dc.setSQL(ORACLE_CHECK_NEW_CONTENTLET);
 		dc.addParam(leaveDate);
 		dc.addParam(joinDate);
 		List<Map<String, Object>> rs = dc.loadObjectResults();
+		Logger.info(getClass(), "CheckContentlet: end");
 		return Integer.parseInt((String)rs.get(0).get("num_contentlets"));
 	}
 
 	private int checkContainer(Date leaveDate, Date joinDate) throws DotDataException {
+		Logger.info(getClass(), "CheckContainer: start");
 		dc.setSQL(ORACLE_CHECK_NEW_CONTAINER);
 		dc.addParam(leaveDate);
 		dc.addParam(joinDate);
 		List<Map<String, Object>> rs = dc.loadObjectResults();
+		Logger.info(getClass(), "CheckContainer: end");
 		return Integer.parseInt((String)rs.get(0).get("num_containers"));
 		
 	}
 	
 	private int checkHtmlPage(Date leaveDate, Date joinDate) throws DotDataException {
+		Logger.info(getClass(), "CheckHtmlPage: start");
 		dc.setSQL(ORACLE_CHECK_NEW_HTMLPAGE);
 		dc.addParam(leaveDate);
 		dc.addParam(joinDate);
 		List<Map<String, Object>> rs = dc.loadObjectResults();
+		Logger.info(getClass(), "CheckHtmlPage: end");
 		return Integer.parseInt((String)rs.get(0).get("num_pages"));
 
 	}
 
 	private int checkTemplate(Date leaveDate, Date joinDate) throws DotDataException {
+		Logger.info(getClass(), "CheckTemplate: start");
 		dc.setSQL(ORACLE_CHECK_NEW_TEMPLATE);
 		dc.addParam(leaveDate);
 		dc.addParam(joinDate);
 		List<Map<String, Object>> rs = dc.loadObjectResults();
+		Logger.info(getClass(), "CheckTemplate: end");
 		return Integer.parseInt((String)rs.get(0).get("num_templates"));
 	}
 	/**
