@@ -274,8 +274,12 @@ public class HealthCheckerAPI {
 	 * @throws DotDataException
 	 */
 	public boolean needFlushCache(Date leaveDate, Date joinDate) throws DotDataException {
-		int count = checkContentlet(leaveDate, joinDate) + checkContainer(leaveDate, joinDate) + checkHtmlPage(leaveDate, joinDate) + checkTemplate(leaveDate, joinDate);
-		return count > 0;
+		if(null!=leaveDate){
+			int count = checkContentlet(leaveDate, joinDate) + checkContainer(leaveDate, joinDate) + checkHtmlPage(leaveDate, joinDate) + checkTemplate(leaveDate, joinDate);
+			return count > 0;
+		}else
+			return false;
+		
 	}
 	
 	private int checkContentlet(Date leaveDate, Date joinDate) throws DotDataException {
