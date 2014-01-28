@@ -40,10 +40,10 @@ public class HealthCheckerTool implements ViewTool {
 	@SuppressWarnings("deprecation")
 	private boolean checkCacheStatus(){
 		boolean cacheHealth = !healthAPI.isLeaveNode(healthClusterChannel.getLocalAddress());
-		Logger.info(getClass(), "Cluster View  (Health): 	"+healthClusterChannel.getView().toString());
-		Logger.info(getClass(), "Local Address (Health): 	"+healthClusterChannel.getLocalAddress().toString());
-		Logger.info(getClass(), "Cluster View  (Cache): 	"+cacheChannel.getView().toString());
-		Logger.info(getClass(), "Local Address (Cache): 	"+cacheChannel.getLocalAddress().toString());
+		Logger.debug(getClass(), "Cluster View  (Health): 	"+healthClusterChannel.getView().toString());
+		Logger.debug(getClass(), "Local Address (Health): 	"+healthClusterChannel.getLocalAddress().toString());
+		Logger.debug(getClass(), "Cluster View  (Cache): 	"+cacheChannel.getView().toString());
+		Logger.debug(getClass(), "Local Address (Cache): 	"+cacheChannel.getLocalAddress().toString());
 		boolean esHealth = true;
 		Map<String, ClusterIndexHealth> map = APILocator.getESIndexAPI().getClusterHealth();
 		for(String indexName: APILocator.getESIndexAPI().listIndices()){

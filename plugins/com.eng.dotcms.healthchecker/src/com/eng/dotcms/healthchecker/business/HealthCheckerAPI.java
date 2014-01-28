@@ -1,5 +1,6 @@
 package com.eng.dotcms.healthchecker.business;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -129,8 +130,17 @@ public class HealthCheckerAPI {
 			dc.setSQL(ORACLE_CHECK_JOIN_AFTER_LEAVE);
 			dc.addParam(HealthUtil.getStringAddress(address));
 			dc.addParam(leaveModDate);
+			List<Map<String, Object>> rs = dc.loadObjectResults();
+			if(rs.size()>0){
+				Map<String, Object> row = rs.get(0);
+				
+				BigDecimal count = (BigDecimal)row.get("num_joined_after");
+				return count.intValue()>0;
+			}
 			return dc.loadObjectResults().size()>0;
-		}catch(DotDataException e){
+		}catch(DotDataException e){			
+			return false;			
+		}catch(Exception e){
 			return false;
 		}
 	}
