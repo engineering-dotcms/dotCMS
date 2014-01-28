@@ -30,7 +30,10 @@ import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_GET_SINGLE_C
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_DELETE_HEALTH_CLUSTER_VIEW;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_UPDATE_HEALTH_CLUSTER_CREATOR;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CHECK_JOIN_AFTER_LEAVE;
-import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CHECK_NEW_DATA;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CHECK_NEW_CONTAINER;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CHECK_NEW_CONTENTLET;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CHECK_NEW_HTMLPAGE;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CHECK_NEW_TEMPLATE;
 
 public class HealthCheckerAPI {
 	
@@ -264,31 +267,50 @@ public class HealthCheckerAPI {
 	}
 
 	/**
-	 * Controlla se sono stati inseriti dei contenuti (INODE) nell'intervallo in cui il nodo è rimasto fuori dal cluster.
+	 * Controlla se sono stati inseriti dei contenuti nell'intervallo in cui il nodo è rimasto fuori dal cluster.
 	 * 
 	 * @param address
 	 * @return
 	 * @throws DotDataException
 	 */
-	public boolean needFlushCache(Date leaveDate, Date joinDate) {
-		try{
-			dc.setSQL(ORACLE_CHECK_NEW_DATA);
-			dc.addParam(leaveDate);
-			dc.addParam(joinDate);
-			List<Map<String, Object>> rs = dc.loadObjectResults();
-			if(rs.size()>0){
-				Map<String, Object> row = rs.get(0);
-				int num_inodes = Integer.parseInt(row.get("num_inodes").toString());
-				return num_inodes>0;
-			}
-			return false;
-		}catch(DotDataException e){			
-			return false;			
-		}catch(Exception e){
-			return false;
-		}
+	public boolean needFlushCache(Date leaveDate, Date joinDate) throws DotDataException {
+		int count = checkContentlet(leaveDate, joinDate) + checkContainer(leaveDate, joinDate) + checkHtmlPage(leaveDate, joinDate) + checkTemplate(leaveDate, joinDate);
+		return count > 0;
 	}
 	
+	private int checkContentlet(Date leaveDate, Date joinDate) throws DotDataException {
+		dc.setSQL(ORACLE_CHECK_NEW_CONTENTLET);
+		dc.addParam(leaveDate);
+		dc.addParam(joinDate);
+		List<Map<String, Object>> rs = dc.loadObjectResults();
+		return Integer.parseInt((String)rs.get(0).get("num_contentlets"));
+	}
+
+	private int checkContainer(Date leaveDate, Date joinDate) throws DotDataException {
+		dc.setSQL(ORACLE_CHECK_NEW_CONTAINER);
+		dc.addParam(leaveDate);
+		dc.addParam(joinDate);
+		List<Map<String, Object>> rs = dc.loadObjectResults();
+		return Integer.parseInt((String)rs.get(0).get("num_containers"));
+		
+	}
+	
+	private int checkHtmlPage(Date leaveDate, Date joinDate) throws DotDataException {
+		dc.setSQL(ORACLE_CHECK_NEW_HTMLPAGE);
+		dc.addParam(leaveDate);
+		dc.addParam(joinDate);
+		List<Map<String, Object>> rs = dc.loadObjectResults();
+		return Integer.parseInt((String)rs.get(0).get("num_pages"));
+
+	}
+
+	private int checkTemplate(Date leaveDate, Date joinDate) throws DotDataException {
+		dc.setSQL(ORACLE_CHECK_NEW_TEMPLATE);
+		dc.addParam(leaveDate);
+		dc.addParam(joinDate);
+		List<Map<String, Object>> rs = dc.loadObjectResults();
+		return Integer.parseInt((String)rs.get(0).get("num_templates"));
+	}
 	/**
 	 * Dato un nodo controlla se è etichettato come fuori dal cluster.
 	 * 

@@ -28,7 +28,7 @@ public class HealthServlet extends HttpServlet {
 	public void init(ServletConfig config) throws ServletException {
 		Logger.info(getClass(), "BEGIN 	Init Health Cluster Handle");
 		if(Config.getBooleanProperty("DIST_INDEXATION_ENABLED", false)){
-			Date now = new Date();			 
+			Date now = new Date();
 			Address localAddress = CacheLocator.getCacheAdministrator().getJGroupsChannel().getLocalAddress();			
 			HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 			Date lastLeave = healthAPI.getDateOfLastLeaveEvent(localAddress);
