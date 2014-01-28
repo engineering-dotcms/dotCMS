@@ -10,6 +10,9 @@ import com.dotmarketing.util.Logger;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_ADD_HEALTH_TABLE;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CHECK_TABLE;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_ADD_HEALTH_CLUSTER_TABLE;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CREATE_INDEX_ADDRESS_EVENT;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CREATE_INDEX_ADDRESS_VIEW;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CREATE_INDEX_STATUS_VIEW;
 
 public class HealthCheckerDeployer extends PluginDeployer {
 	
@@ -24,6 +27,12 @@ public class HealthCheckerDeployer extends PluginDeployer {
 					dc.loadResult();
 					dc.setSQL(ORACLE_ADD_HEALTH_CLUSTER_TABLE);
 					dc.loadResult();
+					dc.setSQL(ORACLE_CREATE_INDEX_ADDRESS_EVENT);
+					dc.loadResult();
+					dc.setSQL(ORACLE_CREATE_INDEX_ADDRESS_VIEW);
+					dc.loadResult();
+					dc.setSQL(ORACLE_CREATE_INDEX_STATUS_VIEW);
+					dc.loadResult();					
 				}
 				return true;
 			}catch(DotDataException e){

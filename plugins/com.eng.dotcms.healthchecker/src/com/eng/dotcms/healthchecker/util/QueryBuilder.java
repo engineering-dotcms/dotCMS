@@ -26,6 +26,12 @@ public class QueryBuilder {
 																			" 	CONSTRAINT health_cluster_pk PRIMARY KEY(ID)" +
 																			")";
 	
+	public static final String ORACLE_CREATE_INDEX_ADDRESS_EVENT		=	"CREATE INDEX idx_health_event_addr ON HEALTH_EVENT (ADDRESS)";
+	
+	public static final String ORACLE_CREATE_INDEX_ADDRESS_VIEW			=	"CREATE INDEX idx_health_view_addr ON HEALTH_CLUSTER_VIEW (ADDRESS)";
+	
+	public static final String ORACLE_CREATE_INDEX_STATUS_VIEW			=	"CREATE INDEX idx_health_view_status ON HEALTH_CLUSTER_VIEW (STATUS)";
+	
 	
 	public static final String ORACLE_INSERT_HEALTH						=	"INSERT INTO HEALTH_EVENT (ADDRESS, CLUSTER_VIEW, STATUS, WRITTEN_BY, MOD_DATE) VALUES (?,?,?,?,SYSDATE)";
 	
