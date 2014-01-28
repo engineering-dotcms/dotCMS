@@ -4,23 +4,23 @@ import org.jgroups.View;
 
 public class HealthChecker {
 	
-	private HealthEvent health;
+	private HealthEvent healthEvent;
 	public static HealthChecker INSTANCE = new HealthChecker();
 	private HealthClusterAdministrator clusterAdmin;
 	private View lastView = null; 
 	private int countSuspect = 0;
 	
 	private HealthChecker(){
-		health = new HealthEvent();
+		healthEvent = new HealthEvent();
 		setClusterAdmin(new HealthClusterAdministrator());
 	}
 
-	public HealthEvent getHealth() {
-		return health;
+	public HealthEvent getHealthEvent() {
+		return healthEvent;
 	}
 
-	public void setHealth(HealthEvent health) {
-		this.health = health;
+	public void setHealthEvent(HealthEvent health) {
+		this.healthEvent = health;
 	}
 
 	public HealthClusterAdministrator getClusterAdmin() {
@@ -48,7 +48,7 @@ public class HealthChecker {
 	}
 
 	public void flush(){
-		health = new HealthEvent();
+		healthEvent = new HealthEvent();
 	}
 
 }

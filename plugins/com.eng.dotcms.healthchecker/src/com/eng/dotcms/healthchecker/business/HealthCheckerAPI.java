@@ -30,6 +30,7 @@ import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_GET_SINGLE_C
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_DELETE_HEALTH_CLUSTER_VIEW;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_UPDATE_HEALTH_CLUSTER_CREATOR;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CHECK_JOIN_AFTER_LEAVE;
+import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_CHECK_NEW_DATA;
 
 public class HealthCheckerAPI {
 	
@@ -51,6 +52,7 @@ public class HealthCheckerAPI {
 		dc.addParam(health.getClusterView().toString());
 		dc.addParam(health.getStatus().toString());
 		dc.addParam(HealthUtil.getStringAddress(health.getWrittenBy()));
+		dc.addParam(health.getModDate());
 		dc.loadResult();
 	}
 	
@@ -150,7 +152,7 @@ public class HealthCheckerAPI {
 	 *
 	 * @date Jan 22, 2014
 	 */
-	public void insertHealthClusterView(Address address, String port, String protocol, boolean isCreator, AddressStatus status) throws DotDataException {
+	public void insertHealthClusterView(Address address, String port, String protocol, boolean isCreator, AddressStatus status, Date now) throws DotDataException {
 		dc.setSQL(ORACLE_INSERT_HEALTH_CLUSTER_VIEW);
 		dc.addParam(UUID.randomUUID().toString());
 		dc.addParam(HealthUtil.getStringAddress(address));
@@ -158,6 +160,7 @@ public class HealthCheckerAPI {
 		dc.addParam(protocol);
 		dc.addParam(status.toString());
 		dc.addParam(isCreator?"Y":"N");
+		dc.addParam(now);
 		dc.loadResult();			
 	}
 	
@@ -259,6 +262,32 @@ public class HealthCheckerAPI {
 		int num_op = Integer.parseInt(rs.get(0).get("num_op").toString());
 		return num_op>0;				
 	}
+
+	/**
+	 * Controlla se sono stati inseriti dei contenuti (INODE) nell'intervallo in cui il nodo è rimasto fuori dal cluster.
+	 * 
+	 * @param address
+	 * @return
+	 * @throws DotDataException
+	 */
+	public boolean needFlushCache(Date leaveDate, Date joinDate) {
+		try{
+			dc.setSQL(ORACLE_CHECK_NEW_DATA);
+			dc.addParam(leaveDate);
+			dc.addParam(joinDate);
+			List<Map<String, Object>> rs = dc.loadObjectResults();
+			if(rs.size()>0){
+				Map<String, Object> row = rs.get(0);
+				int num_inodes = Integer.parseInt(row.get("num_inodes").toString());
+				return num_inodes>0;
+			}
+			return false;
+		}catch(DotDataException e){			
+			return false;			
+		}catch(Exception e){
+			return false;
+		}
+	}
 	
 	/**
 	 * Dato un nodo controlla se è etichettato come fuori dal cluster.
@@ -278,7 +307,7 @@ public class HealthCheckerAPI {
 				int count = Integer.parseInt(row.get("num_joined_after").toString());
 				return count>0;
 			}
-			return dc.loadObjectResults().size()>0;
+			return false;
 		}catch(DotDataException e){			
 			return false;			
 		}catch(Exception e){
