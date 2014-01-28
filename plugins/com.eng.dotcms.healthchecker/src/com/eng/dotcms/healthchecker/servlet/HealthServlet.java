@@ -34,6 +34,7 @@ public class HealthServlet extends HttpServlet {
 				healthAPI.deleteHealthStatus(localAddress, AddressStatus.JOIN);
 				healthAPI.deleteHealthClusterView(localAddress);
 				boolean isCreator = CacheLocator.getCacheAdministrator().getJGroupsChannel().getView().getCreator().equals(localAddress);
+				// inserisco il nodo nella cluster view con status JOINED.
 				healthAPI.insertHealthClusterView(localAddress,
 						Config.getStringProperty("HEALTH_CHECKER_REST_PORT","80"),Config.getStringProperty("HEALTH_CHECKER_REST_PROTOCOL","http"),isCreator,
 						AddressStatus.JOIN);
@@ -41,8 +42,8 @@ public class HealthServlet extends HttpServlet {
 				HealthClusterAdministrator clusterAdmin = new HealthClusterAdministrator();				
 				clusterAdmin.init();
 				HealthChecker.INSTANCE.setClusterAdmin(clusterAdmin);				
-				// inserisco il nodo nella cluster view con status JOINED.
-				
+				// flush cache
+				CacheLocator.getCacheAdministrator().flushAlLocalOnlyl();
 			} catch (DotDataException e) {
 				Logger.error(getClass(), "Error in init HealthServlet: " + e.getMessage());
 				try {
