@@ -18,6 +18,7 @@ import com.dotmarketing.business.CacheLocator;
 import com.dotmarketing.util.Logger;
 import com.eng.dotcms.healthchecker.HealthChecker;
 import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
+import com.eng.dotcms.healthchecker.util.HealthUtil;
 
 public class HealthCheckerTool implements ViewTool {
 	
@@ -31,7 +32,11 @@ public class HealthCheckerTool implements ViewTool {
 	}
 	
 	public boolean checkHealth(){
-		return checkCacheStatus();
+		try{
+			return checkCacheStatus();
+		}catch(Exception e){
+			return false;
+		}
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -44,30 +49,35 @@ public class HealthCheckerTool implements ViewTool {
 	 * @return
 	 */
 	@SuppressWarnings("deprecation")
-	private boolean checkCacheStatus(){
+	private boolean checkCacheStatus() throws Exception {
+		String address = HealthUtil.getStringAddress(cacheChannel.getLocalAddress());
 		boolean cacheHealth = !healthAPI.isLeaveNode(healthClusterChannel.getLocalAddress());
 		Logger.debug(getClass(), "Cluster View  (Health): 	"+healthClusterChannel.getView().toString());
 		Logger.debug(getClass(), "Local Address (Health): 	"+healthClusterChannel.getLocalAddress().toString());
 		Logger.debug(getClass(), "Cluster View  (Cache): 	"+cacheChannel.getView().toString());
 		Logger.debug(getClass(), "Local Address (Cache): 	"+cacheChannel.getLocalAddress().toString());
-		boolean esHealth = true;
-		Map<String, ClusterIndexHealth> map = APILocator.getESIndexAPI().getClusterHealth();
-		
+		boolean esHealth = false;
+//		Map<String, ClusterIndexHealth> map = APILocator.getESIndexAPI().getClusterHealth();
+//		
 		NodeInfo[] nodesInCluster = getNodesInfo();
 		for(NodeInfo n:nodesInCluster){
-			Logger.info(getClass(), "Node: "+n.getHttp().address().publishAddress().toString());
-		}
-		for(String indexName: APILocator.getESIndexAPI().listIndices()){
-			ClusterIndexHealth health = map.get(indexName);
-			if(health.getStatus().equals(ClusterHealthStatus.YELLOW)){
-				esHealth = false;
+			Logger.info(getClass(), "Node: "+n.getHostname());
+			if(address.equals(n.getHostname())){
+				esHealth = true;
 				break;
-			}
+			}	
 		}
+//		for(String indexName: APILocator.getESIndexAPI().listIndices()){
+//			ClusterIndexHealth health = map.get(indexName);
+//			if(health.getStatus().equals(ClusterHealthStatus.YELLOW)){
+//				esHealth = false;
+//				break;
+//			}
+//		}
 		return esHealth&&cacheHealth;
 	}
 	
-	private NodeInfo[] getNodesInfo(){
+	private NodeInfo[] getNodesInfo() throws Exception{
 		AdminClient client=new ESClient().getClient().admin();
 		NodesInfoRequest req = new NodesInfoRequest();
 		ActionFuture<NodesInfoResponse> nir = client.cluster().nodesInfo(req);
