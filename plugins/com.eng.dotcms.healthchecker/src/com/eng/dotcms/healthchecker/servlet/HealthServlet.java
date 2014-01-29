@@ -23,6 +23,7 @@ import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
 public class HealthServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -3299155158485099069L;
+	private HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 	
 	@SuppressWarnings("deprecation")
 	public void init(ServletConfig config) throws ServletException {
@@ -30,16 +31,11 @@ public class HealthServlet extends HttpServlet {
 		if(Config.getBooleanProperty("DIST_INDEXATION_ENABLED", false)){
 			Date now = new Date();
 			Address localAddress = CacheLocator.getCacheAdministrator().getJGroupsChannel().getLocalAddress();			
-			HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 			Date lastLeave = healthAPI.getDateOfLastLeaveEvent(localAddress);
 			try {				
 				HibernateUtil.startTransaction();
 				// elimino i vecchi records riguardanti il nodo attuale in quanto sono in riavvio.
-				healthAPI.deleteHealthStatus(localAddress, AddressStatus.LEAVE);
-				healthAPI.deleteHealthStatus(localAddress, AddressStatus.JOIN);
-				healthAPI.deleteHealthClusterView(localAddress);
-				healthAPI.deleteHealthLock(localAddress, Operation.RESTARTING);
-				healthAPI.deleteHealthLock(localAddress, Operation.FLUSHING);
+				cleanNode(localAddress);
 				boolean isCreator = CacheLocator.getCacheAdministrator().getJGroupsChannel().getView().getCreator().equals(localAddress);
 				// inserisco il nodo nella cluster view con status JOINED.
 				healthAPI.insertHealthClusterView(localAddress,
@@ -66,5 +62,14 @@ public class HealthServlet extends HttpServlet {
 			}
 		}
 		Logger.info(getClass(), "END 	Init Health Cluster Handle");
+	}
+	
+	private void cleanNode(Address localAddress) throws DotDataException {
+		healthAPI.deleteHealthStatus(localAddress, AddressStatus.LEAVE);
+		healthAPI.deleteHealthStatus(localAddress, AddressStatus.JOIN);
+		healthAPI.deleteHealthClusterView(localAddress);
+		healthAPI.deleteHealthLock(localAddress, Operation.RESTARTING);
+		healthAPI.deleteHealthLock(localAddress, Operation.FLUSHING);
+		healthAPI.deleteHealthLock(localAddress, Operation.STARTING);
 	}
 }
