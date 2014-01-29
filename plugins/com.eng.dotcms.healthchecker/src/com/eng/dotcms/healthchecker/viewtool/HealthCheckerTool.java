@@ -51,6 +51,7 @@ public class HealthCheckerTool implements ViewTool {
 	 */
 	@SuppressWarnings("deprecation")
 	private boolean checkCacheStatus() throws Exception {
+		String es_network_host = Config.getStringProperty("es.network.host", "localhost");
 		boolean cacheHealth = !healthAPI.isLeaveNode(healthClusterChannel.getLocalAddress());
 		Logger.debug(getClass(), "Cluster View  (Health): 	"+healthClusterChannel.getView().toString());
 		Logger.debug(getClass(), "Local Address (Health): 	"+healthClusterChannel.getLocalAddress().toString());
@@ -60,10 +61,11 @@ public class HealthCheckerTool implements ViewTool {
 //		Map<String, ClusterIndexHealth> map = APILocator.getESIndexAPI().getClusterHealth();
 //		
 		NodeInfo[] nodesInCluster = getNodesInfo();
+		Logger.info(getClass(), nodesInCluster.toString());
+		Logger.info(getClass(), "Number of nodes in cluster: " + nodesInCluster.length);
 		for(NodeInfo n:nodesInCluster){
 			String inet = n.getNode().address().toString();
-			Logger.info(getClass(), "Node: "+inet);
-			String es_network_host = Config.getStringProperty("es.network.host", "localhost");
+			Logger.info(getClass(), "Node: "+inet);			
 			if(inet.contains(es_network_host)){
 				esHealth = true;
 				break;

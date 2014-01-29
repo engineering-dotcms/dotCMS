@@ -1,7 +1,6 @@
 #!/bin/bash
 
 service JBossWCMProd stop
-sleep 20
-service JBossWCMProd start
-
+sleep 5
+sh ./restart_server.sh
 exit 0;
