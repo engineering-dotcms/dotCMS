@@ -61,7 +61,9 @@ public class HealthServlet extends HttpServlet {
 				} catch (DotHibernateException e1) {
 					Logger.fatal(getClass(), "DotHibernateException: " + e1.getMessage());
 				}
-			}		
+			} catch (Exception e) {
+				Logger.error(getClass(), "Errore generico.", e);
+			}
 		}
 		Logger.info(getClass(), "END 	Init Health Cluster Handle");
 	}

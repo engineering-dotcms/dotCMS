@@ -303,7 +303,7 @@ public class HealthCheckerAPI {
 		dc.addParam(joinDate);
 		List<Map<String, Object>> rs = dc.loadObjectResults();
 		Logger.info(getClass(), "CheckContentlet: end");
-		return Integer.parseInt((String)rs.get(0).get("num_contentlets"));
+		return Integer.parseInt(rs.get(0).get("num_contentlets").toString());
 	}
 
 	private int checkContainer(Date leaveDate, Date joinDate) throws DotDataException {
@@ -313,7 +313,7 @@ public class HealthCheckerAPI {
 		dc.addParam(joinDate);
 		List<Map<String, Object>> rs = dc.loadObjectResults();
 		Logger.info(getClass(), "CheckContainer: end");
-		return Integer.parseInt((String)rs.get(0).get("num_containers"));
+		return Integer.parseInt(rs.get(0).get("num_containers").toString());
 		
 	}
 	
@@ -324,7 +324,7 @@ public class HealthCheckerAPI {
 		dc.addParam(joinDate);
 		List<Map<String, Object>> rs = dc.loadObjectResults();
 		Logger.info(getClass(), "CheckHtmlPage: end");
-		return Integer.parseInt((String)rs.get(0).get("num_pages"));
+		return Integer.parseInt(rs.get(0).get("num_pages").toString());
 
 	}
 
@@ -335,7 +335,7 @@ public class HealthCheckerAPI {
 		dc.addParam(joinDate);
 		List<Map<String, Object>> rs = dc.loadObjectResults();
 		Logger.info(getClass(), "CheckTemplate: end");
-		return Integer.parseInt((String)rs.get(0).get("num_templates"));
+		return Integer.parseInt(rs.get(0).get("num_templates").toString());
 	}
 	/**
 	 * Dato un nodo controlla se è etichettato come fuori dal cluster.
