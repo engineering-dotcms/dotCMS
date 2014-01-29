@@ -129,7 +129,7 @@ function refreshCache(address,port,protocol,id){
 						}%>
 					</td>
 					<td style="padding-left: 10px; font-size: 12px" >
-						<%if("JOIN".equals(singleView.getStatus())) {%>
+						<%if("JOIN".equals(singleView.getStatus()) && null!=singleView.getOperation() && Operation.RESTARTING.equals(singleView.getOperation())) {%>
 							<button <%if(null!=singleView.getOperation() && Operation.FLUSHING.equals(singleView.getOperation())) {%> disabled="true" <%}%> id="refreshCacheBtn_<%=singleView.getId()%>" iconClass="reloadCache" dojoType="dijit.form.Button" onClick="refreshCache('<%=singleView.getAddress()%>','<%=singleView.getPort()%>','<%=singleView.getProtocol()%>','<%=singleView.getId()%>')">
 								<strong><%= LanguageUtil.get(pageContext, "health_Reload_Cache") %></strong>
 							</button>						

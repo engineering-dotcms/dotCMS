@@ -280,15 +280,15 @@ public class HealthCheckerAPI {
 			if(count>0)
 				return true;
 			else
-				count += checkContainer(leaveDate, joinDate);
+				count = checkContainer(leaveDate, joinDate);
 			if(count>0)
 				return true;
 			else
-				count += checkHtmlPage(leaveDate, joinDate);
+				count = checkHtmlPage(leaveDate, joinDate);
 			if(count>0)
 				return true;
 			else
-				count += checkTemplate(leaveDate, joinDate);
+				count = checkTemplate(leaveDate, joinDate);
 			
 			return count > 0;
 		}else

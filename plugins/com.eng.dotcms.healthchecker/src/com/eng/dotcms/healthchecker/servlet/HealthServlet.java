@@ -50,8 +50,10 @@ public class HealthServlet extends HttpServlet {
 				clusterAdmin.init();
 				HealthChecker.INSTANCE.setClusterAdmin(clusterAdmin);				
 				// flush cache
+				healthAPI.insertHealthLock(localAddress, Operation.STARTING);
 				if(healthAPI.needFlushCache(lastLeave, now))
 					CacheLocator.getCacheAdministrator().flushAlLocalOnlyl();
+				healthAPI.deleteHealthLock(localAddress, Operation.STARTING);
 			} catch (DotDataException e) {
 				Logger.error(getClass(), "Error in init HealthServlet: " + e.getMessage());
 				try {

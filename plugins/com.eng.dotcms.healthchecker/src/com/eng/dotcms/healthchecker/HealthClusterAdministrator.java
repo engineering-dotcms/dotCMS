@@ -222,7 +222,7 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 				 */
 				for(Address newone:joined){										
 					try{
-						boolean isInLock = healthAPI.isHealthLock(newone, Operation.FLUSHING);						
+						boolean isInLock = healthAPI.isHealthLock(newone, Operation.FLUSHING) || healthAPI.isHealthLock(newone, Operation.STARTING);						
 						if(!isInLock){
 							Date lastLeave = healthAPI.getDateOfLastLeaveEvent(newone);
 							long diffInMilliseconds = HealthUtil.getDateDiff(now, lastLeave, TimeUnit.MILLISECONDS);							
