@@ -9,9 +9,12 @@ import javax.servlet.http.HttpServletResponse;
 import com.dotmarketing.servlets.ajax.AjaxAction;
 import com.dotmarketing.util.Logger;
 import com.eng.dotcms.healthchecker.HealthClusterViewStatus;
+import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
 import com.eng.dotcms.healthchecker.util.HealthUtil;
 
 public class HealthCheckerAjax extends AjaxAction {
+	
+	private HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 	
 	@SuppressWarnings("rawtypes")
 	public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -34,16 +37,20 @@ public class HealthCheckerAjax extends AjaxAction {
     }
 	
 	public void refreshCache(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
 		Map<String,String> pmap=getURIParams();
 		String address = pmap.get("address");
-		String port = pmap.get("port");
-		String protocol = pmap.get("protocol");
-		HealthClusterViewStatus status = new HealthClusterViewStatus();
-		status.setAddress(address);
-		status.setPort(port);
-		status.setProtocol(protocol);
-        String responseRest = HealthUtil.callRESTService(status,"/joinCluster");
-        response.getWriter().println(responseRest);
+		if(!healthAPI.isLeaveNode(address)){
+			String port = pmap.get("port");
+			String protocol = pmap.get("protocol");
+			HealthClusterViewStatus status = new HealthClusterViewStatus();
+			status.setAddress(address);
+			status.setPort(port);
+			status.setProtocol(protocol);
+	        String responseRest = HealthUtil.callRESTService(status,"/joinCluster");
+	        response.getWriter().println(responseRest);
+		}else
+			response.getWriter().println("ALREADY_OOC");
 	}
 	
 	@Override

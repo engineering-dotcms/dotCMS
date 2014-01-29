@@ -56,6 +56,11 @@ function refreshCache(address,port,protocol,id){
 				divResponse.innerHTML = '<%= LanguageUtil.get(pageContext, "health-refreshing-cache-ok") %>'
 				dijit.byId("refreshCacheBtn_"+id).setAttribute('disabled',false);
 				body.removeAttribute("style");
+			}else if(data.indexOf("ALREADY_OOC")> -1){
+				dojo.style(divResponse, {color:'#CC3333'});
+				divResponse.innerHTML = '<%= LanguageUtil.get(pageContext, "health-node-out-of-cluster") %>'
+				dijit.byId("refreshCacheBtn_"+id).setAttribute('disabled',false);
+				body.removeAttribute("style");
 			}else{
 				dojo.style(divResponse, {color:'#CC3333'});
 				divResponse.innerHTML = '<%= LanguageUtil.get(pageContext, "health-refreshing-cache-ko") %><br />'+data	

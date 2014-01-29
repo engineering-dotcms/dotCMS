@@ -33,9 +33,9 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 	private HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 	private JChannel channel;
 	private boolean cluster = false;
-	private static int MAX_COUNT_SUSPECT = Config.getIntProperty("HEALTH_CHECKER_MAX_COUNT_SUSPECT", 5);
+	private static int 	MAX_COUNT_SUSPECT = Config.getIntProperty("HEALTH_CHECKER_MAX_COUNT_SUSPECT", 5);
 	private static long MAX_REJOIN_TIME = Config.getIntProperty("HEALTH_CHECKER_MAX_REJOIN_TIME", 60000);
-	private static int MAX_COUNT_COMPLETELY_REJOIN = Config.getIntProperty("HEALTH_CHECKER_MAX_COUNT_COMPLETELY_REJOIN", 60);
+	private static int 	MAX_COUNT_COMPLETELY_REJOIN = Config.getIntProperty("HEALTH_CHECKER_MAX_COUNT_COMPLETELY_REJOIN", 60);
 	
 	public HealthClusterAdministrator() {}
 	

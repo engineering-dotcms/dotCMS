@@ -110,9 +110,20 @@ public class HealthCheckerAPI {
 	 * @throws DotDataException
 	 */
 	public boolean isLeaveNode(Address address) {
+		return isLeaveNode(HealthUtil.getStringAddress(address));
+	}
+	
+	/**
+	 * Dato un nodo controlla se è etichettato come fuori dal cluster.
+	 * 
+	 * @param address
+	 * @return
+	 * @throws DotDataException
+	 */
+	public boolean isLeaveNode(String address) {
 		try{
 			dc.setSQL(ORACLE_GET_NODE_LEAVE);
-			dc.addParam(HealthUtil.getStringAddress(address));
+			dc.addParam(address);
 			List<Map<String, Object>> rs = dc.loadObjectResults();
 			if(rs.size()>0){
 				Map<String, Object> row = rs.get(0);
@@ -299,6 +310,7 @@ public class HealthCheckerAPI {
 		List<Map<String, Object>> rs = dc.loadObjectResults();
 		return Integer.parseInt(rs.get(0).get("num_templates").toString());
 	}
+	
 	/**
 	 * Dato un nodo controlla se è etichettato come fuori dal cluster.
 	 * 
@@ -306,10 +318,10 @@ public class HealthCheckerAPI {
 	 * @return
 	 * @throws DotDataException
 	 */
-	private boolean isJoined(Address address, Date leaveModDate) {
+	private boolean isJoined(String address, Date leaveModDate) {
 		try{
 			dc.setSQL(ORACLE_CHECK_JOIN_AFTER_LEAVE);
-			dc.addParam(HealthUtil.getStringAddress(address));
+			dc.addParam(address);
 			dc.addParam(leaveModDate);
 			List<Map<String, Object>> rs = dc.loadObjectResults();
 			if(rs.size()>0){
@@ -324,5 +336,4 @@ public class HealthCheckerAPI {
 			return false;
 		}
 	}
-	
 }
