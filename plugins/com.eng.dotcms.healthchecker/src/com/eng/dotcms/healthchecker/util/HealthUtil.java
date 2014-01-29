@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit;
 import org.jgroups.Address;
 import org.jgroups.View;
 
+import com.dotmarketing.exception.DotDataException;
+import com.dotmarketing.util.Logger;
 import com.eng.dotcms.healthchecker.HealthChecker;
 import com.eng.dotcms.healthchecker.HealthClusterViewStatus;
 import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
@@ -17,6 +19,8 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 
 public class HealthUtil {
+	
+	private static HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 	
 	public static boolean containsMember(View clusterView, Address address) {
 		String address_str = address.toString().split("[-]")[0];
@@ -35,7 +39,6 @@ public class HealthUtil {
 	 */
 	@SuppressWarnings("deprecation")
 	public static List<Address> getJoined(View new_view) {
-		HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 		List<Address> joined = new ArrayList<Address>();
 		for(Address new_view_addr : new_view.getMembers()){
 			if(!HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress().equals(new_view_addr)){
@@ -73,6 +76,35 @@ public class HealthUtil {
 			return -1;
 	}
 
+	/**
+	 * Controlla se sono stati inseriti dei contenuti nell'intervallo in cui il nodo è rimasto fuori dal cluster.
+	 * 
+	 * @param address
+	 * @return
+	 * @throws DotDataException
+	 */
+	public static boolean needFlushCache(Date leaveDate, Date joinDate) throws DotDataException {
+		if(null!=leaveDate){
+			int count = healthAPI.checkContentlet(leaveDate, joinDate);
+			if(count>0)
+				return true;
+			else
+				count = healthAPI.checkContainer(leaveDate, joinDate);
+			if(count>0)
+				return true;
+			else
+				count = healthAPI.checkHtmlPage(leaveDate, joinDate);
+			if(count>0)
+				return true;
+			else
+				count = healthAPI.checkTemplate(leaveDate, joinDate);
+			
+			return count > 0;
+		}else
+			return false;
+		
+	}
+	
 	private static String getRESTURL(HealthClusterViewStatus status){
 		StringBuilder sb = new StringBuilder();
 		sb.append(status);

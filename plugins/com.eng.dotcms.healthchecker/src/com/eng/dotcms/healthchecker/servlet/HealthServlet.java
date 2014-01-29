@@ -19,6 +19,7 @@ import com.eng.dotcms.healthchecker.HealthChecker;
 import com.eng.dotcms.healthchecker.HealthClusterAdministrator;
 import com.eng.dotcms.healthchecker.Operation;
 import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
+import com.eng.dotcms.healthchecker.util.HealthUtil;
 
 public class HealthServlet extends HttpServlet {
 
@@ -46,10 +47,11 @@ public class HealthServlet extends HttpServlet {
 				clusterAdmin.init();
 				HealthChecker.INSTANCE.setClusterAdmin(clusterAdmin);				
 				// flush cache
-				healthAPI.insertHealthLock(localAddress, Operation.STARTING);
-				if(healthAPI.needFlushCache(lastLeave, now))
+				if(!Config.getBooleanProperty("HEALTH_CHECKER_ALWAYS_FLUSH_CACHE", true) && HealthUtil.needFlushCache(lastLeave, now)){
+					healthAPI.insertHealthLock(localAddress, Operation.STARTING);				
 					CacheLocator.getCacheAdministrator().flushAlLocalOnlyl();
-				healthAPI.deleteHealthLock(localAddress, Operation.STARTING);
+					healthAPI.deleteHealthLock(localAddress, Operation.STARTING);
+				}
 			} catch (DotDataException e) {
 				Logger.error(getClass(), "Error in init HealthServlet: " + e.getMessage());
 				try {

@@ -265,76 +265,38 @@ public class HealthCheckerAPI {
 		int num_op = Integer.parseInt(rs.get(0).get("num_op").toString());
 		return num_op>0;				
 	}
-
-	/**
-	 * Controlla se sono stati inseriti dei contenuti nell'intervallo in cui il nodo è rimasto fuori dal cluster.
-	 * 
-	 * @param address
-	 * @return
-	 * @throws DotDataException
-	 */
-	public boolean needFlushCache(Date leaveDate, Date joinDate) throws DotDataException {
-		Logger.info(getClass(), "needFlushCache: leaveDate: " + leaveDate + "; joinDate: " + joinDate);
-		if(null!=leaveDate){
-			int count = checkContentlet(leaveDate, joinDate);
-			if(count>0)
-				return true;
-			else
-				count = checkContainer(leaveDate, joinDate);
-			if(count>0)
-				return true;
-			else
-				count = checkHtmlPage(leaveDate, joinDate);
-			if(count>0)
-				return true;
-			else
-				count = checkTemplate(leaveDate, joinDate);
-			
-			return count > 0;
-		}else
-			return false;
-		
-	}
 	
-	private int checkContentlet(Date leaveDate, Date joinDate) throws DotDataException {
-		Logger.info(getClass(), "CheckContentlet: start");
+	public int checkContentlet(Date leaveDate, Date joinDate) throws DotDataException {
 		dc.setSQL(ORACLE_CHECK_NEW_CONTENTLET);
 		dc.addParam(leaveDate);
 		dc.addParam(joinDate);
 		List<Map<String, Object>> rs = dc.loadObjectResults();
-		Logger.info(getClass(), "CheckContentlet: end");
 		return Integer.parseInt(rs.get(0).get("num_contentlets").toString());
 	}
 
-	private int checkContainer(Date leaveDate, Date joinDate) throws DotDataException {
-		Logger.info(getClass(), "CheckContainer: start");
+	public int checkContainer(Date leaveDate, Date joinDate) throws DotDataException {
 		dc.setSQL(ORACLE_CHECK_NEW_CONTAINER);
 		dc.addParam(leaveDate);
 		dc.addParam(joinDate);
 		List<Map<String, Object>> rs = dc.loadObjectResults();
-		Logger.info(getClass(), "CheckContainer: end");
 		return Integer.parseInt(rs.get(0).get("num_containers").toString());
 		
 	}
 	
-	private int checkHtmlPage(Date leaveDate, Date joinDate) throws DotDataException {
-		Logger.info(getClass(), "CheckHtmlPage: start");
+	public int checkHtmlPage(Date leaveDate, Date joinDate) throws DotDataException {
 		dc.setSQL(ORACLE_CHECK_NEW_HTMLPAGE);
 		dc.addParam(leaveDate);
 		dc.addParam(joinDate);
 		List<Map<String, Object>> rs = dc.loadObjectResults();
-		Logger.info(getClass(), "CheckHtmlPage: end");
 		return Integer.parseInt(rs.get(0).get("num_pages").toString());
 
 	}
 
-	private int checkTemplate(Date leaveDate, Date joinDate) throws DotDataException {
-		Logger.info(getClass(), "CheckTemplate: start");
+	public int checkTemplate(Date leaveDate, Date joinDate) throws DotDataException {
 		dc.setSQL(ORACLE_CHECK_NEW_TEMPLATE);
 		dc.addParam(leaveDate);
 		dc.addParam(joinDate);
 		List<Map<String, Object>> rs = dc.loadObjectResults();
-		Logger.info(getClass(), "CheckTemplate: end");
 		return Integer.parseInt(rs.get(0).get("num_templates").toString());
 	}
 	/**

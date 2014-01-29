@@ -259,7 +259,7 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 								        	 *     cluster nuovamente;   
 								        	 */
 								        	HealthClusterViewStatus status = healthAPI.singleClusterView(HealthChecker.INSTANCE.getHealthEvent().getAddress());
-								        	if(healthAPI.needFlushCache(lastLeave, now)){
+								        	if(!Config.getBooleanProperty("HEALTH_CHECKER_ALWAYS_FLUSH_CACHE", true) && HealthUtil.needFlushCache(lastLeave, now)){
 												Logger.info(getClass(), "Node "+HealthChecker.INSTANCE.getHealthEvent().getAddress()+" back into the cluster: flushing cache...");											
 												healthAPI.insertHealthLock(HealthChecker.INSTANCE.getHealthEvent().getAddress(), Operation.FLUSHING);
 										        String response = HealthUtil.callRESTService(status,"/joinCluster");
