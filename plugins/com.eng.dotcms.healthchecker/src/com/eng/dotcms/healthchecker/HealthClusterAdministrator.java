@@ -110,12 +110,16 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 			if(!isInLock){
 				boolean isAlreadyLeave = healthAPI.isLeaveNode(mbr);
 				if(isAlreadyLeave) {
-					Logger.info(getClass(), "Method suspect:  The node " + mbr + " is already out of cluster and I can't re-join. Force restart...");
-					HealthClusterViewStatus status = healthAPI.singleClusterView(mbr);
-					healthAPI.insertHealthLock(mbr, Operation.RESTARTING);
-					String response = HealthUtil.callRESTService(status, "/forceJoinCluster");
-					if(HealthService.STATUS_OK.equals(response))					
-						Logger.info(getClass(), "Method suspect:  The node " + mbr + " was successful restarted...it will come back into the cluster as soon as possible.");				
+					Logger.info(getClass(), "Method suspect:  The node " + mbr + " is already out of cluster and I can't re-join. Try to force restart...");
+					boolean isInRestart = healthAPI.isHealthLock(mbr, Operation.RESTARTING);
+					if(!isInRestart){
+						HealthClusterViewStatus status = healthAPI.singleClusterView(mbr);
+						healthAPI.insertHealthLock(mbr, Operation.RESTARTING);
+						String response = HealthUtil.callRESTService(status, "/forceJoinCluster");
+						if(HealthService.STATUS_OK.equals(response))					
+							Logger.info(getClass(), "Method suspect:  The node " + mbr + " was successful restarted...it will come back into the cluster as soon as possible.");
+					}else
+						Logger.info(getClass(), "Method suspect:  The node " + mbr + " is already in restart. Waiting the end of the operation.");
 				}else{			
 					Date now = new GregorianCalendar().getTime();
 					int countSuspect = HealthChecker.INSTANCE.getCountSuspect();
@@ -207,7 +211,7 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 		}else { 
 			// recupero la lista degli indirizzi joinati
 			List<Address> joined = HealthUtil.getJoined(new_view);
-			Logger.info(getClass(), "Joined size: " + joined.size());
+			Logger.debug(getClass(), "Joined size: " + joined.size());
 			if(joined.size()>0){
 				/**
 				 * Il controllo sugli indirizzi "joinati" viene fatto solo ed esclusivamente partendo dal presupposto che questi indirizzi

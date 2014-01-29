@@ -9,7 +9,6 @@ import org.jgroups.Address;
 import org.jgroups.View;
 
 import com.dotmarketing.exception.DotDataException;
-import com.dotmarketing.util.Logger;
 import com.eng.dotcms.healthchecker.HealthChecker;
 import com.eng.dotcms.healthchecker.HealthClusterViewStatus;
 import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
