@@ -27,8 +27,8 @@ public class QueryBuilder {
 																			")";
 		
 	public static final String ORACLE_ADD_HEALTH_LOCK_TABLE				=	"CREATE TABLE HEALTH_LOCK ( " +
-																			"	ADDRESS			VARCHAR2(30)  																NOT NULL, " +
-																			"	OPERATION		VARCHAR2(10) check (OPERATION in ('FLUSHING','RESTARTING','STARTING'))  	NOT NULL, " +
+																			"	ADDRESS			VARCHAR2(30)  																		NOT NULL, " +
+																			"	OPERATION		VARCHAR2(10) check (OPERATION in ('FLUSHING','RESTARTING','STARTING','JOINING'))  	NOT NULL, " +
 																			" 	CONSTRAINT health_lock_pk PRIMARY KEY(ADDRESS)" +
 																			")";
 	

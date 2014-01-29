@@ -15,6 +15,7 @@ import org.jgroups.JChannel;
 import com.dotcms.content.elasticsearch.util.ESClient;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.business.CacheLocator;
+import com.dotmarketing.util.Config;
 import com.dotmarketing.util.Logger;
 import com.eng.dotcms.healthchecker.HealthChecker;
 import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
@@ -50,7 +51,6 @@ public class HealthCheckerTool implements ViewTool {
 	 */
 	@SuppressWarnings("deprecation")
 	private boolean checkCacheStatus() throws Exception {
-		String address = HealthUtil.getStringAddress(cacheChannel.getLocalAddress());
 		boolean cacheHealth = !healthAPI.isLeaveNode(healthClusterChannel.getLocalAddress());
 		Logger.debug(getClass(), "Cluster View  (Health): 	"+healthClusterChannel.getView().toString());
 		Logger.debug(getClass(), "Local Address (Health): 	"+healthClusterChannel.getLocalAddress().toString());
@@ -61,8 +61,10 @@ public class HealthCheckerTool implements ViewTool {
 //		
 		NodeInfo[] nodesInCluster = getNodesInfo();
 		for(NodeInfo n:nodesInCluster){
-			Logger.info(getClass(), "Node: "+n.getHostname());
-			if(address.equals(n.getHostname())){
+			String inet = n.getNode().address().toString();
+			Logger.info(getClass(), "Node: "+inet);
+			String es_network_host = Config.getStringProperty("es.network.host", "localhost");
+			if(inet.contains(es_network_host)){
 				esHealth = true;
 				break;
 			}	
