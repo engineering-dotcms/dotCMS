@@ -145,9 +145,10 @@ public class LinkMapFilter implements Filter {
 		HttpSession session = request.getSession();
 		StringBuilder query = null;
 		query = new StringBuilder();
-		query.append("+structureName:Link  -Link.linkType:*E*  +Link.identificativo:" + uri + " +Link.idRemoto:*True*  +deleted:false ");
+		query.append("+structureName:Link  -Link.linkType:*E*  +Link.identificativo:" + uri + " +Link.idRemoto:*True*  +deleted:false +languageId:1*  ");
 		String params = addDefaultParameterToQuery(session, host);
 		query.append(params);
+		
 		return query.toString();
 
 	}
@@ -168,9 +169,9 @@ public class LinkMapFilter implements Filter {
 				Logger.error(LinkMapFilter.class, e.getMessage() + "addDefaultParameterToQuery  : Unable to build host in query : ", e);
 			}
 		}
-		if(UtilMethods.isSet(session.getAttribute("com.dotmarketing.htmlpage.language"))){
-			queryParam.append( " +languageId:" + session.getAttribute("com.dotmarketing.htmlpage.language") );
-		}
+//		if(UtilMethods.isSet(session.getAttribute("com.dotmarketing.htmlpage.language"))){
+//			queryParam.append( " +languageId:" + session.getAttribute("com.dotmarketing.htmlpage.language") );
+//		}
 		return queryParam.toString();
 	}
 }

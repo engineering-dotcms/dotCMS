@@ -48,22 +48,18 @@ public class SiteSearchAction extends DispatchAction {
 	public static String REGEX_2 = "[\"'&\\/]{1,}";
 	private static String POLICY_FILENAME = "antisamy-bankit.xml";
 
-	private static String simpleQuery = " && -uri:(*rss.html || /homepage/search/*  || /homepage/images/* || /application/* || /interna/* || /selettore/* || /static/*) -mimeType:image* ";
+	private static String simpleQuery = " && -uri:(*rss.html || /homepage/search/*  || /homepage/*   || /homepage/images/* " +
+			                      "  || /application/* || /interna/* || /backup/* || /selettore/* || /static/*) -mimeType:image* ";
 	
-	private static String pathToEcludeQuery = "+StructureName:webPageContent +webPageContent.title:*PathToExclude*";
+	private static String pathToEcludeQuery = "+StructureName:webPageContent +webPageContent.title:*PathToExclude* ";
 	//private String pathToexclude = " && -uri:(  /pubblicazioni/econo/bollec/*/en*  || /pubblicazioni/econo/temidi/*/en* || " +" /pubblicazioni/quarigi/*en*   ";
 	
 	private static String excludeFrmSearch = " && -uri:(*rss.html) && -mimeType:image* ";
 	private static String apice = "\"";
-
-	//private static String indexIT;
-	//private static String indexEN;
 	private static String indexALL;
 
 	@Override
 	protected ActionForward dispatchMethod(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response, String name) throws Exception {
-		//indexIT = pAPI.loadProperty(IDeployConst.PLUGIN_ID, "siteSearch.indexName.it");
-		//indexEN = pAPI.loadProperty(IDeployConst.PLUGIN_ID, "siteSearch.indexName.en");
 		indexALL = pAPI.loadProperty(IDeployConst.PLUGIN_ID, "siteSearch.indexName.all");
 		policy = Policy.getInstance(Thread.currentThread().getContextClassLoader().getResourceAsStream(POLICY_FILENAME));
 		antiSamy = new AntiSamy(policy);
@@ -102,19 +98,22 @@ public class SiteSearchAction extends DispatchAction {
 				} else {
 					query = apice + query + apice;
 				}
-				
+				int langInt = 0;
 				query = aggiungiPesoQuery(query);
-				String reSql = pathToExclude(currentUser) ;
-				if( UtilMethods.isSet(reSql)){
-					query = query + reSql;
-				}
-				
 				if ("it".equals(lingua)) {
+					 langInt = 1; 
 					query = query.concat(" && language:1 ");
 				} else if ("en".equals(lingua)) {
 					query = query.concat(" && language:103 ");
+					 langInt = 103;
 				} 
 
+				String reSql = pathToExclude(currentUser , langInt ) ;
+				if( UtilMethods.isSet(reSql)){
+					query = query + reSql  ;
+				}
+				
+			
 				if (sectionsFilter != null && sectionsFilter.length > 0) {
 					query = query.concat(excludeFrmSearch);
 					query = query.concat("&& +uri:");
@@ -190,8 +189,8 @@ public class SiteSearchAction extends DispatchAction {
 			if( UtilMethods.isSet(language)){
 				query = query + language;
 			}
-			
-			String reSql = pathToExclude(currentUser) ;
+			//passo 0 al metodo perchè così la search prende la lingua dalla sessione
+			String reSql = pathToExclude(currentUser, 0 ) ;
 			if( UtilMethods.isSet(reSql)){
 				query = query + reSql;
 			}
@@ -258,31 +257,30 @@ public class SiteSearchAction extends DispatchAction {
 		}
 	}
 	
-	private String pathToExclude(User user) {
+	private String pathToExclude(User user , int language ) {
 		String badPath = "";
 		Contentlet pathToExcludeContent;
 		Logger.info(SiteSearchAction.class, "Query per escludere i path: "+pathToEcludeQuery);
+		if( language != 0){
+			pathToEcludeQuery = pathToEcludeQuery +" +languageId:" +language;
+		}
 		try {
 			List<Contentlet> pathContent = APILocator.getContentletAPI().search(pathToEcludeQuery, 1, 0, "modDate desc", user, true);
-			if (pathContent.size()>0) {
-				
-				Logger.info(SiteSearchAction.class, "Esiste almeno un contenuto che risponde alla query: "+pathToEcludeQuery);
+			if (pathContent.size()>0) {				
+				Logger.debug(SiteSearchAction.class, "Esiste almeno un contenuto che risponde alla query: "+pathToEcludeQuery);
 				pathToExcludeContent = pathContent.get(0);
 				badPath = pathToExcludeContent.getStringProperty("body")+ " ";
-				Logger.info(SiteSearchAction.class, "Body del contenuto \"PathToExclude\": "+badPath);
+				Logger.debug(SiteSearchAction.class, "Body del contenuto \"PathToExclude\": "+badPath);
 				return " && "+badPath;
 			}
 		} catch (Exception e) {
-			Logger.info(SiteSearchAction.class, "Problemi nell'individuazione del content per l'esclusione dei path nella siteSearchAction");
+			Logger.error(SiteSearchAction.class, "Problemi nell'individuazione del content per l'esclusione dei path nella siteSearchAction");
 		}
-
 		return badPath;
-		
 	}
 	
 	
-	private String getRequestLanguage(HttpServletRequest request) throws DotDataException {
-		
+	private String getRequestLanguage(HttpServletRequest request) throws DotDataException {		
 		String languageId;		
 		if (request.getSession().getAttribute(com.dotmarketing.util.WebKeys.HTMLPAGE_LANGUAGE) != null) {
 			languageId = ((Object) request.getSession().getAttribute(com.dotmarketing.util.WebKeys.HTMLPAGE_LANGUAGE)).toString();

@@ -54,7 +54,8 @@ public class SiteSeachForm extends ValidatorForm {
 		
 		try {
 			queryRicerca = sanitizeAndDecode(ParamUtil.get(request, "cerca", "default"));
-			if (queryRicerca.equals("default") || queryRicerca.trim().equals(defaulIT) || queryRicerca.trim().equals(defaulEN) || queryRicerca.length()>250) {
+			if (queryRicerca.equalsIgnoreCase("default") || queryRicerca.trim().equalsIgnoreCase(defaulIT) 
+					     || queryRicerca.trim().equalsIgnoreCase(defaulEN) || queryRicerca.length()>250) {
 				errors = new ActionErrors();
 				request.getSession().setAttribute(ActionMessages.GLOBAL_MESSAGE, "message.search.noResult");
 				errors.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage("message.search.noResult"));
@@ -63,7 +64,7 @@ public class SiteSeachForm extends ValidatorForm {
 			
 			String numPag = (String)ParamUtil.get(request, "curpage", "default");
 			try {
-				int page = Integer.parseInt(numPag);
+				Integer.parseInt(numPag);
 			} catch (NumberFormatException e) {
 				errors = new ActionErrors();
 				request.getSession().setAttribute(ActionMessages.GLOBAL_MESSAGE, "message.search.pageError");

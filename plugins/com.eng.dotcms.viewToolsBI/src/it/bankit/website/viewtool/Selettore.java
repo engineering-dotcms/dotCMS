@@ -94,7 +94,6 @@ public class Selettore {
 
 				String qLinkSemplice = "";
 				qLinkSemplice = "+StructureName:Linksemplice +languageId:" + languageID + " +live:true +parentPath:" + path + "/";
-
 				List<Contentlet> linksSempliceList = APILocator.getContentletAPI().search(qLinkSemplice, -1, 0, "modDate desc", user, false);
 
 				stringbuf.append("<div id=\"dt_" + folderTranslation + "\">");
@@ -112,7 +111,6 @@ public class Selettore {
 					String allegatoId = "";
 					String src = null;
 					String ms = "";
-
 					if (UtilMethods.isSet(link.getStringProperty("titoloLungo"))) {
 						titolo = link.getStringProperty("titoloLungo");
 					} else {
@@ -162,18 +160,19 @@ public class Selettore {
 
 					} else if ("I".equals(linkType)) {
 						String li = link.getStringProperty("linkInterno");
-
 						if (li != null && !"".equals(li) && li.endsWith(".html")) {
 
 							HTMLPage linkedPage = pageAPI.loadPageByPath(li, hostId);
 							Template linkedPageTemplate = null;
-
 							if(UtilMethods.isSet(linkedPage) && linkedPage.isLive()){
 								linkedPageTemplate = templateApi.findLiveTemplate(linkedPage.getTemplateId(), user, true);
-
 								Folder folder = folderAPI.findFolderByPath(li.substring(0, li.lastIndexOf("/")), hostId, user, true);
-								href = li.substring(0, li.lastIndexOf("/") + 1);
-
+								if(li.endsWith("index.html") ){
+								  href = li.substring(0, li.lastIndexOf("/") + 1);
+								}else {
+     								LOG.info("Link ad una pagina non index : " + li );	
+								  href = li;
+								}
 								if(UtilMethods.isSet(linkedPageTemplate) && linkedPageTemplate.getTitle().toLowerCase().contains("video")){							
 									src = WMVICON;
 								} else if (folderAPI.findMenuItems(folder, user, true).size() > 0) {
@@ -185,14 +184,13 @@ public class Selettore {
 						}
 
 					} else {
-
-						//	if (link.getStringProperty("identificativo") != null && !"".equals(link.getStringProperty("identificativo"))) {
-						//	href = path + "/" + link.getStringProperty("identificativo");
 						href =  link.getStringProperty("linkEsterno");
+						String pathE255 = (String) link.getStringProperty("linkEsternomaggioreDi255");
+						if( UtilMethods.isSet(pathE255)){
+							href =  pathE255;
+						}
 						src = ESTERNO;
-						//	}
 					}
-
 					if (!"".equals(href)) {
 						stringbuf.append("<li>");
 						stringbuf.append("<a href=\"" + href + "\"><img src=\"" + src + "\" class=\"ico\" width=\"14\" height=\"14\">" + titolo + "</a> " + buildSpan(link, size, labelType));
@@ -201,7 +199,6 @@ public class Selettore {
 						}
 						stringbuf.append("</li>");
 					}
-
 				}
 
 				Contentlet linkSemplice = null;
@@ -211,7 +208,6 @@ public class Selettore {
 					linkSempliceType = linkSemplice.getStringProperty("linkType");
 				}
 				if (linkSemplice != null && (!"".equals(linkSempliceType) && "I".equals(linkSempliceType))) {
-
 					String linkSempHref = "";
 					if("I".equals(linkSempliceType)){
 						linkSempHref = linkSemplice.getStringProperty("linkInterno");
@@ -227,7 +223,6 @@ public class Selettore {
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
-
 		return stringbuf.toString();
 
 	}
@@ -264,7 +259,7 @@ public class Selettore {
 		}else if (type.contains(".doc")) {
 			return DOCICON;
 		} else if (type.contains(".docx")) {
-			return XLSICON;
+			return DOCICON;
 		} else if (type.contains(".epub")) {
 			return EPUBICON;
 		} else if (type.contains(".wmv")) {
@@ -303,6 +298,7 @@ public class Selettore {
 			return PKCS;
 		} else {
 			return null;
+			
 		}
 
 	}
@@ -350,7 +346,6 @@ public class Selettore {
 			} else if (s.endsWith("&nbsp;-&nbsp;")) {
 				s = s.substring(0, s.lastIndexOf("&nbsp;-&nbsp;"));
 			}
-
 		}
 		s += "</span>";
 
@@ -386,22 +381,16 @@ public class Selettore {
 		List<Contentlet> nullList = new ArrayList<Contentlet>();
 		if( listOfElements != null && listOfElements.size() > 0  ) {
 			for (Object object : listOfElements) {
-
 				if (object instanceof Contentlet) {
-
 					Date dataEmanazioneField = ((Contentlet) object).getDateProperty("dataEmanazione");
-
 					if (dataEmanazioneField != null && UtilMethods.isSet(((Contentlet) object).getIdentifier())) {
 						nullList.add((Contentlet) object);
 					} else {
 						orderedList.add((Contentlet) object);
 					}
-
 				}
-
 			}
-
-			boolean merge = nullList.addAll(orderedList);
+			nullList.addAll(orderedList);
 		}
 		return nullList;
 	}
@@ -437,179 +426,12 @@ public class Selettore {
 			if (!folderTranslation.equals("")) {
 				Category cat = APILocator.getCategoryAPI().findByKey(category, APILocator.getUserAPI().getSystemUser(), true);
 				System.out.println(  " Categoria trovata " + cat );
-
 				if( cat!= null && UtilMethods.isSet(cat.getInode() ) ){
 					List<Category> cats = new ArrayList<Category>();
 					cats.add(cat);
 					linksList = APILocator.getContentletAPI().find(cats, Long.parseLong(languageID), true,  sortOrder , user, true);
 					nullLast(linksList);
 				}
-				
-				
-//				String qLinkSemplice = "";
-//				qLinkSemplice = "+StructureName:Linksemplice +languageId:" + languageID + " +live:true +parentPath:" + path + "/";
-//
-//				List<Contentlet> linksSempliceList = APILocator.getContentletAPI().search(qLinkSemplice, -1, 0, "modDate desc", user, false);
-//
-//				stringbuf.append("<div id=\"dt_" + folderTranslation + "\">");
-//				stringbuf.append("<div class=\"titolo\"><h3>" + folderTranslation + "</h3></div>");
-//				stringbuf.append("<ul>");
-			
-//				if(linksList != null  )	{				 
-//					System.out.println(  " Nuemro contentlet trovate   " + linksList.size() );
-//					for (Contentlet link : linksList) {
-//						String titolo = "";
-//						String sommario = "";
-//						String href = "";
-//						String type = "";
-//						String labelType = "";
-//						String size = "";
-//						String allegatoId = "";
-//						String src = null;
-//						String ms = "";
-//
-//						Structure st = link.getStructure();
-//						if (UtilMethods.isSet(link.getStringProperty("titoloLungo"))) {
-//							titolo = link.getStringProperty("titoloLungo");
-//						} else {
-//							titolo = link.getStringProperty("titolo");
-//						}
-//						String mostraS =link.getStringProperty("mostraSommario");
-//						if (UtilMethods.isSet( mostraS )) {
-//							ms = mostraS;
-//							if (link.getStringProperty("sommario") != null) {
-//								sommario = link.getStringProperty("sommario");
-//							}	
-//						}
-//						System.out.println(  " Struttture contentlet  " + st.getVelocityVarName() );
-//
-//						if( st.getVelocityVarName().equalsIgnoreCase("Link") ) {
-//							String linkType = link.getStringProperty("linkType");
-//
-//							if ("A".equals(linkType)) {
-//								Contentlet allegatoDettaglio;
-//
-//								if (UtilMethods.isSet(link.getStringProperty("allegatoId"))) {
-//									allegatoId = link.getStringProperty("allegatoId");
-//								} else if (UtilMethods.isSet(link.getStringProperty("allegato"))) {
-//									allegatoId = link.getStringProperty("allegato");
-//								}
-//
-//								String queryForAllegatoDettaglio = "";
-//
-//								if (allegatoId != null && !"".equals(allegatoId)) {
-//
-//									queryForAllegatoDettaglio = "+identifier:" + allegatoId + " +languageId:" + languageID;
-//									List<Contentlet> allegatoList = APILocator.getContentletAPI().search( queryForAllegatoDettaglio, -1, 0, null, user, false);
-//
-//									if (allegatoList.size() > 0) {
-//										allegatoDettaglio = allegatoList.get(0);
-//										File file = allegatoDettaglio.getBinary("fileAsset");
-//										size = FileSizeUtil.getsize(file);
-//										type = file.getName().substring(file.getName().lastIndexOf("."));
-//										labelType = assignType(type);
-//										String id = allegatoDettaglio.getIdentifier();
-//										Identifier i = APILocator.getIdentifierAPI().loadFromCache(id);
-//										if (i == null) {
-//											i = APILocator.getIdentifierAPI().find(id);
-//										}
-//
-//										src = assignIcon(type);
-//										if (src.equals(WMV)) {
-//											href = i.getPath() + "internal&action=video.action";
-//										} else {
-//											href = i.getPath();
-//										}
-//
-//									}
-//
-//								}
-//
-//							} else if ("I".equals(linkType)) {
-//								String li = link.getStringProperty("linkInterno");
-//
-//								if (li != null && !"".equals(li) && li.endsWith(".html")) {
-//
-//									HTMLPage linkedPage = pageAPI.loadPageByPath(li, hostId);
-//									Template linkedPageTemplate = null;
-//
-//									if(UtilMethods.isSet(linkedPage) && linkedPage.isLive()){
-//										linkedPageTemplate = templateApi.findLiveTemplate(linkedPage.getTemplateId(), user, true);
-//
-//										Folder folder = folderAPI.findFolderByPath(li.substring(0, li.lastIndexOf("/")), hostId, user, true);
-//										href = li.substring(0, li.lastIndexOf("/") + 1);
-//
-//										if(UtilMethods.isSet(linkedPageTemplate) && linkedPageTemplate.getTitle().toLowerCase().contains("video")){							
-//											src = WMVICON;
-//										} else if (folderAPI.findMenuItems(folder, user, true).size() > 0) {
-//											src = FOLDERICON;								
-//										} else {
-//											src = PAGEICON;
-//										}
-//									}
-//								}
-//
-//							} else {
-//
-//								//	if (link.getStringProperty("identificativo") != null && !"".equals(link.getStringProperty("identificativo"))) {
-//								//	href = path + "/" + link.getStringProperty("identificativo");
-//								href =  link.getStringProperty("linkEsterno");
-//								src = ESTERNO;
-//								//	}
-//							}
-//						}else if( st.getVelocityVarName().equalsIgnoreCase("Dettaglio") ) {		
-//							String fold = link.getFolder() ;
-//							System.out.println(  " link.getFolder()   " +fold );
-//							Identifier id = APILocator.getIdentifierAPI().loadFromCache(link.getFolder());
-//							System.out.println(  "UtilMethods.isSet(id)    " +UtilMethods.isSet(id) );
-//							src = PAGEICON;
-//							if( UtilMethods.isSet(id) && UtilMethods.isSet(id.getId() )){
-//								href = id.getPath();
-//							}else{
-//								Folder f = APILocator.getFolderAPI().find(fold, user, true );
-//								Identifier ide = APILocator.getIdentifierAPI().loadFromCache(f.getIdentifier() );
-//								System.out.println(  "UtilMethods.isSet(ide)    " +UtilMethods.isSet(ide) );
-//								if( UtilMethods.isSet(ide) && UtilMethods.isSet(ide.getId() )){
-//									href = ide.getPath();
-//									System.out.println(  "href  " +href );
-//								}
-//							}
-//						}
-//
-//						if (!"".equals(href)) {
-//							stringbuf.append("<li>");
-//							stringbuf.append("<a href=\"" + href + "\"><img src=\"" + src + "\" class=\"ico\" width=\"14\" height=\"14\">" + titolo + "</a> " + buildSpan(link, size, labelType));
-//							if (!"".equals(ms) && !"".equals(sommario)) {
-//								stringbuf.append("<br/>" + sommario);
-//							}
-//							stringbuf.append("</li>");
-//						}
-//
-//					}
-//				}
-
-//				Contentlet linkSemplice = null;
-//				String linkSempliceType = "";
-//				if (linksSempliceList.size() > 0){
-//					linkSemplice = linksSempliceList.get(0);
-//					linkSempliceType = linkSemplice.getStringProperty("linkType");
-//				}
-//
-//				if (linkSemplice != null && (!"".equals(linkSempliceType) && "I".equals(linkSempliceType))) {
-//
-//					String linkSempHref = "";
-//					if("I".equals(linkSempliceType)){
-//						linkSempHref = linkSemplice.getStringProperty("linkInterno");
-//					} else {
-//						linkSempHref = path;
-//					}
-//
-//					String titolo = linkSemplice.getStringProperty("titolo");
-//					stringbuf.append("<li class=\"noborder\"><a href=\"" + linkSempHref + "\" class=\"altri\">" + titolo + "</a></li>");
-//				}
-//
-//				stringbuf.append("</ul>");
-//				stringbuf.append("</div>");
 
 			}
 		}catch (Exception e) {

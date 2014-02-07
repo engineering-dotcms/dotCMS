@@ -187,8 +187,8 @@ public class ListingUtil implements ViewTool {
 			HibernateUtil hu = new HibernateUtil(com.dotmarketing.portlets.contentlet.business.Contentlet.class);
 			int offset = contentsPerPage * (currentPage - 1);
 			hu.setSQLQuery( completeQuery );
-			hu.setFirstResult( offset );
-			hu.setMaxResults( contentsPerPage );
+			hu.setFirstResult(offset);
+			hu.setMaxResults(contentsPerPage);
 			List<com.dotmarketing.portlets.contentlet.business.Contentlet> fatties = hu.list();
 			contentlets =  convertContentsToContentMap( fatties );
 			if( UtilMethods.isSet(sort) && ( sort.indexOf("#") != -1  ||  sort.indexOf("t") != -1    ||  sort.indexOf("T") != -1   )){
@@ -197,7 +197,7 @@ public class ListingUtil implements ViewTool {
 			if( UtilMethods.isSet(sort) && sort.indexOf("D")  == -1 ){
 				sort = sort+"-D" ;
 			}
-			else if( !UtilMethods.isSet(sort)){
+			else if(!UtilMethods.isSet(sort)){
 				return  contentlets;
 			}
 			//sort deve essere fornito nel valore 
@@ -299,11 +299,6 @@ public class ListingUtil implements ViewTool {
 		String defaultSort = addPullSortOrder( sort , f );
 		String folderURI = APILocator.getIdentifierAPI().loadFromCache(  folder.getIdentifier()).getURI() + "/";
 
-		//		String innerQuery = "select contentlet.identifier from contentlet contentlet  , " +
-		//		"   tree t , structure struct, contentlet_version_info cvi " +
-		//		"   where  cvi.identifier = contentlet.identifier and   relation_type = 'Parent_Dettaglio-Child_Link' " +
-		//		" 	and struct.velocity_var_name =  'Link'  and cvi.identifier = child  and struct.inode = contentlet.structure_inode "; 
-
 		String query = "select {contentlet.*} from   contentlet contentlet , "
 			+ " inode contentlet_1_  ,identifier identifier , contentlet_version_info cvi, structure st  " + " where  "
 			+ "(contentlet.inode = contentlet_1_.inode)  	and   cvi.identifier = identifier.id   and   cvi.identifier = contentlet.identifier "
@@ -314,8 +309,7 @@ public class ListingUtil implements ViewTool {
 			+ " and cvi.identifier  not in ( "+innerQuery +" )" 
 			+ " and cvi.identifier  not in ( "+ addQuery(folderURI) +" )"
 			+ defaultSort  ;
-
-		return  selectContentlets( query ,  currentPage,  contentsPerPage,  sort );
+		return  selectContentlets( query, currentPage, contentsPerPage, sort );
 	}
 
 
