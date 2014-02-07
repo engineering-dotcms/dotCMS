@@ -49,7 +49,7 @@
 		}
 		myCp = new dojox.layout.ContentPane({
 			id : "clusterViewContent"
-		}).placeAt("listingClusterView");
+		}).placeAt("clusterView");
 
 		myCp.attr("href", url);
 		myCp.refresh();
@@ -73,17 +73,6 @@
 	<div id="mainTabContainer" dojoType="dijit.layout.TabContainer" dolayout="false">
 
   		<div id="clusterView" dojoType="dijit.layout.ContentPane" title="<%= LanguageUtil.get(pageContext, "health_checker_cluster_view") %>" >
-  			<div id="clusterViewDetail">
-				<%= LanguageUtil.get(pageContext, "health_Cluster_View") %> <%=df.format(new GregorianCalendar().getTime())%>: <br />
-				<strong><%=HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView()%></strong>
-				<br />
-				<br />
-				<%= LanguageUtil.get(pageContext, "health_Creator") %>:<br /> 
-				<strong><%=HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView().getCreator()%></strong>
-			</div>
-			<hr>
-			<div>&nbsp;</div>
-			<div id="listingClusterView"></div>
 		</div>
 	</div>
 </div>

@@ -1,11 +1,14 @@
 package com.eng.dotcms.healthchecker.ajax;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.servlets.ajax.AjaxAction;
 import com.dotmarketing.util.Logger;
 import com.eng.dotcms.healthchecker.HealthClusterViewStatus;
@@ -37,20 +40,25 @@ public class HealthCheckerAjax extends AjaxAction {
     }
 	
 	public void refreshCache(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-		Map<String,String> pmap=getURIParams();
-		String address = pmap.get("address");
-		if(!healthAPI.isLeaveNode(address)){
-			String port = pmap.get("port");
-			String protocol = pmap.get("protocol");
-			HealthClusterViewStatus status = new HealthClusterViewStatus();
-			status.setAddress(address);
-			status.setPort(port);
-			status.setProtocol(protocol);
-	        String responseRest = HealthUtil.callRESTService(status,"/joinCluster");
-	        response.getWriter().println(responseRest);
-		}else
-			response.getWriter().println("ALREADY_OOC");
+		try{
+			Map<String,String> pmap=getURIParams();
+			String address = pmap.get("address");
+			if(!healthAPI.isLeaveNode(address)){
+				String port = pmap.get("port");
+				String protocol = pmap.get("protocol");
+				HealthClusterViewStatus status = new HealthClusterViewStatus();
+				status.setAddress(address);
+				status.setPort(port);
+				status.setProtocol(protocol);
+				Map<String, String> params = new HashMap<String, String>();
+				params.put("unlock", "KO");
+		        String responseRest = HealthUtil.callRESTService(status,"/joinCluster");
+		        response.getWriter().println(responseRest);
+			}else
+				response.getWriter().println("ALREADY_OOC");
+		}catch(DotDataException e){
+			response.getWriter().println("KO");
+		}
 	}
 	
 	@Override

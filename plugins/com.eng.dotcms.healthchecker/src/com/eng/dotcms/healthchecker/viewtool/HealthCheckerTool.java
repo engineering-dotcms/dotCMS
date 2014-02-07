@@ -33,6 +33,7 @@ public class HealthCheckerTool implements ViewTool {
 		try{
 			return checkCacheStatus();
 		}catch(Exception e){
+//			Logger.error(getClass(), "Error in HealthCheckerTool.",e);
 			return false;
 		}
 	}
@@ -49,29 +50,32 @@ public class HealthCheckerTool implements ViewTool {
 	@SuppressWarnings("deprecation")
 	private boolean checkCacheStatus() throws Exception {
 		boolean cacheHealth = !healthAPI.isLeaveNode(healthClusterChannel.getLocalAddress());
+		Logger.debug(getClass(), "Is in cluster? " + cacheHealth);
 		Logger.debug(getClass(), "Cluster View  (Health): 	"+healthClusterChannel.getView().toString());
 		Logger.debug(getClass(), "Local Address (Health): 	"+healthClusterChannel.getLocalAddress().toString());
 		Logger.debug(getClass(), "Cluster View  (Cache): 	"+cacheChannel.getView().toString());
 		Logger.debug(getClass(), "Local Address (Cache): 	"+cacheChannel.getLocalAddress().toString());
-		boolean esHealth = false;
+		boolean esHealth = true;
 		ClusterHealthStatus status = getClusterStatus();
 		if(!status.equals(ClusterHealthStatus.RED)){
+			Logger.debug(getClass(), "Il cluster ES è " + status.toString());
 			Map<String, ClusterIndexHealth> map = APILocator.getESIndexAPI().getClusterHealth();
 			
 			for(String indexName: APILocator.getESIndexAPI().listIndices()){
 				ClusterIndexHealth health = map.get(indexName);
 				if(health.getStatus().equals(ClusterHealthStatus.RED)){
+					Logger.debug(getClass(), "L'indice: " + indexName + " è in stato RED");
 					esHealth = false;
 					break;
 				}
 			}
 		}else
-			esHealth = true;
-		
+			esHealth = false;
+		Logger.debug(getClass(), "return " + cacheHealth +" e "+esHealth);
 		return esHealth&&cacheHealth;
 	}
 	
-	private ClusterHealthStatus getClusterStatus() throws Exception{
+	private ClusterHealthStatus getClusterStatus() throws Exception {
 		AdminClient client=new ESClient().getClient().admin();
 		ActionFuture<ClusterHealthResponse> nir = client.cluster().health(new ClusterHealthRequest());
 		ClusterHealthResponse res  = nir.actionGet();		

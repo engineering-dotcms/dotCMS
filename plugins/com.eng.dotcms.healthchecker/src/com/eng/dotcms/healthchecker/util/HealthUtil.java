@@ -1,5 +1,7 @@
 package com.eng.dotcms.healthchecker.util;
 
+import java.io.IOException;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -8,7 +10,10 @@ import java.util.concurrent.TimeUnit;
 import org.jgroups.Address;
 import org.jgroups.View;
 
+import com.dotcms.rest.HealthService;
 import com.dotmarketing.exception.DotDataException;
+import com.dotmarketing.util.Config;
+import com.dotmarketing.util.UtilMethods;
 import com.eng.dotcms.healthchecker.HealthChecker;
 import com.eng.dotcms.healthchecker.HealthClusterViewStatus;
 import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
@@ -39,13 +44,15 @@ public class HealthUtil {
 	@SuppressWarnings("deprecation")
 	public static List<Address> getJoined(View new_view) {
 		List<Address> joined = new ArrayList<Address>();
-		for(Address new_view_addr : new_view.getMembers()){
-			if(!HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress().equals(new_view_addr)){
-				if(healthAPI.isLeaveNode(new_view_addr)){
-					joined.add(new_view_addr);
+		try{
+			for(Address new_view_addr : new_view.getMembers()){
+				if(!HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress().equals(new_view_addr)){
+					if(healthAPI.isLeaveNode(new_view_addr)){
+						joined.add(new_view_addr);
+					}
 				}
 			}
-		}
+		}catch(DotDataException e){}
 		return joined;
 	}
 	
@@ -56,15 +63,29 @@ public class HealthUtil {
 			sb.append(_address[i]);
 			sb.append("-");
 		}
+		if(UtilMethods.isSet(Config.getStringProperty("HEALTH_CHECKER_ADDRESS_SUFFIX")))
+			return sb.toString().substring(0, sb.toString().length()-1).concat(Config.getStringProperty("HEALTH_CHECKER_ADDRESS_SUFFIX"));
 		return sb.toString().substring(0, sb.toString().length()-1); 
 	}
 	
 	
-	public static String callRESTService(HealthClusterViewStatus status, String operation){
-		ClientConfig clientConfig = new DefaultClientConfig();
-		Client client = Client.create(clientConfig);
-        WebResource webResource = client.resource(getRESTURL(status));
-        return webResource.path(operation).get(String.class);
+	public static String callRESTService(HealthClusterViewStatus status, String operation) {
+		try{
+			ClientConfig clientConfig = new DefaultClientConfig();
+			Client client = Client.create(clientConfig);
+			client.setConnectTimeout(20000);
+			client.setReadTimeout(60000);
+	        WebResource webResource = client.resource(getRESTURL(status));
+	        webResource = webResource.path(operation);
+	        return webResource.get(String.class);
+		}catch(Exception e){
+//			Logger.info(HealthUtil.class, "Exc: " + e.getCause().getClass());
+			if(e.getCause() instanceof ConnectException)
+				return HealthService.CONNECTION_EXC;
+			else {
+				return HealthService.SOCKET_EXC;
+			}
+		}
 	}
 	
 	public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
@@ -102,6 +123,11 @@ public class HealthUtil {
 		}else
 			return false;
 		
+	}
+	
+	public void runOSCommand(String...cmds) throws IOException{
+		ProcessBuilder pb = new ProcessBuilder(cmds);
+		pb.start();
 	}
 	
 	private static String getRESTURL(HealthClusterViewStatus status){

@@ -9,6 +9,7 @@ public class HealthChecker {
 	private HealthClusterAdministrator clusterAdmin;
 	private View lastView = null; 
 	private int countSuspect = 0;
+	private int countTimer = 0;
 	
 	private HealthChecker(){
 		healthEvent = new HealthEvent();
@@ -47,6 +48,14 @@ public class HealthChecker {
 		this.countSuspect = countSuspect;
 	}
 
+	public int getCountTimer() {
+		return countTimer;
+	}
+
+	public void setCountTimer(int countTimer) {
+		this.countTimer = countTimer;
+	}
+	
 	public void flush(){
 		healthEvent = new HealthEvent();
 	}

@@ -9,7 +9,6 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -113,11 +112,6 @@ public class HealthFilter implements Filter {
 				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.LOGGED_IN_USER_TAGS);
 				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.USER_FAVORITES);
 				        
-				        Cookie idCookie = new Cookie(com.dotmarketing.util.WebKeys.CMS_USER_ID_COOKIE, null);
-				        idCookie.setMaxAge(0);
-				        idCookie.setPath("/");
-				        res.addCookie(idCookie);
-				        
 				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.PREVIEW_MODE_SESSION);
 				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.EDIT_MODE_SESSION);
 				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.ADMIN_MODE_SESSION);
@@ -136,11 +130,6 @@ public class HealthFilter implements Filter {
 				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.LOGGED_IN_USER_TAGS);
 				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.USER_FAVORITES);
 				        
-				        Cookie idCookie = new Cookie(com.dotmarketing.util.WebKeys.CMS_USER_ID_COOKIE, null);
-				        idCookie.setMaxAge(0);
-				        idCookie.setPath("/");
-				        res.addCookie(idCookie);
-				        
 				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.PREVIEW_MODE_SESSION);
 				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.EDIT_MODE_SESSION);
 				        req.getSession().removeAttribute(com.dotmarketing.util.WebKeys.ADMIN_MODE_SESSION);
@@ -156,8 +145,10 @@ public class HealthFilter implements Filter {
 						return;
 					}
 							
-				}else
+				}else{
 					chain.doFilter(request, response);
+				}
+					
 			}else
 				chain.doFilter(request, response);
 			
@@ -171,6 +162,9 @@ public class HealthFilter implements Filter {
 			e.printStackTrace();
 			chain.doFilter(request, response);
 		} catch (DotSecurityException e) {
+			e.printStackTrace();
+			chain.doFilter(request, response);
+		} catch (Exception e) {
 			e.printStackTrace();
 			chain.doFilter(request, response);
 		}

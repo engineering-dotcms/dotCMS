@@ -9,7 +9,7 @@ public class QueryBuilder {
 	public static final String ORACLE_ADD_HEALTH_TABLE					=	"CREATE TABLE HEALTH_EVENT ( " +
 																			"	ADDRESS			VARCHAR2(30)  										NOT NULL, " +
 																			"	CLUSTER_VIEW	VARCHAR2(400) 										NOT NULL, " +
-																			"	STATUS			VARCHAR2(10) check (STATUS in ('JOIN','LEAVE'))  	NOT NULL, " +
+																			"	STATUS			VARCHAR2(10) check (STATUS in ('JOIN','LEFT'))  	NOT NULL, " +
 																			"	WRITTEN_BY		VARCHAR2(30)  										NOT NULL, " +
 																			"	MOD_DATE		TIMESTAMP	  										NOT NULL, " +
 																			" 	CONSTRAINT health_checker_pk PRIMARY KEY(ADDRESS,STATUS)" +
@@ -20,9 +20,10 @@ public class QueryBuilder {
 																			"	ADDRESS			VARCHAR2(30)  										NOT NULL, " +
 																			"	PORT			VARCHAR2(10)  										NOT NULL, " +
 																			"	PROTOCOL		VARCHAR2(5)   										NOT NULL, " +
-																			"	STATUS			VARCHAR2(10) check (STATUS in ('JOIN','LEAVE'))  	NOT NULL, " +
+																			"	STATUS			VARCHAR2(10) check (STATUS in ('JOIN','LEFT'))  	NOT NULL, " +
 																			"	CREATOR			CHAR 		 check (CREATOR in ('N','Y'))   		NOT NULL, " +
-																			"	MOD_DATE		TIMESTAMP	  										NOT NULL, " +																			
+																			"	MOD_DATE		TIMESTAMP	  										NOT NULL, " +
+																			"	OUT_FOR_TIMER	CHAR		 check (OUT_FOR_TIMER in ('N','Y'))   	NOT NULL, " +																			
 																			" 	CONSTRAINT health_cluster_pk PRIMARY KEY(ID)" +
 																			")";
 		
@@ -50,11 +51,15 @@ public class QueryBuilder {
 	
 	public static final String ORACLE_DELETE_HEALTH						=	"DELETE FROM HEALTH_EVENT WHERE ADDRESS = ? AND STATUS = ?";
 	
-	public static final String ORACLE_CHECK_LEAVE						=	"SELECT count(*) AS NUM_LEAVE FROM HEALTH_EVENT WHERE STATUS='LEAVE'";
+	public static final String ORACLE_CHECK_LEAVE						=	"SELECT count(*) AS NUM_LEAVE FROM HEALTH_EVENT WHERE STATUS = ?";
 	
-	public static final String ORACLE_GET_NODE_LEAVE					=	"SELECT * FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ? AND STATUS='LEAVE' ORDER BY MOD_DATE DESC";
+	public static final String ORACLE_GET_NODE_LEAVE					=	"SELECT * FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ? ORDER BY MOD_DATE DESC";
 	
-	public static final String ORACLE_INSERT_HEALTH_CLUSTER_VIEW		=	"INSERT INTO HEALTH_CLUSTER_VIEW (ID, ADDRESS, PORT, PROTOCOL, STATUS, CREATOR, MOD_DATE) VALUES (?,?,?,?,?,?,?)";
+	public static final String ORACLE_GET_DATE_NODE_LEAVE				=	"SELECT MOD_DATE FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ? ORDER BY MOD_DATE DESC";
+	
+	public static final String ORACLE_INSERT_HEALTH_CLUSTER_VIEW		=	"INSERT INTO HEALTH_CLUSTER_VIEW (ID, ADDRESS, PORT, PROTOCOL, STATUS, CREATOR, MOD_DATE, OUT_FOR_TIMER) VALUES (?,?,?,?,?,?,?,?)";
+	
+	public static final String ORACLE_UPDATE_HEALTH_CLUSTER_VIEW_TIMER	=	"UPDATE HEALTH_CLUSTER_VIEW SET OUT_FOR_TIMER = ?, MOD_DATE = ? WHERE ADDRESS = ? AND STATUS = ?";
 	
 	public static final String ORACLE_UPDATE_HEALTH_CLUSTER_CREATOR 	= 	"UPDATE HEALTH_CLUSTER_VIEW SET CREATOR = ? " +
 																			"WHERE ID = ( " +
@@ -70,13 +75,13 @@ public class QueryBuilder {
 	
 	public static final String ORACLE_DELETE_HEALTH_CLUSTER_VIEW		=	"DELETE FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ?";
 	
-	public static final String ORACLE_GET_HEALTH_CLUSTER_VIEW_STATUS	=	"SELECT hcv.ID, hcv.ADDRESS, hcv.PORT, hcv.PROTOCOL, hcv.STATUS, hcv.CREATOR, hcv.MOD_DATE, hl.OPERATION " +
+	public static final String ORACLE_GET_HEALTH_CLUSTER_VIEW_STATUS	=	"SELECT hcv.ID, hcv.ADDRESS, hcv.PORT, hcv.PROTOCOL, hcv.STATUS, hcv.CREATOR, hcv.MOD_DATE, hl.OPERATION, hcv.OUT_FOR_TIMER " +
 																			"FROM HEALTH_CLUSTER_VIEW hcv LEFT JOIN HEALTH_LOCK hl ON hcv.ADDRESS = hl.ADDRESS " +
 																			"ORDER BY hcv.MOD_DATE desc";
 	
 	public static final String ORACLE_GET_SINGLE_CLUSTER_VIEW_STATUS	=	"SELECT * FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ?";
 	
-	public static final String ORACLE_CHECK_JOIN_AFTER_LEAVE			=	"SELECT count(*) AS NUM_JOINED_AFTER FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ? AND STATUS = 'JOIN' AND MOD_DATE > ?";
+	public static final String ORACLE_CHECK_JOIN_AFTER_LEAVE			=	"SELECT count(*) AS NUM_JOINED_AFTER FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ? AND STATUS = ? AND MOD_DATE > ?";
 	
 	public static final String ORACLE_CHECK_NEW_CONTENTLET				=	"SELECT count(*) AS NUM_CONTENTLETS FROM CONTENTLET_VERSION_INFO WHERE VERSION_TS > ? AND VERSION_TS < ?";
 	
@@ -86,4 +91,5 @@ public class QueryBuilder {
 	
 	public static final String ORACLE_CHECK_NEW_TEMPLATE				=	"SELECT count(*) AS NUM_TEMPLATES FROM TEMPLATE_VERSION_INFO WHERE VERSION_TS > ? AND VERSION_TS < ?";
 	
+	public static final String ORACLE_GET_ALL_SERVERS_IN_CLUSTER		=	"SELECT DISTINCT ADDRESS FROM HEALTH_EVENT WHERE ADDRESS != ?";
 }

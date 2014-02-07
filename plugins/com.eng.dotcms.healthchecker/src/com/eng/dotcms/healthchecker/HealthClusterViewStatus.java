@@ -10,6 +10,7 @@ public class HealthClusterViewStatus {
 	private String protocol;
 	private String status;
 	private boolean creator;
+	private boolean outForTimer;
 	private Date modDate;
 	
 	// from health_lock
@@ -62,6 +63,12 @@ public class HealthClusterViewStatus {
 	}
 	public void setOperation(Operation operation) {
 		this.operation = operation;
+	}
+	public boolean isOutForTimer() {
+		return outForTimer;
+	}
+	public void setOutForTimer(boolean outForTimer) {
+		this.outForTimer = outForTimer;
 	}
 	public String toString(){
 		StringBuilder sb = new StringBuilder();

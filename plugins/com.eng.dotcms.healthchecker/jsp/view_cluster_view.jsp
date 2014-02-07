@@ -1,3 +1,4 @@
+<%@page import="java.util.GregorianCalendar"%>
 <%@page import="com.eng.dotcms.healthchecker.Operation"%>
 <%@page import="com.eng.dotcms.healthchecker.util.HealthUtil"%>
 <%@page import="com.eng.dotcms.healthchecker.HealthChecker"%>
@@ -81,78 +82,91 @@ function refreshCache(address,port,protocol,id){
 }
 
 </script>
-
-<div style="padding-top: 5px">
-			
-			<table  class="listingTable" style="width:95%; float:left; margin: 0 0 0 10px">
-				<tr style="line-height:20px; padding-bottom: 15px">					
-					<th nowrap="nowrap" style="padding-left: 10px; width: 20%">
-						<%= LanguageUtil.get(pageContext, "health_Server") %>
-					</th>
-					<th align="center" style="padding-left: 10px; font-size: 12px; width: 5%" >
-						<%= LanguageUtil.get(pageContext, "health_Port") %>
-					</th>
-					<th align="center" style="padding-left: 10px; font-size: 12px; width: 5%" >
-						<%= LanguageUtil.get(pageContext, "health_Protocol") %>
-					</th>					
-					<th align="center" style="padding-left: 10px; width: 5%">
-						<%= LanguageUtil.get(pageContext, "health_Status") %>
-					</th>
-					<th align="right" style="padding-left: 10px; width: 20%">
-						<%= LanguageUtil.get(pageContext, "health_Date") %>
-					</th>
-					<th align="center" style="padding-left: 10px; width: 5%">
-					</th>	
-					<th align="center" style="padding-left: 10px; width: 5%">
-					</th>					
-					<th align="center" style="padding-left: 10px; width: 40%">
-					</th>				
-				</tr>
-	<%
-			boolean hasServers = view.size()>0;
-			for(HealthClusterViewStatus singleView : view) {
-	%>
-				<tr <%if(Operation.RESTARTING.equals(singleView.getOperation())) {%> class="restarting" <%}%> style="line-height:20px; padding-bottom: 15px; <%if(_myAddress.equals(singleView.getAddress())) {%> font-weight: bold;<%}%>">
-					<td style="padding-left: 10px; font-size: 12px;" >
-						<%=singleView.getAddress()%>
-					</td>
-					<td style="padding-left: 10px; font-size: 12px" align="center" >
-						<%=singleView.getPort()%>
-					</td>
-					<td style="padding-left: 10px; font-size: 12px" align="center" >
-						<%=singleView.getProtocol()%>
-					</td>					
-					<td style="padding-left: 10px; font-size: 12px" >
-						<img src="/html/plugins/com.eng.dotcms.healthchecker/images/<%=singleView.getStatus().toLowerCase()%>_cluster.png" alt="<%=singleView.getStatus()%>" title="<%=singleView.getStatus()%>" />
-					</td>
-					<td style="padding-left: 10px; font-size: 12px" >
-						<%=df.format(singleView.getModDate())%>
-					</td>
-					<td style="padding-left: 10px; font-size: 12px" >
-						<%if(UtilMethods.isSet(singleView.getOperation().toString()) && !Operation.NOONE.equals(singleView.getOperation())){
-							out.println(singleView.getOperation().toString());
-						}%>
-					</td>
-					<td style="padding-left: 10px; font-size: 12px" >
-						<%if("JOIN".equals(singleView.getStatus()) && !Operation.RESTARTING.equals(singleView.getOperation()) && !Operation.STARTING.equals(singleView.getOperation())) {%>
-							<button <%if(Operation.FLUSHING.equals(singleView.getOperation())) {%> disabled="true" <%}%> id="refreshCacheBtn_<%=singleView.getId()%>" iconClass="reloadCache" dojoType="dijit.form.Button" onClick="refreshCache('<%=singleView.getAddress()%>','<%=singleView.getPort()%>','<%=singleView.getProtocol()%>','<%=singleView.getId()%>')">
-								<strong><%= LanguageUtil.get(pageContext, "health_Reload_Cache") %></strong>
-							</button>						
-                		<%}%>
-					</td>
-					
-					<td id="responseRefresh_<%=singleView.getId()%>" style="padding-left: 10px; font-size: 12px" >
-					</td>
-				</tr>
-
-
-		<%}%>
-			</table><br />						
-		<%if(!hasServers){ %>
-			<table style="width: 99%; border: 1px solid #D0D0D0">
-				<tr>
-					<td colspan="100" align="center"><%= LanguageUtil.get(pageContext, "health_No_Results") %></td>
-				</tr>
-			</table>
-		<%}%>
-</div>
+			<div id="clusterViewDetail">
+				<%= LanguageUtil.get(pageContext, "health_Cluster_View") %> <%=df.format(new GregorianCalendar().getTime())%>: <br />
+				<strong><%=HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView()%></strong>
+				<br />
+				<br />
+				<%= LanguageUtil.get(pageContext, "health_Creator") %>:<br /> 
+				<strong><%=HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getView().getCreator()%></strong>
+			</div>
+			<hr>
+			<div>&nbsp;</div>
+			<div id="listingClusterView">
+				<div style="padding-top: 5px">
+							
+							<table  class="listingTable" style="width:95%; float:left; margin: 0 0 0 10px">
+								<tr style="line-height:20px; padding-bottom: 15px">					
+									<th nowrap="nowrap" style="padding-left: 10px; width: 20%">
+										<%= LanguageUtil.get(pageContext, "health_Server") %>
+									</th>
+									<th align="center" style="padding-left: 10px; font-size: 12px; width: 5%" >
+										<%= LanguageUtil.get(pageContext, "health_Port") %>
+									</th>
+									<th align="center" style="padding-left: 10px; font-size: 12px; width: 5%" >
+										<%= LanguageUtil.get(pageContext, "health_Protocol") %>
+									</th>					
+									<th align="center" style="padding-left: 10px; width: 5%">
+										<%= LanguageUtil.get(pageContext, "health_Status") %>
+									</th>
+									<th align="right" style="padding-left: 10px; width: 20%">
+										<%= LanguageUtil.get(pageContext, "health_Date") %>
+									</th>
+									<th align="center" style="padding-left: 10px; width: 5%">
+									</th>	
+									<th align="center" style="padding-left: 10px; width: 5%">
+									</th>					
+									<th align="center" style="padding-left: 10px; width: 40%">
+									</th>				
+								</tr>
+					<%
+							boolean hasServers = view.size()>0;
+							for(HealthClusterViewStatus singleView : view) {
+								if(!singleView.isOutForTimer()) {
+					%>
+								<tr <%if(Operation.RESTARTING.equals(singleView.getOperation())) {%> class="restarting" <%}%> style="line-height:20px; padding-bottom: 15px; <%if(_myAddress.equals(singleView.getAddress())) {%> font-weight: bold;<%}%>">
+									<td style="padding-left: 10px; font-size: 12px;" >
+										<%=singleView.getAddress()%>
+									</td>
+									<td style="padding-left: 10px; font-size: 12px" align="center" >
+										<%=singleView.getPort()%>
+									</td>
+									<td style="padding-left: 10px; font-size: 12px" align="center" >
+										<%=singleView.getProtocol()%>
+									</td>					
+									<td style="padding-left: 10px; font-size: 12px" >
+										<img src="/html/plugins/com.eng.dotcms.healthchecker/images/<%=singleView.getStatus().toLowerCase()%>_cluster.png" alt="<%=singleView.getStatus()%>" title="<%=singleView.getStatus()%>" />
+									</td>
+									<td style="padding-left: 10px; font-size: 12px" >
+										<%=df.format(singleView.getModDate())%>
+									</td>
+									<td style="padding-left: 10px; font-size: 12px" >
+										<%if(UtilMethods.isSet(singleView.getOperation().toString()) && !Operation.NOONE.equals(singleView.getOperation())){
+											out.println(singleView.getOperation().toString());
+										}%>
+									</td>
+									<td style="padding-left: 10px; font-size: 12px" >
+										<%if("JOIN".equals(singleView.getStatus()) && !Operation.RESTARTING.equals(singleView.getOperation()) && !Operation.STARTING.equals(singleView.getOperation())) {%>
+											<button <%if(Operation.FLUSHING.equals(singleView.getOperation()) ||  Operation.JOINING.equals(singleView.getOperation())) {%> disabled="true" <%}%> id="refreshCacheBtn_<%=singleView.getId()%>" iconClass="reloadCache" dojoType="dijit.form.Button" onClick="refreshCache('<%=singleView.getAddress()%>','<%=singleView.getPort()%>','<%=singleView.getProtocol()%>','<%=singleView.getId()%>')">
+												<strong><%= LanguageUtil.get(pageContext, "health_Reload_Cache") %></strong>
+											</button>						
+				                		<%}%>
+									</td>
+									
+									<td id="responseRefresh_<%=singleView.getId()%>" style="padding-left: 10px; font-size: 12px" >
+									</td>
+								</tr>
+				
+				
+						<%		}
+							}%>
+							</table><br />						
+						<%if(!hasServers){ %>
+							<table style="width: 99%; border: 1px solid #D0D0D0">
+								<tr>
+									<td colspan="100" align="center"><%= LanguageUtil.get(pageContext, "health_No_Results") %></td>
+								</tr>
+							</table>
+						<%}%>
+				</div>
+			</div>
