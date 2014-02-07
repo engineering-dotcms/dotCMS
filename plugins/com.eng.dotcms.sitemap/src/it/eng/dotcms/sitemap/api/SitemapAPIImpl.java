@@ -3,6 +3,7 @@ package it.eng.dotcms.sitemap.api;
 import it.eng.dotcms.sitemap.wrapper.HtmlLinkWrapper;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -317,7 +318,13 @@ public class SitemapAPIImpl extends SitemapAPI {
 								}
 								break;
 							case 'E':
-								String pathE = idLink.getParentPath()+(String) linkShowOnMenu.get("identificativo");
+								String pathENorm = (String) linkShowOnMenu.get("linkEsterno");
+								String pathE =  pathENorm;
+								String pathE255 = (String) linkShowOnMenu.get("linkEsternomaggioreDi255");
+								if( UtilMethods.isSet(pathE255)){
+									pathE =  pathE255;
+								}
+								//idLink.getParentPath()+(String) linkShowOnMenu.get("identificativo");
 								linkWrapper = new HtmlLinkWrapper(
 										idLink.getId(),
 										depth,
@@ -395,6 +402,7 @@ public class SitemapAPIImpl extends SitemapAPI {
 			
 			if(siteMapContentlet != null) {
 				siteMapContentlet.setProperty("body", htmlMap.toString());
+				siteMapContentlet.setModDate( Calendar.getInstance().getTime() );
 				APILocator.getContentletAPI().publish(siteMapContentlet, sysUser, false);
 			}
 		}
