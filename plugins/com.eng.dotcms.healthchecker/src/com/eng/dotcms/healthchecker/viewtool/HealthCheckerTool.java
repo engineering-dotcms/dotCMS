@@ -58,20 +58,17 @@ public class HealthCheckerTool implements ViewTool {
 		boolean esHealth = true;
 		ClusterHealthStatus status = getClusterStatus();
 		if(!status.equals(ClusterHealthStatus.RED)){
-			Logger.debug(getClass(), "Il cluster ES è " + status.toString());
 			Map<String, ClusterIndexHealth> map = APILocator.getESIndexAPI().getClusterHealth();
 			
 			for(String indexName: APILocator.getESIndexAPI().listIndices()){
 				ClusterIndexHealth health = map.get(indexName);
 				if(health.getStatus().equals(ClusterHealthStatus.RED)){
-					Logger.debug(getClass(), "L'indice: " + indexName + " è in stato RED");
 					esHealth = false;
 					break;
 				}
 			}
 		}else
 			esHealth = false;
-		Logger.debug(getClass(), "return " + cacheHealth +" e "+esHealth);
 		return esHealth&&cacheHealth;
 	}
 	

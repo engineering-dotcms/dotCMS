@@ -52,7 +52,7 @@ public class HealthServlet extends HttpServlet {
 				// elimino i vecchi records riguardanti il nodo attuale in quanto sono in riavvio.
 				cleanNode(localAddress);
 				HibernateUtil.commitTransaction();	
-				healthAPI.insertHealthLock(localAddress, Operation.STARTING);
+//				healthAPI.insertHealthLock(localAddress, Operation.STARTING);
 				boolean isCreator = CacheLocator.getCacheAdministrator().getJGroupsChannel().getView().getCreator().equals(localAddress);
 				// inserisco il nodo nella cluster view con status JOINED.
 				healthAPI.insertHealthClusterView(localAddress,
@@ -106,7 +106,7 @@ public class HealthServlet extends HttpServlet {
 		healthAPI.deleteHealthLock(localAddress, Operation.RESTARTING);
 		healthAPI.deleteHealthLock(localAddress, Operation.FLUSHING);
 		healthAPI.deleteHealthLock(localAddress, Operation.JOINING);
-		healthAPI.deleteHealthLock(localAddress, Operation.STARTING);
+//		healthAPI.deleteHealthLock(localAddress, Operation.STARTING);
 	}
 	
 	private void startMonitoring() {
@@ -119,7 +119,7 @@ public class HealthServlet extends HttpServlet {
 		try {
 			String scriptFolder = pluginAPI.loadProperty("com.eng.dotcms.healthchecker", "script.folder");
 			String unlockRemotePublishScriptName = pluginAPI.loadProperty("com.eng.dotcms.healthchecker", "unlock.remote.publish.script.name");
-			Logger.info(getClass(), "Received ACK for block the remote publishing port.");
+			Logger.info(getClass(), "Received ACK for allow the remote publishing port.");
 			ProcessBuilder pb = new ProcessBuilder("nohup","/usr/bin/sudo", scriptFolder+unlockRemotePublishScriptName,"&");
 			pb.start();
 		} catch (DotDataException e) {

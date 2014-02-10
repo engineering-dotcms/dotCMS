@@ -5,6 +5,12 @@
 	<load-on-startup>11</load-on-startup>
 </servlet>
 
+<servlet>
+	<servlet-name>init-health-servlet</servlet-name>
+	<servlet-class>com.eng.dotcms.healthchecker.servlet.InitHealthServlet</servlet-class>
+	<load-on-startup>0</load-on-startup>
+</servlet>
+
 <filter>
 	<filter-name>HealthFilter</filter-name>
 	<filter-class>com.eng.dotcms.healthchecker.filter.HealthFilter</filter-class>

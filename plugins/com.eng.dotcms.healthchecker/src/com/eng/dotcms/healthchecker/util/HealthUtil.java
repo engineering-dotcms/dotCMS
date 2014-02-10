@@ -68,6 +68,18 @@ public class HealthUtil {
 		return sb.toString().substring(0, sb.toString().length()-1); 
 	}
 	
+	public static String getStringAddress(String address){
+		String[] _address = address.toString().split("[-]");
+		StringBuilder sb = new StringBuilder();
+		for(int i=0; i<_address.length-1; i++){
+			sb.append(_address[i]);
+			sb.append("-");
+		}
+		if(UtilMethods.isSet(Config.getStringProperty("HEALTH_CHECKER_ADDRESS_SUFFIX")))
+			return sb.toString().substring(0, sb.toString().length()-1).concat(Config.getStringProperty("HEALTH_CHECKER_ADDRESS_SUFFIX"));
+		return sb.toString().substring(0, sb.toString().length()-1); 
+	}
+	
 	
 	public static String callRESTService(HealthClusterViewStatus status, String operation) {
 		try{

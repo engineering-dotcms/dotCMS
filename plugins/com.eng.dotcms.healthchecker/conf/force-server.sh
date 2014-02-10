@@ -2,7 +2,7 @@
 LOG_FILE="/var/log/dotcms/logs/restart.log"
 echo "Start sleeping 5 sec" >> $LOG_FILE
 sleep 5
-service JBossWCMProd stop
+/usr/bin/sudo /sbin/service JBossWCMProd stop
 echo "JBoss stopped..." >> $LOG_FILE
 sleep 10
 echo "...restarting" >> $LOG_FILE
