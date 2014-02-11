@@ -1,11 +1,9 @@
-package com.eng.dotcms.healthchecker.servlet;
+package com.eng.dotcms.healthchecker.listener;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import com.dotmarketing.db.HibernateUtil;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.util.Logger;
@@ -14,13 +12,18 @@ import com.eng.dotcms.healthchecker.Operation;
 import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
 import com.eng.dotcms.healthchecker.util.HealthUtil;
 
-public class InitHealthServlet extends HttpServlet {
+public class InitHealthListener implements ServletContextListener {
 
-	private static final long serialVersionUID = -435887443748366784L;
 	private HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 	
+	
 	@Override
-	public void init(ServletConfig config) throws ServletException {
+	public void contextDestroyed(ServletContextEvent arg0) {
+		
+	}
+
+	@Override
+	public void contextInitialized(ServletContextEvent arg0) {
 		try {
 			String hostname = InetAddress.getLocalHost().getHostName();
 			hostname = HealthUtil.getStringAddress(hostname);
@@ -36,7 +39,6 @@ public class InitHealthServlet extends HttpServlet {
 		} catch (DotDataException e) {
 			Logger.warn(getClass(), "Warning. " + e.getMessage());
 		}
-		
 	}
 	
 	private void cleanNode(String localAddress) throws DotDataException {
@@ -48,5 +50,5 @@ public class InitHealthServlet extends HttpServlet {
 		healthAPI.deleteHealthLock(localAddress, Operation.JOINING);
 //		healthAPI.deleteHealthLock(localAddress, Operation.STARTING);
 	}
-	
+
 }
