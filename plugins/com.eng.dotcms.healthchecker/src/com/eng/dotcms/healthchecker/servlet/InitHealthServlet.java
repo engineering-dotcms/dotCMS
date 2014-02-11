@@ -3,6 +3,7 @@ package com.eng.dotcms.healthchecker.servlet;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
@@ -18,7 +19,7 @@ public class InitHealthServlet extends HttpServlet {
 	private HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 	
 	@Override
-	public void init() throws ServletException {
+	public void init(ServletConfig config) throws ServletException {
 		try {
 			String hostname = InetAddress.getLocalHost().getHostName();
 			hostname = HealthUtil.getStringAddress(hostname);
