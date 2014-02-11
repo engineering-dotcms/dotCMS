@@ -6,7 +6,7 @@
 </servlet>
 
 <listener>
-	<listener-class>com.eng.dotcms.healthchecker.servlet.InitHealthServlet</listener-class>	
+	<listener-class>com.eng.dotcms.healthchecker.listener.InitHealthListener</listener-class>	
 </listener>
 
 <filter>
