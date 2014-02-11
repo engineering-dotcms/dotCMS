@@ -396,6 +396,7 @@ public class HealthCheckerAPI {
 		deleteHealthLock(localAddress, Operation.RESTARTING);
 		deleteHealthLock(localAddress, Operation.FLUSHING);
 		deleteHealthLock(localAddress, Operation.JOINING);
+		deleteHealthLock(localAddress, Operation.STARTING);
 	}
 	
 	public void cleanNode(String localAddress) throws DotDataException {
@@ -405,5 +406,6 @@ public class HealthCheckerAPI {
 		deleteHealthLock(localAddress, Operation.RESTARTING);
 		deleteHealthLock(localAddress, Operation.FLUSHING);
 		deleteHealthLock(localAddress, Operation.JOINING);
+		deleteHealthLock(localAddress, Operation.STARTING);
 	}
 }

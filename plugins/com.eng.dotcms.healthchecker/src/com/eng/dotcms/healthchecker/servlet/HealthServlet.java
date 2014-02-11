@@ -54,7 +54,7 @@ public class HealthServlet extends HttpServlet {
 					// elimino i vecchi records riguardanti il nodo attuale in quanto sono in riavvio.
 					healthAPI.cleanNode(localAddress);
 					HibernateUtil.commitTransaction();	
-	//				healthAPI.insertHealthLock(localAddress, Operation.STARTING);
+					healthAPI.insertHealthLock(localAddress, Operation.STARTING);
 					boolean isCreator = CacheLocator.getCacheAdministrator().getJGroupsChannel().getView().getCreator().equals(localAddress);
 					// inserisco il nodo nella cluster view con status JOINED.
 					healthAPI.insertHealthClusterView(localAddress,
