@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.servlets.ajax.AjaxAction;
 import com.dotmarketing.util.Logger;
@@ -16,8 +17,6 @@ import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
 import com.eng.dotcms.healthchecker.util.HealthUtil;
 
 public class HealthCheckerAjax extends AjaxAction {
-	
-	private HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 	
 	@SuppressWarnings("rawtypes")
 	public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -41,6 +40,7 @@ public class HealthCheckerAjax extends AjaxAction {
 	
 	public void refreshCache(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try{
+			HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 			Map<String,String> pmap=getURIParams();
 			String address = pmap.get("address");
 			if(!healthAPI.nodeHasLeft(address)){
@@ -58,6 +58,8 @@ public class HealthCheckerAjax extends AjaxAction {
 				response.getWriter().println("ALREADY_OOC");
 		}catch(DotDataException e){
 			response.getWriter().println("KO");
+		}finally{
+			DbConnectionFactory.closeConnection();
 		}
 	}
 	

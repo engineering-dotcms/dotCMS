@@ -389,4 +389,21 @@ public class HealthCheckerAPI {
 		return servers;
 	}
 	
+	public void cleanNode(Address localAddress) throws DotDataException {
+		deleteHealthStatus(localAddress, AddressStatus.LEFT);
+		deleteHealthStatus(localAddress, AddressStatus.JOIN);
+		deleteHealthClusterView(localAddress);
+		deleteHealthLock(localAddress, Operation.RESTARTING);
+		deleteHealthLock(localAddress, Operation.FLUSHING);
+		deleteHealthLock(localAddress, Operation.JOINING);
+	}
+	
+	public void cleanNode(String localAddress) throws DotDataException {
+		deleteHealthStatus(localAddress, AddressStatus.LEFT);
+		deleteHealthStatus(localAddress, AddressStatus.JOIN);
+		deleteHealthClusterView(localAddress);
+		deleteHealthLock(localAddress, Operation.RESTARTING);
+		deleteHealthLock(localAddress, Operation.FLUSHING);
+		deleteHealthLock(localAddress, Operation.JOINING);
+	}
 }

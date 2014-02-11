@@ -4,19 +4,17 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+
+import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.db.HibernateUtil;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.util.Logger;
-import com.eng.dotcms.healthchecker.AddressStatus;
 import com.eng.dotcms.healthchecker.Operation;
 import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
 import com.eng.dotcms.healthchecker.util.HealthUtil;
 
 public class InitHealthListener implements ServletContextListener {
 
-	private HealthCheckerAPI healthAPI = new HealthCheckerAPI();
-	
-	
 	@Override
 	public void contextDestroyed(ServletContextEvent arg0) {
 		
@@ -25,12 +23,13 @@ public class InitHealthListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent arg0) {
 		try {
+			HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 			String hostname = InetAddress.getLocalHost().getHostName();
 			hostname = HealthUtil.getStringAddress(hostname);
 			Logger.info(getClass(), "STARTING CLUSTER HEALTH INITIALIZATION...");
 			HibernateUtil.startTransaction();
 			// elimino i vecchi records riguardanti il nodo attuale in quanto sono in riavvio.
-			cleanNode(hostname);
+			healthAPI.cleanNode(hostname);
 			healthAPI.insertHealthLock(hostname, Operation.STARTING);
 			HibernateUtil.commitTransaction();			
 			Logger.info(getClass(), "...CLUSTER HEALTH INITIALIZATION DONE!");
@@ -38,17 +37,9 @@ public class InitHealthListener implements ServletContextListener {
 			Logger.warn(getClass(), "Warning. " + e.getMessage());
 		} catch (DotDataException e) {
 			Logger.warn(getClass(), "Warning. " + e.getMessage());
+		} finally {
+			DbConnectionFactory.closeConnection();
 		}
 	}
 	
-	private void cleanNode(String localAddress) throws DotDataException {
-		healthAPI.deleteHealthStatus(localAddress, AddressStatus.LEFT);
-		healthAPI.deleteHealthStatus(localAddress, AddressStatus.JOIN);
-		healthAPI.deleteHealthClusterView(localAddress);
-		healthAPI.deleteHealthLock(localAddress, Operation.RESTARTING);
-		healthAPI.deleteHealthLock(localAddress, Operation.FLUSHING);
-		healthAPI.deleteHealthLock(localAddress, Operation.JOINING);
-//		healthAPI.deleteHealthLock(localAddress, Operation.STARTING);
-	}
-
 }

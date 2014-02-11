@@ -14,6 +14,7 @@ import org.jgroups.Address;
 import com.dotcms.rest.HealthService;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.business.CacheLocator;
+import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.db.HibernateUtil;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotHibernateException;
@@ -33,8 +34,7 @@ import com.eng.dotcms.healthchecker.util.HealthUtil;
 public class HealthServlet extends HttpServlet {
 
 	private PluginAPI pluginAPI = APILocator.getPluginAPI();
-	private static final long serialVersionUID = -3299155158485099069L;
-	private HealthCheckerAPI healthAPI = new HealthCheckerAPI();
+	private static final long serialVersionUID = -3299155158485099069L;	
 	private TimerTask timerTask = new HealthCheckerTimer();
 	private TimerTask checkNetworkTimerTask = new HealthCheckerCheckNetworkTimer();
 	private Timer timer = new Timer(true);
@@ -42,54 +42,59 @@ public class HealthServlet extends HttpServlet {
 	
 	@SuppressWarnings("deprecation")
 	public void init(ServletConfig config) throws ServletException {
-		Logger.info(getClass(), "BEGIN 	Init Health Cluster Handle");		
-		if(Config.getBooleanProperty("DIST_INDEXATION_ENABLED", false)){
-			Date now = new Date();
-			Address localAddress = CacheLocator.getCacheAdministrator().getJGroupsChannel().getLocalAddress();				
-			Date lastLeave = healthAPI.getDateOfLastLeaveEvent(localAddress);
-			try {
-				HibernateUtil.startTransaction();
-				// elimino i vecchi records riguardanti il nodo attuale in quanto sono in riavvio.
-				cleanNode(localAddress);
-				HibernateUtil.commitTransaction();	
-//				healthAPI.insertHealthLock(localAddress, Operation.STARTING);
-				boolean isCreator = CacheLocator.getCacheAdministrator().getJGroupsChannel().getView().getCreator().equals(localAddress);
-				// inserisco il nodo nella cluster view con status JOINED.
-				healthAPI.insertHealthClusterView(localAddress,
-						Config.getStringProperty("HEALTH_CHECKER_REST_PORT","80"),Config.getStringProperty("HEALTH_CHECKER_REST_PROTOCOL","http"),isCreator,
-						AddressStatus.JOIN,now,false);
-				HealthClusterAdministrator clusterAdmin = new HealthClusterAdministrator();				
-				clusterAdmin.init();
-				HealthChecker.INSTANCE.setClusterAdmin(clusterAdmin);				
-				// flush cache
-				if(!Config.getBooleanProperty("HEALTH_CHECKER_ALWAYS_FLUSH_CACHE", true) && HealthUtil.needFlushCache(lastLeave, now)) {
-					Logger.info(getClass(), "Need flushing cache.");									
-					CacheLocator.getCacheAdministrator().flushAlLocalOnlyl();
-				}
-				Logger.info(getClass(), "Starting monitoring...");
-				startMonitoring();
-				Logger.info(getClass(), "started!");
-			
-				Logger.info(getClass(), "END 	Init Health Cluster Handle");
-				if(Config.getBooleanProperty("HEALTH_CHECKER_LOCK_REMOTE_PUBLISH",false)){
-					HealthClusterViewStatus status = healthAPI.singleClusterView(localAddress);
-					Logger.info(getClass(), "The node "+localAddress+" is an endpoint for remote publish: unlock it");
-					String response = unlockLocalRemotePublish();
-					if(HealthService.STATUS_OK.equals(response))
-						Logger.info(getClass(), status.getAddress()+" Unlocked.");					
-				}
-				healthAPI.deleteHealthLock(localAddress, Operation.STARTING);
-			} catch (DotDataException e) {
-				Logger.error(getClass(), "Error in init HealthServlet: " + e.getMessage(), e);
-				
+		try{
+			HealthCheckerAPI healthAPI = new HealthCheckerAPI();
+			Logger.info(getClass(), "BEGIN 	Init Health Cluster Handle");		
+			if(Config.getBooleanProperty("DIST_INDEXATION_ENABLED", false)){
+				Date now = new Date();
+				Address localAddress = CacheLocator.getCacheAdministrator().getJGroupsChannel().getLocalAddress();				
+				Date lastLeave = healthAPI.getDateOfLastLeaveEvent(localAddress);
 				try {
-					HibernateUtil.rollbackTransaction();
-				} catch (DotHibernateException e1) {
-					Logger.fatal(getClass(), "DotHibernateException: " + e1.getMessage(), e);
+					HibernateUtil.startTransaction();
+					// elimino i vecchi records riguardanti il nodo attuale in quanto sono in riavvio.
+					healthAPI.cleanNode(localAddress);
+					HibernateUtil.commitTransaction();	
+	//				healthAPI.insertHealthLock(localAddress, Operation.STARTING);
+					boolean isCreator = CacheLocator.getCacheAdministrator().getJGroupsChannel().getView().getCreator().equals(localAddress);
+					// inserisco il nodo nella cluster view con status JOINED.
+					healthAPI.insertHealthClusterView(localAddress,
+							Config.getStringProperty("HEALTH_CHECKER_REST_PORT","80"),Config.getStringProperty("HEALTH_CHECKER_REST_PROTOCOL","http"),isCreator,
+							AddressStatus.JOIN,now,false);
+					HealthClusterAdministrator clusterAdmin = new HealthClusterAdministrator();				
+					clusterAdmin.init();
+					HealthChecker.INSTANCE.setClusterAdmin(clusterAdmin);				
+					// flush cache
+					if(!Config.getBooleanProperty("HEALTH_CHECKER_ALWAYS_FLUSH_CACHE", true) && HealthUtil.needFlushCache(lastLeave, now)) {
+						Logger.info(getClass(), "Need flushing cache.");									
+						CacheLocator.getCacheAdministrator().flushAlLocalOnlyl();
+					}
+					Logger.info(getClass(), "Starting monitoring...");
+					startMonitoring();
+					Logger.info(getClass(), "started!");
+				
+					Logger.info(getClass(), "END 	Init Health Cluster Handle");
+					if(Config.getBooleanProperty("HEALTH_CHECKER_LOCK_REMOTE_PUBLISH",false)){
+						HealthClusterViewStatus status = healthAPI.singleClusterView(localAddress);
+						Logger.info(getClass(), "The node "+localAddress+" is an endpoint for remote publish: unlock it");
+						String response = unlockLocalRemotePublish();
+						if(HealthService.STATUS_OK.equals(response))
+							Logger.info(getClass(), status.getAddress()+" Unlocked.");					
+					}
+					healthAPI.deleteHealthLock(localAddress, Operation.STARTING);
+				} catch (DotDataException e) {
+					Logger.error(getClass(), "Error in init HealthServlet: " + e.getMessage(), e);
+					
+					try {
+						HibernateUtil.rollbackTransaction();
+					} catch (DotHibernateException e1) {
+						Logger.fatal(getClass(), "DotHibernateException: " + e1.getMessage(), e);
+					}
+				} catch (Exception e) {
+					Logger.error(getClass(), "Errore generico.", e);
 				}
-			} catch (Exception e) {
-				Logger.error(getClass(), "Errore generico.", e);
 			}
+		} finally {
+			DbConnectionFactory.closeConnection();
 		}
 		
 	}
@@ -97,16 +102,6 @@ public class HealthServlet extends HttpServlet {
 	@Override
 	public void destroy() {
 		timer.cancel();
-	}
-
-	private void cleanNode(Address localAddress) throws DotDataException {
-		healthAPI.deleteHealthStatus(localAddress, AddressStatus.LEFT);
-		healthAPI.deleteHealthStatus(localAddress, AddressStatus.JOIN);
-		healthAPI.deleteHealthClusterView(localAddress);
-		healthAPI.deleteHealthLock(localAddress, Operation.RESTARTING);
-		healthAPI.deleteHealthLock(localAddress, Operation.FLUSHING);
-		healthAPI.deleteHealthLock(localAddress, Operation.JOINING);
-//		healthAPI.deleteHealthLock(localAddress, Operation.STARTING);
 	}
 	
 	private void startMonitoring() {

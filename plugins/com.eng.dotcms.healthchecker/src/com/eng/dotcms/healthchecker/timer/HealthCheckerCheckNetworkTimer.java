@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.TimerTask;
 import com.dotcms.rest.HealthService;
 import com.dotmarketing.business.APILocator;
+import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.plugin.business.PluginAPI;
 import com.dotmarketing.util.Config;
@@ -15,7 +16,6 @@ import com.eng.dotcms.healthchecker.util.HealthUtil;
 
 public class HealthCheckerCheckNetworkTimer extends TimerTask {
 
-	private HealthCheckerAPI healthAPI = new HealthCheckerAPI(); 
 	private PluginAPI pluginAPI = APILocator.getPluginAPI();
 	
 	@Override
@@ -30,6 +30,7 @@ public class HealthCheckerCheckNetworkTimer extends TimerTask {
 	@SuppressWarnings("deprecation")
 	private void checkNetwork(){
 		try {
+			HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 			HealthClusterViewStatus status = healthAPI.singleClusterView(HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress());			
 			String response = HealthUtil.callRESTService(status, "/checkNetwork");
 			if(HealthService.SOCKET_EXC.equals(response)) {
@@ -51,6 +52,8 @@ public class HealthCheckerCheckNetworkTimer extends TimerTask {
 			Logger.error(getClass(), "DotDataException: Error in checkNetwork",e);
 		}catch(IOException e){
 			Logger.error(getClass(), "IOException: Error in checkNetwork",e);
+		}finally{
+			DbConnectionFactory.closeConnection();
 		}
 	}
 	

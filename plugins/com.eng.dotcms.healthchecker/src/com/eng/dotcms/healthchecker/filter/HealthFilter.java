@@ -22,6 +22,7 @@ import com.dotcms.content.elasticsearch.util.ESClient;
 import com.dotmarketing.beans.Host;
 import com.dotmarketing.business.web.WebAPILocator;
 import com.dotmarketing.cache.VirtualLinksCache;
+import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.util.Logger;
@@ -33,8 +34,6 @@ import com.liferay.portal.SystemException;
 import com.liferay.portal.util.WebKeys;
 
 public class HealthFilter implements Filter {
-	
-	private HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 	
 	private static String DEFAULT_PATH_TO_PAGE = "/application/error/out-of-cluster.html";
 	
@@ -52,6 +51,7 @@ public class HealthFilter implements Filter {
 		String uri = req.getRequestURI();
 		if(!uri.contains("/api/bundlePublisher/publish")){
 			try {
+				HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 				if(null!=WebAPILocator.getUserWebAPI().getLoggedInUser(req)){
 					Address localAddress = HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress();
 					if(healthAPI.nodeHasLeft(localAddress)){
@@ -161,20 +161,17 @@ public class HealthFilter implements Filter {
 					chain.doFilter(request, response);
 				
 			} catch (PortalException e) {
-				e.printStackTrace();
 				chain.doFilter(request, response);
 			} catch (SystemException e) {
-				e.printStackTrace();
 				chain.doFilter(request, response);
-			} catch (DotDataException e) {
-				e.printStackTrace();
+			} catch (DotDataException e) {				
 				chain.doFilter(request, response);
 			} catch (DotSecurityException e) {
-				e.printStackTrace();
 				chain.doFilter(request, response);
 			} catch (Exception e) {
-				e.printStackTrace();
 				chain.doFilter(request, response);
+			}finally{
+				DbConnectionFactory.closeConnection();
 			}
 		}else{ // check if this node can publish			
 			int totalShards = getTotalShards();

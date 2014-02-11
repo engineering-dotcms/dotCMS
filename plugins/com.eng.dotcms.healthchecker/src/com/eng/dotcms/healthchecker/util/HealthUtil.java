@@ -11,6 +11,7 @@ import org.jgroups.Address;
 import org.jgroups.View;
 
 import com.dotcms.rest.HealthService;
+import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.util.Config;
 import com.dotmarketing.util.UtilMethods;
@@ -23,8 +24,6 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 
 public class HealthUtil {
-	
-	private static HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 	
 	public static boolean containsMember(View clusterView, Address address) {
 		String address_str = address.toString().split("[-]")[0];
@@ -45,6 +44,7 @@ public class HealthUtil {
 	public static List<Address> getJoined(View new_view) {
 		List<Address> joined = new ArrayList<Address>();
 		try{
+			HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 			for(Address new_view_addr : new_view.getMembers()){
 				if(!HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress().equals(new_view_addr)){
 					if(healthAPI.nodeHasLeft(new_view_addr)){
@@ -53,6 +53,10 @@ public class HealthUtil {
 				}
 			}
 		}catch(DotDataException e){}
+		finally{
+			DbConnectionFactory.closeConnection();
+		}
+		
 		return joined;
 	}
 	
@@ -116,25 +120,29 @@ public class HealthUtil {
 	 * @throws DotDataException
 	 */
 	public static boolean needFlushCache(Date leaveDate, Date joinDate) throws DotDataException {
-		if(null!=leaveDate){
-			int count = healthAPI.checkContentlet(leaveDate, joinDate);
-			if(count>0)
-				return true;
-			else
-				count = healthAPI.checkContainer(leaveDate, joinDate);
-			if(count>0)
-				return true;
-			else
-				count = healthAPI.checkHtmlPage(leaveDate, joinDate);
-			if(count>0)
-				return true;
-			else
-				count = healthAPI.checkTemplate(leaveDate, joinDate);
-			
-			return count > 0;
-		}else
-			return false;
-		
+		try{
+			HealthCheckerAPI healthAPI = new HealthCheckerAPI();
+			if(null!=leaveDate){
+				int count = healthAPI.checkContentlet(leaveDate, joinDate);
+				if(count>0)
+					return true;
+				else
+					count = healthAPI.checkContainer(leaveDate, joinDate);
+				if(count>0)
+					return true;
+				else
+					count = healthAPI.checkHtmlPage(leaveDate, joinDate);
+				if(count>0)
+					return true;
+				else
+					count = healthAPI.checkTemplate(leaveDate, joinDate);
+				
+				return count > 0;
+			}else
+				return false;
+		}finally{
+			DbConnectionFactory.closeConnection();
+		}
 	}
 	
 	public void runOSCommand(String...cmds) throws IOException{

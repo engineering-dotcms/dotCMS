@@ -7,6 +7,7 @@ import javax.ws.rs.Path;
 import com.dotcms.rest.WebResource;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.business.CacheLocator;
+import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.plugin.business.PluginAPI;
 import com.dotmarketing.util.Config;
@@ -17,7 +18,6 @@ import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
 @Path("/health")
 public class HealthService extends WebResource {
 
-	private HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 	private PluginAPI pluginAPI = APILocator.getPluginAPI();
 	public static String STATUS_OK = "OK";
 	public static String CONNECTION_EXC = "CONNECT_EXC";
@@ -29,6 +29,7 @@ public class HealthService extends WebResource {
 	public String flushCache() {
 		String ctrl = STATUS_OK;
 		try {
+			HealthCheckerAPI healthAPI = new HealthCheckerAPI();
 			Logger.info(getClass(), "Received ACK for flush cache event when I rejoin the cluster.");
 			CacheLocator.getCacheAdministrator().flushAlLocalOnlyl();
 			Logger.info(getClass(), "Cache flushed correctly.");
@@ -38,6 +39,8 @@ public class HealthService extends WebResource {
 		} catch (DotDataException e) {
 			Logger.error(getClass(), "Error in rejoin and flush cache.");
 			ctrl = "KO";
+		}finally{
+			DbConnectionFactory.closeConnection();
 		}
 		return ctrl;
 	}
