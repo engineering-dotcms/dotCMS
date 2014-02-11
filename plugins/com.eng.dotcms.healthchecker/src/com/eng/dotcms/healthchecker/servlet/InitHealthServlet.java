@@ -22,7 +22,9 @@ public class InitHealthServlet extends HttpServlet {
 		try {
 			String hostname = InetAddress.getLocalHost().getHostName();
 			hostname = HealthUtil.getStringAddress(hostname);
+			Logger.info(getClass(), "STARTING CLUSTER HEALTH INITIALIZATION...");
 			healthAPI.insertHealthLock(hostname, Operation.STARTING);
+			Logger.info(getClass(), "...CLUSTER HEALTH INITIALIZATION DONE!");
 		} catch (UnknownHostException e) {
 			Logger.warn(getClass(), "Warning. " + e.getMessage());
 		} catch (DotDataException e) {

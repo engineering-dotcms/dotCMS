@@ -43,7 +43,7 @@ public class HealthCheckerAjax extends AjaxAction {
 		try{
 			Map<String,String> pmap=getURIParams();
 			String address = pmap.get("address");
-			if(!healthAPI.isLeaveNode(address)){
+			if(!healthAPI.nodeHasLeft(address)){
 				String port = pmap.get("port");
 				String protocol = pmap.get("protocol");
 				HealthClusterViewStatus status = new HealthClusterViewStatus();

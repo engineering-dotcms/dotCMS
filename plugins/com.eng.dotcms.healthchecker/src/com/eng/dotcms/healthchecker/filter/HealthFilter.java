@@ -54,7 +54,7 @@ public class HealthFilter implements Filter {
 			try {
 				if(null!=WebAPILocator.getUserWebAPI().getLoggedInUser(req)){
 					Address localAddress = HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress();
-					if(healthAPI.isLeaveNode(localAddress)){
+					if(healthAPI.nodeHasLeft(localAddress)){
 						Host host = WebAPILocator.getHostWebAPI().getCurrentHost(req);
 							
 						String ep_originatingHost = host.getHostname();
@@ -176,11 +176,11 @@ public class HealthFilter implements Filter {
 				e.printStackTrace();
 				chain.doFilter(request, response);
 			}
-		}else{ // check if this node can publish
+		}else{ // check if this node can publish			
 			int totalShards = getTotalShards();
-			int activeShards = getActiveShards();
-			
+			int activeShards = getActiveShards();			
 			if(activeShards<= (totalShards/2)){ // we have not a quorum...
+				Logger.info(getClass(), "We don't have a ES quorum for the shards. Total: " + totalShards + ". Active: " + activeShards);
 				res.sendError(500, "Pubblicazione bloccata: temporaneamente fuori dal cluster");
 				return;
 			}else
@@ -197,8 +197,8 @@ public class HealthFilter implements Filter {
 	private int getActiveShards() {
 		AdminClient client=new ESClient().getClient().admin();
 		ActionFuture<ClusterHealthResponse> nir = client.cluster().health(new ClusterHealthRequest());
-		ClusterHealthResponse res  = nir.actionGet();		
-		return res.getActiveShards();
+		ClusterHealthResponse resp  = nir.actionGet();		
+		return resp.getActiveShards();
 	}
 	
 	private int getTotalShards() {

@@ -37,7 +37,7 @@ public class HealthCheckerTimer extends TimerTask {
 		Date now = new Date();
 		List<String> servers = healthAPI.getAllServersInClusterExceptMe();
 		for(String server:servers){			
-			if(healthAPI.isLeaveNode(server)){
+			if(healthAPI.nodeHasLeft(server)){
 				Date lastLeave = healthAPI.getDateOfLastLeaveEvent(server);
 				if(HealthUtil.getDateDiff(now, lastLeave, TimeUnit.MILLISECONDS)>MAX_REJOIN_TIME 
 						&& !healthAPI.isHealthLock(server, Operation.RESTARTING)

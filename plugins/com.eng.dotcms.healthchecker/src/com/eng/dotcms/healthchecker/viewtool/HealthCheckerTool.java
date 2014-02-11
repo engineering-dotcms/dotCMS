@@ -49,7 +49,7 @@ public class HealthCheckerTool implements ViewTool {
 	 */
 	@SuppressWarnings("deprecation")
 	private boolean checkCacheStatus() throws Exception {
-		boolean cacheHealth = !healthAPI.isLeaveNode(healthClusterChannel.getLocalAddress());
+		boolean cacheHealth = !healthAPI.nodeHasLeft(healthClusterChannel.getLocalAddress());
 		Logger.debug(getClass(), "Is in cluster? " + cacheHealth);
 		Logger.debug(getClass(), "Cluster View  (Health): 	"+healthClusterChannel.getView().toString());
 		Logger.debug(getClass(), "Local Address (Health): 	"+healthClusterChannel.getLocalAddress().toString());

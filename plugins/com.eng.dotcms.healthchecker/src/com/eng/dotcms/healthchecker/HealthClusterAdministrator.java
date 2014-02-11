@@ -109,13 +109,13 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 	 */
 	public void suspect(Address mbr) {
 		try{
-			boolean amIOut = healthAPI.isLeaveNode(HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress());
+			boolean amIOut = healthAPI.nodeHasLeft(HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress());
 			HealthClusterViewStatus status = healthAPI.singleClusterView(HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress());
 			String resp = HealthUtil.callRESTService(status, "/checkNetwork");
 			if(!amIOut && !HealthService.SOCKET_EXC.equals(resp)) {
 				boolean isInLock = healthAPI.isHealthLock(mbr, Operation.FLUSHING) || healthAPI.isHealthLock(mbr, Operation.JOINING);
 				if(!isInLock){
-					boolean isAlreadyLeave = healthAPI.isLeaveNode(mbr);
+					boolean isAlreadyLeave = healthAPI.nodeHasLeft(mbr);
 					if(isAlreadyLeave) {
 						Logger.info(getClass(), "Method suspect:  The node " + mbr + " is already out of cluster and I can't re-join. Try to force restart...");
 						boolean isInRestart = healthAPI.isHealthLock(mbr, Operation.RESTARTING);
@@ -195,7 +195,7 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 		boolean amIOut = false;
 		HealthClusterViewStatus _status = new HealthClusterViewStatus();
 		try {
-			amIOut = healthAPI.isLeaveNode(HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress());
+			amIOut = healthAPI.nodeHasLeft(HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress());
 			_status = healthAPI.singleClusterView(HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress());
 		} catch (DotDataException e2) {}
 		String resp = HealthUtil.callRESTService(_status, "/checkNetwork");

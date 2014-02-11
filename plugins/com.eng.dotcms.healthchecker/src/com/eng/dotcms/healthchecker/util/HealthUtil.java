@@ -47,7 +47,7 @@ public class HealthUtil {
 		try{
 			for(Address new_view_addr : new_view.getMembers()){
 				if(!HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress().equals(new_view_addr)){
-					if(healthAPI.isLeaveNode(new_view_addr)){
+					if(healthAPI.nodeHasLeft(new_view_addr)){
 						joined.add(new_view_addr);
 					}
 				}

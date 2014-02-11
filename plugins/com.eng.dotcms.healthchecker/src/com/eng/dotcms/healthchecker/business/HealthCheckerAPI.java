@@ -117,8 +117,8 @@ public class HealthCheckerAPI {
 	 * @return
 	 * @throws DotDataException
 	 */
-	public boolean isLeaveNode(Address address) throws DotDataException {
-		return isLeaveNode(HealthUtil.getStringAddress(address));
+	public boolean nodeHasLeft(Address address) throws DotDataException {
+		return nodeHasLeft(HealthUtil.getStringAddress(address));
 	}
 	
 	/**
@@ -128,7 +128,7 @@ public class HealthCheckerAPI {
 	 * @return
 	 * @throws DotDataException
 	 */
-	public boolean isLeaveNode(String address) throws DotDataException {
+	public boolean nodeHasLeft(String address) throws DotDataException {
 		dc.setSQL(ORACLE_GET_NODE_LEAVE);
 		dc.addParam(address);
 		List<Map<String, Object>> rs = dc.loadObjectResults();
@@ -389,34 +389,4 @@ public class HealthCheckerAPI {
 		return servers;
 	}
 	
-//	/**
-//	 * Dato un nodo controlla se è etichettato come fuori dal cluster.
-//	 * 
-//	 * @param address
-//	 * @return
-//	 * @throws DotDataException
-//	 */
-//	private boolean isJoined(String address, Date leaveModDate) {
-//		try{			
-//			dc.setSQL(ORACLE_CHECK_JOIN_AFTER_LEAVE);
-//			dc.addParam(address);
-//			dc.addParam(AddressStatus.JOIN.toString());
-//			dc.addParam(leaveModDate);
-//			List<Map<String, Object>> rs = dc.loadObjectResults();
-//			Logger.info(getClass(), "isJoined dimensioni: " + rs.size());
-//			if(rs.size()>0){
-//				Map<String, Object> row = rs.get(0);
-//				int count = Integer.parseInt(row.get("num_joined_after").toString());
-//				Logger.info(getClass(), "isJoined count: " + count);
-//				return count>0;
-//			}
-//			return false;
-//		}catch(DotDataException e){	
-//			Logger.error(getClass(), "Errore in isJoined: ",e);
-//			return false;			
-//		}catch(Exception e){
-//			Logger.error(getClass(), "Errore in isJoined: ",e);
-//			return false;
-//		}
-//	}
 }
