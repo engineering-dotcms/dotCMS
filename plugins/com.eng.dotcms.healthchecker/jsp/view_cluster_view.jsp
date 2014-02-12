@@ -15,7 +15,7 @@
 <%@ page import="com.liferay.portal.language.LanguageUtil"%>
 
 <%
-	HealthCheckerAPI healthAPI = new HealthCheckerAPI();
+	HealthCheckerAPI healthAPI = (HealthCheckerAPI)HealthChecker.INSTANCE.getSpringContext().getBean("healthCheckerAPI");
 	List<HealthClusterViewStatus> view = healthAPI.clusterView();
 	SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss",WebAPILocator.getUserWebAPI().getLoggedInUser(request).getLocale());
 	
