@@ -15,7 +15,7 @@ public class HealthClusterViewStatusMapper implements RowMapper<HealthClusterVie
 		status.setAddress(rs.getString("address"));
 		status.setCreator("Y".equals(rs.getString("creator")));
 		status.setId(rs.getString("id"));
-		status.setModDate(rs.getDate("mod_date"));
+		status.setModDate(rs.getTimestamp("mod_date"));
 		status.setOutForTimer("Y".equals(rs.getString("out_for_timer")));
 		status.setPort(rs.getString("port"));
 		status.setProtocol(rs.getString("protocol"));

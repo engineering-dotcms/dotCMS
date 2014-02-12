@@ -19,10 +19,6 @@ import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_SELECT_LOCK;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_UPDATE_HEALTH_CLUSTER_CREATOR;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_UPDATE_HEALTH_CLUSTER_VIEW_TIMER;
 
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -31,6 +27,7 @@ import org.jgroups.Address;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.eng.dotcms.healthchecker.AddressStatus;
 import com.eng.dotcms.healthchecker.HealthChecker;
@@ -69,6 +66,7 @@ public class HealthCheckerDAO {
 	 * @param health
 	 * @throws DotDataException
 	 */
+	@Transactional
 	public void storeHealthStatus(HealthEvent health) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("address", HealthUtil.getStringAddress(health.getAddress()));
@@ -85,6 +83,7 @@ public class HealthCheckerDAO {
 	 * @param health
 	 * @throws DotDataException
 	 */
+	@Transactional
 	public void deleteHealthStatus(HealthEvent health) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("address", HealthUtil.getStringAddress(health.getAddress()));
@@ -92,10 +91,12 @@ public class HealthCheckerDAO {
 		namedParameterJdbcTemplate.update(ORACLE_DELETE_HEALTH, params);
 	}
 	
+	@Transactional
 	public void deleteHealthStatus(Address address, AddressStatus status) {
 		deleteHealthStatus(HealthUtil.getStringAddress(address), status);
 	}
 	
+	@Transactional
 	public void deleteHealthStatus(String address, AddressStatus status) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("address", address);
@@ -176,6 +177,7 @@ public class HealthCheckerDAO {
 	 *
 	 * @date Jan 22, 2014
 	 */
+	@Transactional
 	public void insertHealthClusterView(Address address, String port, String protocol, boolean isCreator, AddressStatus status, Date now, boolean isOutForTimer) {
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("id", UUID.randomUUID().toString());
@@ -184,7 +186,7 @@ public class HealthCheckerDAO {
 		params.addValue("protocol", protocol);
 		params.addValue("status", status.toString());
 		params.addValue("creator", isCreator?"Y":"N");
-		params.addValue("modDate", new Timestamp(now.getTime()), Types.TIMESTAMP);
+		params.addValue("modDate", now);
 		params.addValue("outForTimer", isOutForTimer?"Y":"N");
 		namedParameterJdbcTemplate.update(ORACLE_INSERT_HEALTH_CLUSTER_VIEW, params);			
 	}
@@ -196,6 +198,7 @@ public class HealthCheckerDAO {
 	 *
 	 * @date Jan 22, 2014
 	 */
+	@Transactional
 	public void updateHealthClusterView(Address address, Date now, boolean isOutForTimer) {
 		updateHealthClusterView(HealthUtil.getStringAddress(address), now, isOutForTimer);
 	}
@@ -207,6 +210,7 @@ public class HealthCheckerDAO {
 	 *
 	 * @date Jan 22, 2014
 	 */
+	@Transactional
 	public void updateHealthClusterView(String address, Date now, boolean isOutForTimer) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("outForTimer", isOutForTimer?"Y":"N");
@@ -279,11 +283,12 @@ public class HealthCheckerDAO {
 		params.put("operation", op.toString());
 		namedParameterJdbcTemplate.update(ORACLE_INSERT_LOCK, params);
 	}
-	
+	@Transactional
 	public void deleteHealthLock(Address address, Operation op) {
 		deleteHealthLock(HealthUtil.getStringAddress(address), op);
 	}
 	
+	@Transactional
 	public void deleteHealthLock(String address, Operation op) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("address", address);
