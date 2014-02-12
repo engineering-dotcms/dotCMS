@@ -241,7 +241,8 @@ public class HealthCheckerDAO {
 	public HealthClusterViewStatus singleClusterView(String address) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("address", address);
-		return namedParameterJdbcTemplate.queryForObject(ORACLE_GET_SINGLE_CLUSTER_VIEW_STATUS, params, new HealthClusterViewStatusMapper());
+		List<HealthClusterViewStatus> status = namedParameterJdbcTemplate.query(ORACLE_GET_SINGLE_CLUSTER_VIEW_STATUS, params, new HealthClusterViewStatusMapper());
+		return status.size()>0?status.get(0):null;
 	}
 	
 	/**
