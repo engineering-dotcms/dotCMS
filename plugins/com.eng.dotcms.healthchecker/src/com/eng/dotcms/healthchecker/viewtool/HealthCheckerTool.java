@@ -14,7 +14,6 @@ import org.jgroups.JChannel;
 import com.dotcms.content.elasticsearch.util.ESClient;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.business.CacheLocator;
-import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.util.Logger;
 import com.eng.dotcms.healthchecker.HealthChecker;
 import com.eng.dotcms.healthchecker.business.HealthCheckerAPI;
@@ -49,32 +48,29 @@ public class HealthCheckerTool implements ViewTool {
 	 */
 	@SuppressWarnings("deprecation")
 	private boolean checkCacheStatus() throws Exception {
-		try{
-			HealthCheckerAPI healthAPI = new HealthCheckerAPI();
-			boolean cacheHealth = !healthAPI.nodeHasLeft(healthClusterChannel.getLocalAddress());
-			Logger.debug(getClass(), "Is in cluster? " + cacheHealth);
-			Logger.debug(getClass(), "Cluster View  (Health): 	"+healthClusterChannel.getView().toString());
-			Logger.debug(getClass(), "Local Address (Health): 	"+healthClusterChannel.getLocalAddress().toString());
-			Logger.debug(getClass(), "Cluster View  (Cache): 	"+cacheChannel.getView().toString());
-			Logger.debug(getClass(), "Local Address (Cache): 	"+cacheChannel.getLocalAddress().toString());
-			boolean esHealth = true;
-			ClusterHealthStatus status = getClusterStatus();
-			if(!status.equals(ClusterHealthStatus.RED)){
-				Map<String, ClusterIndexHealth> map = APILocator.getESIndexAPI().getClusterHealth();
-				
-				for(String indexName: APILocator.getESIndexAPI().listIndices()){
-					ClusterIndexHealth health = map.get(indexName);
-					if(health.getStatus().equals(ClusterHealthStatus.RED)){
-						esHealth = false;
-						break;
-					}
+		HealthCheckerAPI healthAPI = (HealthCheckerAPI)HealthChecker.INSTANCE.getSpringContext().getBean("healthCheckerAPI");
+		boolean cacheHealth = !healthAPI.nodeHasLeft(healthClusterChannel.getLocalAddress());
+		Logger.debug(getClass(), "Is in cluster? " + cacheHealth);
+		Logger.debug(getClass(), "Cluster View  (Health): 	"+healthClusterChannel.getView().toString());
+		Logger.debug(getClass(), "Local Address (Health): 	"+healthClusterChannel.getLocalAddress().toString());
+		Logger.debug(getClass(), "Cluster View  (Cache): 	"+cacheChannel.getView().toString());
+		Logger.debug(getClass(), "Local Address (Cache): 	"+cacheChannel.getLocalAddress().toString());
+		boolean esHealth = true;
+		ClusterHealthStatus status = getClusterStatus();
+		if(!status.equals(ClusterHealthStatus.RED)){
+			Map<String, ClusterIndexHealth> map = APILocator.getESIndexAPI().getClusterHealth();
+			
+			for(String indexName: APILocator.getESIndexAPI().listIndices()){
+				ClusterIndexHealth health = map.get(indexName);
+				if(health.getStatus().equals(ClusterHealthStatus.RED)){
+					esHealth = false;
+					break;
 				}
-			}else
-				esHealth = false;
-			return esHealth&&cacheHealth;
-		}finally{
-			DbConnectionFactory.closeConnection();
-		}
+			}
+		}else
+			esHealth = false;
+		return esHealth&&cacheHealth;
+		
 	}
 	
 	private ClusterHealthStatus getClusterStatus() throws Exception {

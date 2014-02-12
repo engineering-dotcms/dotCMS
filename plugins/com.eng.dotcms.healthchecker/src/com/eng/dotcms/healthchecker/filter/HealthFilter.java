@@ -22,8 +22,6 @@ import com.dotcms.content.elasticsearch.util.ESClient;
 import com.dotmarketing.beans.Host;
 import com.dotmarketing.business.web.WebAPILocator;
 import com.dotmarketing.cache.VirtualLinksCache;
-import com.dotmarketing.db.DbConnectionFactory;
-import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.UtilMethods;
@@ -51,7 +49,7 @@ public class HealthFilter implements Filter {
 		String uri = req.getRequestURI();
 		if(!uri.contains("/api/bundlePublisher/publish")){
 			try {
-				HealthCheckerAPI healthAPI = new HealthCheckerAPI();
+				HealthCheckerAPI healthAPI = (HealthCheckerAPI)HealthChecker.INSTANCE.getSpringContext().getBean("healthCheckerAPI");
 				if(null!=WebAPILocator.getUserWebAPI().getLoggedInUser(req)){
 					Address localAddress = HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress();
 					if(healthAPI.nodeHasLeft(localAddress)){
@@ -164,14 +162,10 @@ public class HealthFilter implements Filter {
 				chain.doFilter(request, response);
 			} catch (SystemException e) {
 				chain.doFilter(request, response);
-			} catch (DotDataException e) {				
-				chain.doFilter(request, response);
 			} catch (DotSecurityException e) {
 				chain.doFilter(request, response);
 			} catch (Exception e) {
 				chain.doFilter(request, response);
-			}finally{
-				DbConnectionFactory.closeConnection();
 			}
 		}else{ // check if this node can publish			
 			int totalShards = getTotalShards();

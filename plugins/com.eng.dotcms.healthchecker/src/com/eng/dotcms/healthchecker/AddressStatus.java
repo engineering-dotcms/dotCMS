@@ -13,4 +13,5 @@ public enum AddressStatus {
 				return "NO_STATUS";
 		}
 	}
+	
 }

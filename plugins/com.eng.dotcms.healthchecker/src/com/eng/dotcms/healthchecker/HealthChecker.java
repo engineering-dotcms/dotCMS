@@ -1,6 +1,7 @@
 package com.eng.dotcms.healthchecker;
 
 import org.jgroups.View;
+import org.springframework.context.ApplicationContext;
 
 public class HealthChecker {
 	
@@ -10,6 +11,7 @@ public class HealthChecker {
 	private View lastView = null; 
 	private int countSuspect = 0;
 	private int countTimer = 0;
+	private ApplicationContext springContext;
 	
 	private HealthChecker(){
 		healthEvent = new HealthEvent();
@@ -56,6 +58,14 @@ public class HealthChecker {
 		this.countTimer = countTimer;
 	}
 	
+	public ApplicationContext getSpringContext() {
+		return springContext;
+	}
+
+	public void setSpringContext(ApplicationContext springContext) {
+		this.springContext = springContext;
+	}
+
 	public void flush(){
 		healthEvent = new HealthEvent();
 	}

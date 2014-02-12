@@ -14,10 +14,7 @@ import org.jgroups.Address;
 import com.dotcms.rest.HealthService;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.business.CacheLocator;
-import com.dotmarketing.db.DbConnectionFactory;
-import com.dotmarketing.db.HibernateUtil;
 import com.dotmarketing.exception.DotDataException;
-import com.dotmarketing.exception.DotHibernateException;
 import com.dotmarketing.plugin.business.PluginAPI;
 import com.dotmarketing.util.Config;
 import com.dotmarketing.util.Logger;
@@ -41,20 +38,14 @@ public class HealthServlet extends HttpServlet {
 	private Timer timerCheckConn = new Timer(true);
 	
 	@SuppressWarnings("deprecation")
-	public void init(ServletConfig config) throws ServletException {
-		try{
-			HealthCheckerAPI healthAPI = new HealthCheckerAPI();
+	public void init(ServletConfig config) throws ServletException {		
+			HealthCheckerAPI healthAPI = (HealthCheckerAPI)HealthChecker.INSTANCE.getSpringContext().getBean("healthCheckerAPI");
 			Logger.info(getClass(), "BEGIN 	Init Health Cluster Handle");		
 			if(Config.getBooleanProperty("DIST_INDEXATION_ENABLED", false)){
 				Date now = new Date();
 				Address localAddress = CacheLocator.getCacheAdministrator().getJGroupsChannel().getLocalAddress();				
 				Date lastLeave = healthAPI.getDateOfLastLeaveEvent(localAddress);
-				try {
-					HibernateUtil.startTransaction();
-					// elimino i vecchi records riguardanti il nodo attuale in quanto sono in riavvio.
-					healthAPI.cleanNode(localAddress);
-					HibernateUtil.commitTransaction();	
-					healthAPI.insertHealthLock(localAddress, Operation.STARTING);
+				try {					
 					boolean isCreator = CacheLocator.getCacheAdministrator().getJGroupsChannel().getView().getCreator().equals(localAddress);
 					// inserisco il nodo nella cluster view con status JOINED.
 					healthAPI.insertHealthClusterView(localAddress,
@@ -81,22 +72,12 @@ public class HealthServlet extends HttpServlet {
 							Logger.info(getClass(), status.getAddress()+" Unlocked.");					
 					}
 					healthAPI.deleteHealthLock(localAddress, Operation.STARTING);
-				} catch (DotDataException e) {
-					Logger.error(getClass(), "Error in init HealthServlet: " + e.getMessage(), e);
-					
-					try {
-						HibernateUtil.rollbackTransaction();
-					} catch (DotHibernateException e1) {
-						Logger.fatal(getClass(), "DotHibernateException: " + e1.getMessage(), e);
-					}
 				} catch (Exception e) {
-					Logger.error(getClass(), "Errore generico.", e);
+					Logger.error(getClass(), "Errore generico. "+e.getMessage());
+					Logger.info(getClass(), "The node is in an invalid state due the previous error. Delete from cluster view.");
+					healthAPI.cleanNode(localAddress);
 				}
-			}
-		} finally {
-			DbConnectionFactory.closeConnection();
-		}
-		
+			}		
 	}
 	
 	@Override

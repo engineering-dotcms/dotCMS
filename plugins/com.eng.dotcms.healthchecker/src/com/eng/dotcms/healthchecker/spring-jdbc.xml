@@ -1,0 +1,36 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans classpath:/org/springframework/beans/factory/xml/spring-beans-2.5.xsd
+						http://www.springframework.org/schema/jee classpath:/org/springframework/ejb/config/spring-jee-2.5.xsd
+						http://www.springframework.org/schema/tx classpath:/org/springframework/transaction/config/spring-tx-2.5.xsd">
+ 	
+ 	<!--  RECUPERO DATASOURCE DA JNDI -->
+	<jee:jndi-lookup id="dataSource" jndi-name="jdbc/dotCMSPool"/> 
+ 	
+ 	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+  		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<tx:annotation-driven transaction-manager="txManager"/>
+	
+ 	<bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">  
+ 		<constructor-arg ref="dataSource"></constructor-arg>     		 
+	</bean>
+	
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<constructor-arg ref="dataSource"></constructor-arg>     		  
+	</bean>
+ 	
+ 	<!-- DAO -->
+ 	<bean id="healthCheckerDAO" class="com.eng.dotcms.healthchecker.jdbc.HealthCheckerDAO">
+    	<property name="namedParameterJdbcTemplate" ref="namedParameterJdbcTemplate" />
+    	<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	
+	<bean id="healthCheckerAPI" class="com.eng.dotcms.healthchecker.business.HealthCheckerAPI">
+    	<property name="healthDAO" ref="healthCheckerDAO" />
+	</bean>
+</beans>

@@ -11,7 +11,6 @@ import org.jgroups.Address;
 import org.jgroups.View;
 
 import com.dotcms.rest.HealthService;
-import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.util.Config;
 import com.dotmarketing.util.UtilMethods;
@@ -43,20 +42,14 @@ public class HealthUtil {
 	@SuppressWarnings("deprecation")
 	public static List<Address> getJoined(View new_view) {
 		List<Address> joined = new ArrayList<Address>();
-		try{
-			HealthCheckerAPI healthAPI = new HealthCheckerAPI();
-			for(Address new_view_addr : new_view.getMembers()){
-				if(!HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress().equals(new_view_addr)){
-					if(healthAPI.nodeHasLeft(new_view_addr)){
-						joined.add(new_view_addr);
-					}
+		HealthCheckerAPI healthAPI = (HealthCheckerAPI)HealthChecker.INSTANCE.getSpringContext().getBean("healthCheckerAPI");
+		for(Address new_view_addr : new_view.getMembers()){
+			if(!HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress().equals(new_view_addr)){
+				if(healthAPI.nodeHasLeft(new_view_addr)){
+					joined.add(new_view_addr);
 				}
 			}
-		}catch(DotDataException e){}
-		finally{
-			DbConnectionFactory.closeConnection();
-		}
-		
+		}			
 		return joined;
 	}
 	
@@ -72,7 +65,7 @@ public class HealthUtil {
 		return sb.toString().substring(0, sb.toString().length()-1); 
 	}
 	
-	public static String getStringAddress(String address){
+	public static String getStringAddress(String address) {
 		String[] _address = address.toString().split("[-]");
 		StringBuilder sb = new StringBuilder();
 		for(int i=0; i<_address.length-1; i++){
@@ -82,6 +75,14 @@ public class HealthUtil {
 		if(UtilMethods.isSet(Config.getStringProperty("HEALTH_CHECKER_ADDRESS_SUFFIX")))
 			return sb.toString().substring(0, sb.toString().length()-1).concat(Config.getStringProperty("HEALTH_CHECKER_ADDRESS_SUFFIX"));
 		return sb.toString().substring(0, sb.toString().length()-1); 
+	}
+	
+	public static String getAddressFromHostname(String hostname) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(hostname);
+		if(UtilMethods.isSet(Config.getStringProperty("HEALTH_CHECKER_ADDRESS_SUFFIX")))
+			sb.append(Config.getStringProperty("HEALTH_CHECKER_ADDRESS_SUFFIX"));
+		return sb.toString();
 	}
 	
 	
@@ -119,30 +120,26 @@ public class HealthUtil {
 	 * @return
 	 * @throws DotDataException
 	 */
-	public static boolean needFlushCache(Date leaveDate, Date joinDate) throws DotDataException {
-		try{
-			HealthCheckerAPI healthAPI = new HealthCheckerAPI();
-			if(null!=leaveDate){
-				int count = healthAPI.checkContentlet(leaveDate, joinDate);
-				if(count>0)
-					return true;
-				else
-					count = healthAPI.checkContainer(leaveDate, joinDate);
-				if(count>0)
-					return true;
-				else
-					count = healthAPI.checkHtmlPage(leaveDate, joinDate);
-				if(count>0)
-					return true;
-				else
-					count = healthAPI.checkTemplate(leaveDate, joinDate);
-				
-				return count > 0;
-			}else
-				return false;
-		}finally{
-			DbConnectionFactory.closeConnection();
-		}
+	public static boolean needFlushCache(Date leaveDate, Date joinDate) {
+		HealthCheckerAPI healthAPI = (HealthCheckerAPI)HealthChecker.INSTANCE.getSpringContext().getBean("healthCheckerAPI");
+		if(null!=leaveDate){
+			int count = healthAPI.checkContentlet(leaveDate, joinDate);
+			if(count>0)
+				return true;
+			else
+				count = healthAPI.checkContainer(leaveDate, joinDate);
+			if(count>0)
+				return true;
+			else
+				count = healthAPI.checkHtmlPage(leaveDate, joinDate);
+			if(count>0)
+				return true;
+			else
+				count = healthAPI.checkTemplate(leaveDate, joinDate);
+			
+			return count > 0;
+		}else
+			return false;		
 	}
 	
 	public void runOSCommand(String...cmds) throws IOException{

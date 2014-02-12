@@ -33,11 +33,11 @@ public class QueryBuilder {
 																			" 	CONSTRAINT health_lock_pk PRIMARY KEY(ADDRESS)" +
 																			")";
 	
-	public static final String ORACLE_INSERT_LOCK						=	"INSERT INTO HEALTH_LOCK (ADDRESS, OPERATION) VALUES (?, ?)";
+	public static final String ORACLE_INSERT_LOCK						=	"INSERT INTO HEALTH_LOCK (ADDRESS, OPERATION) VALUES (:address, :operation)";
 	
-	public static final String ORACLE_DELETE_LOCK						=	"DELETE FROM HEALTH_LOCK WHERE ADDRESS = ? AND OPERATION = ?";
+	public static final String ORACLE_DELETE_LOCK						=	"DELETE FROM HEALTH_LOCK WHERE ADDRESS = :address AND OPERATION = :operation";
 	
-	public static final String ORACLE_SELECT_LOCK						=	"SELECT count(*) AS NUM_OP FROM HEALTH_LOCK WHERE ADDRESS = ? AND OPERATION = ?";
+	public static final String ORACLE_SELECT_LOCK						=	"SELECT count(*) AS NUM_OP FROM HEALTH_LOCK WHERE ADDRESS = :address AND OPERATION = :operation";
 	
 	public static final String ORACLE_CREATE_INDEX_ADDRESS_EVENT		=	"CREATE INDEX idx_health_event_addr ON HEALTH_EVENT (ADDRESS)";
 	
@@ -47,19 +47,20 @@ public class QueryBuilder {
 	
 	public static final String ORACLE_CREATE_INDEX_OP_LOCK				=	"CREATE INDEX idx_health_lock_op ON HEALTH_LOCK (OPERATION)";	
 	
-	public static final String ORACLE_INSERT_HEALTH						=	"INSERT INTO HEALTH_EVENT (ADDRESS, CLUSTER_VIEW, STATUS, WRITTEN_BY, MOD_DATE) VALUES (?,?,?,?,?)";
+	public static final String ORACLE_INSERT_HEALTH						=	"INSERT INTO HEALTH_EVENT (ADDRESS, CLUSTER_VIEW, STATUS, WRITTEN_BY, MOD_DATE) VALUES (:address,:clusterView,:status,:writtenBy,:modDate)";
 	
-	public static final String ORACLE_DELETE_HEALTH						=	"DELETE FROM HEALTH_EVENT WHERE ADDRESS = ? AND STATUS = ?";
+	public static final String ORACLE_DELETE_HEALTH						=	"DELETE FROM HEALTH_EVENT WHERE ADDRESS = :address AND STATUS = :status";
 	
-	public static final String ORACLE_CHECK_LEAVE						=	"SELECT count(*) AS NUM_LEAVE FROM HEALTH_EVENT WHERE STATUS = ?";
+	public static final String ORACLE_CHECK_LEFT						=	"SELECT count(*) AS NUM_LEFT FROM HEALTH_EVENT WHERE STATUS = :status";
 	
-	public static final String ORACLE_GET_NODE_LEAVE					=	"SELECT * FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ? ORDER BY MOD_DATE DESC";
+	public static final String ORACLE_GET_NODE_LEFT						=	"SELECT * FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = :address ORDER BY MOD_DATE DESC";
 	
-	public static final String ORACLE_GET_DATE_NODE_LEAVE				=	"SELECT MOD_DATE FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ? ORDER BY MOD_DATE DESC";
+//	public static final String ORACLE_GET_DATE_NODE_LEFT				=	"SELECT MOD_DATE FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ? ORDER BY MOD_DATE DESC";
 	
-	public static final String ORACLE_INSERT_HEALTH_CLUSTER_VIEW		=	"INSERT INTO HEALTH_CLUSTER_VIEW (ID, ADDRESS, PORT, PROTOCOL, STATUS, CREATOR, MOD_DATE, OUT_FOR_TIMER) VALUES (?,?,?,?,?,?,?,?)";
+	public static final String ORACLE_INSERT_HEALTH_CLUSTER_VIEW		=	"INSERT INTO HEALTH_CLUSTER_VIEW (ID, ADDRESS, PORT, PROTOCOL, STATUS, CREATOR, MOD_DATE, OUT_FOR_TIMER) VALUES " +
+																			"(:id,:address,:port,:protocol,:status,:creator,:modDate,:outForTimer)";
 	
-	public static final String ORACLE_UPDATE_HEALTH_CLUSTER_VIEW_TIMER	=	"UPDATE HEALTH_CLUSTER_VIEW SET OUT_FOR_TIMER = ?, MOD_DATE = ? WHERE ADDRESS = ? AND STATUS = ?";
+	public static final String ORACLE_UPDATE_HEALTH_CLUSTER_VIEW_TIMER	=	"UPDATE HEALTH_CLUSTER_VIEW SET OUT_FOR_TIMER = :outForTimer, MOD_DATE = :modDate WHERE ADDRESS = :address AND STATUS = :status";
 	
 	public static final String ORACLE_UPDATE_HEALTH_CLUSTER_CREATOR 	= 	"UPDATE HEALTH_CLUSTER_VIEW SET CREATOR = ? " +
 																			"WHERE ID = ( " +
@@ -73,23 +74,25 @@ public class QueryBuilder {
 																			"	WHERE t.ROWNUM<=1 " +
 																			")";
 	
-	public static final String ORACLE_DELETE_HEALTH_CLUSTER_VIEW		=	"DELETE FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ?";
+	public static final String ORACLE_DELETE_HEALTH_CLUSTER_VIEW		=	"DELETE FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = :address";
 	
 	public static final String ORACLE_GET_HEALTH_CLUSTER_VIEW_STATUS	=	"SELECT hcv.ID, hcv.ADDRESS, hcv.PORT, hcv.PROTOCOL, hcv.STATUS, hcv.CREATOR, hcv.MOD_DATE, hl.OPERATION, hcv.OUT_FOR_TIMER " +
 																			"FROM HEALTH_CLUSTER_VIEW hcv LEFT JOIN HEALTH_LOCK hl ON hcv.ADDRESS = hl.ADDRESS " +
 																			"ORDER BY hcv.MOD_DATE desc";
 	
-	public static final String ORACLE_GET_SINGLE_CLUSTER_VIEW_STATUS	=	"SELECT * FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ?";
+	public static final String ORACLE_GET_SINGLE_CLUSTER_VIEW_STATUS	=	"SELECT hcv.*, hl.operation as operation " +
+																			"FROM HEALTH_CLUSTER_VIEW hcv LEFT JOIN HEALTH_LOCK hl ON hcv.ADDRESS = hl.ADDRESS " +
+																			"WHERE hcv.ADDRESS = :address";
 	
 	public static final String ORACLE_CHECK_JOIN_AFTER_LEAVE			=	"SELECT count(*) AS NUM_JOINED_AFTER FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS = ? AND STATUS = ? AND MOD_DATE > ?";
 	
-	public static final String ORACLE_CHECK_NEW_CONTENTLET				=	"SELECT count(*) AS NUM_CONTENTLETS FROM CONTENTLET_VERSION_INFO WHERE VERSION_TS > ? AND VERSION_TS < ?";
+	public static final String ORACLE_CHECK_NEW_CONTENTLET				=	"SELECT count(*) AS NUM_CONTENTLETS FROM CONTENTLET_VERSION_INFO WHERE VERSION_TS > :bottomDate AND VERSION_TS < :topDate";
 	
-	public static final String ORACLE_CHECK_NEW_HTMLPAGE				=	"SELECT count(*) AS NUM_PAGES FROM HTMLPAGE_VERSION_INFO WHERE VERSION_TS > ? AND VERSION_TS < ?";
+	public static final String ORACLE_CHECK_NEW_HTMLPAGE				=	"SELECT count(*) AS NUM_PAGES FROM HTMLPAGE_VERSION_INFO WHERE VERSION_TS > :bottomDate AND VERSION_TS < :topDate";
 	
-	public static final String ORACLE_CHECK_NEW_CONTAINER				=	"SELECT count(*) AS NUM_CONTAINERS FROM CONTAINER_VERSION_INFO WHERE VERSION_TS > ? AND VERSION_TS < ?";
+	public static final String ORACLE_CHECK_NEW_CONTAINER				=	"SELECT count(*) AS NUM_CONTAINERS FROM CONTAINER_VERSION_INFO WHERE VERSION_TS > :bottomDate AND VERSION_TS < :topDate";
 	
-	public static final String ORACLE_CHECK_NEW_TEMPLATE				=	"SELECT count(*) AS NUM_TEMPLATES FROM TEMPLATE_VERSION_INFO WHERE VERSION_TS > ? AND VERSION_TS < ?";
+	public static final String ORACLE_CHECK_NEW_TEMPLATE				=	"SELECT count(*) AS NUM_TEMPLATES FROM TEMPLATE_VERSION_INFO WHERE VERSION_TS > :bottomDate AND VERSION_TS < :topDate";
 	
-	public static final String ORACLE_GET_ALL_SERVERS_IN_CLUSTER		=	"SELECT DISTINCT ADDRESS FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS != ?";
+	public static final String ORACLE_GET_ALL_SERVERS_IN_CLUSTER		=	"SELECT DISTINCT ADDRESS FROM HEALTH_CLUSTER_VIEW WHERE ADDRESS != :address";
 }
