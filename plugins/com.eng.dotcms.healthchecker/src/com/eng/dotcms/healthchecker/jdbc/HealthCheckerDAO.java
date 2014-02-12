@@ -19,6 +19,8 @@ import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_SELECT_LOCK;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_UPDATE_HEALTH_CLUSTER_CREATOR;
 import static com.eng.dotcms.healthchecker.util.QueryBuilder.ORACLE_UPDATE_HEALTH_CLUSTER_VIEW_TIMER;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
