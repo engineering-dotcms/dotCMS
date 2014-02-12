@@ -393,15 +393,13 @@ public class HealthClusterAdministrator extends ReceiverAdapter {
 												healthAPI.deleteHealthLock(newone, Operation.RESTARTING);
 											}
 										} catch (DotDataException e) {
-	//										Logger.error(getClass(), "Error: " + e.getClass()+": "+e.getMessage());
 											HealthChecker.INSTANCE.flush();
 										}
 									}
 									HealthChecker.INSTANCE.flush();
 								}else
 									Logger.info(getClass(), "Method view: 	The node "+ newone +" is in flushing due a previous suspect.");
-							}catch(Exception e){
-								e.printStackTrace();
+							}catch(Exception e){								
 							}
 						}				
 					}

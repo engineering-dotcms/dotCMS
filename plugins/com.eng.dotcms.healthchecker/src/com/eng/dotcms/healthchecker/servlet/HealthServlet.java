@@ -75,7 +75,7 @@ public class HealthServlet extends HttpServlet {
 					Logger.info(getClass(), "END 	Init Health Cluster Handle");
 					if(Config.getBooleanProperty("HEALTH_CHECKER_LOCK_REMOTE_PUBLISH",false)){
 						HealthClusterViewStatus status = healthAPI.singleClusterView(localAddress);
-						Logger.info(getClass(), "The node "+localAddress+" is an endpoint for remote publish: unlock it");
+						Logger.info(getClass(), "The node "+status.getAddress()+" is an endpoint for remote publish: unlock it");
 						String response = unlockLocalRemotePublish();
 						if(HealthService.STATUS_OK.equals(response))
 							Logger.info(getClass(), status.getAddress()+" Unlocked.");					

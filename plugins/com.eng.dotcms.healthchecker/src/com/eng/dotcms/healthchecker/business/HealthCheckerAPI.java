@@ -380,6 +380,7 @@ public class HealthCheckerAPI {
 	@SuppressWarnings("deprecation")
 	public List<String> getAllServersInClusterExceptMe() throws DotDataException {
 		String myself = HealthUtil.getStringAddress(HealthChecker.INSTANCE.getClusterAdmin().getJGroupsHealthChannel().getLocalAddress());
+		Logger.info(getClass(), "Myself: " + myself);
 		List<String> servers = new ArrayList<String>();
 		dc.setSQL(ORACLE_GET_ALL_SERVERS_IN_CLUSTER);
 		dc.addParam(myself);
