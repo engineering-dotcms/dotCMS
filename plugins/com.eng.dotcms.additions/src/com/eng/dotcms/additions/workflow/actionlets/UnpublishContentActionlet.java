@@ -35,11 +35,11 @@ public class UnpublishContentActionlet extends ContentActionlet {
 	public void executeAction(WorkflowProcessor processor,Map<String,WorkflowActionClassParameter>  params) throws WorkflowActionFailureException {
 		try {
 			super.executeAction(processor, params);
-			
+			Logger.info(this.getClass(), "Numero di versioni: " + contentletsToProcess.size());
 			for(Contentlet c : contentletsToProcess) {
 				APILocator.getContentletAPI().unpublish(c, processor.getUser(), true);
 				APILocator.getContentletAPI().unlock(c, processor.getUser(), true);
-				indexAPI.removeContentFromIndex(c,true,true);
+				indexAPI.removeContentFromIndex(c,true);
 				CacheLocator.getIdentifierCache().removeFromCacheByVersionable(c);
 			}
 
