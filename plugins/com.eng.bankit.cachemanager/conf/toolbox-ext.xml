@@ -1,0 +1,5 @@
+<tool>
+	<key>cachemanager</key>
+	<scope>application</scope>
+	<class>com.eng.bankit.cachemanager.viewtool.CacheManagerTool</class>
+</tool>
